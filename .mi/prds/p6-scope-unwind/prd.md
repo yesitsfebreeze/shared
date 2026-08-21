@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p6-scope-unwind
+state: done
 est: 3h
 mode: afk
 priority: 50

@@ -44,6 +44,28 @@ of p0's distribution decision.
 - [ ] **Gate**: `dependency_tree.rs` accepts the crate (p1 proved it moves
       exactly two lines: OWNERS + CLOSURE); `just check` green in the container.
 
+- [ ] **`conserved::scope` and `util/effect` no longer agree — reconcile
+      deliberately, do not diff-and-merge.** p6-scope-unwind made the first
+      *semantic* divergence from the byte-for-byte port (deviation 8 in
+      `conserved/src/scope.rs`'s `# Provenance`): on close, `conserved` runs
+      **every** inverse even when one panics, resumes the first panic reached
+      afterwards, keeps `held()` true *during* the unwind, and adds
+      `Scope::failed()` naming the inverses that panicked. mitosys's
+      `util/effect` still abandons the tail and still reports `held() == []`
+      with inverses owed — measured in
+      `.mi/prds/p5-adoption/load-proof/finding.md`. Adopting the crate
+      therefore **changes teardown behaviour** in all 10+ re-exporting crates:
+      a plugin whose inverse panics now has its remaining inverses run rather
+      than dropped. That is the point of adopting, and it must be stated in the
+      adoption commit rather than discovered. Check the tree for any site that
+      depends on the abandonment — `grep` teardown paths for `catch_unwind`
+      around a `close()` — and for anything that reads `held()` during an
+      unwind. `Scope::failed()` is new API with no mitosys call site yet; adopt
+      it where a teardown failure is currently swallowed. The abort-during-abort
+      case is **unchanged** in both trees.
+      Also: `.mi/prds/p1-scope/specs/spec01.md`'s byte-for-byte `verify:` diff
+      no longer holds, by design.
+
 ## Held — 2026-08-21
 
 **Not dispatchable from this board yet.** The user's instruction is to finish the
