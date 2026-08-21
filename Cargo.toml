@@ -22,3 +22,16 @@ blake3 = "1"
 # `cargo tree --edges normal`, so the crate's one-dependency contract is
 # untouched.
 proptest = "1.11"
+
+# Optional in `conserved` (feature `serde`, off by default). Both consumers
+# already pin serde 1 — `../mitosys/Cargo.toml:191` and
+# `../model/Cargo.toml:65` — so enabling the feature adds no crate that was
+# not already in either closure. `default-features = false`: the impls are
+# hand-written, so no `derive` is needed on the library side.
+serde = { version = "1", default-features = false }
+
+# Dev-only, the two formats the consumers actually use, matching
+# `../model/Cargo.toml:65,48` — so the encoding tests exercise the real
+# encoders rather than a stand-in.
+serde_json = "1"
+postcard = { version = "1", features = ["alloc", "use-std"] }

@@ -7,6 +7,18 @@ description = "Domain-free primitives shared by the Rust trees."
 
 [dependencies]
 blake3 = { workspace = true }
+serde = { workspace = true, optional = true }
+
+[features]
+# The crate's default dependency contract does not move: with `default = []`,
+# `cargo tree -p conserved --edges normal` shows exactly one edge, blake3.
+default = []
+serde = ["dep:serde"]
 
 [dev-dependencies]
 proptest = { workspace = true }
+# `derive` here only — the ContentId impls are hand-written; the test needs it
+# for the two throwaway structs that prove the wire substitution.
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+postcard = { workspace = true }

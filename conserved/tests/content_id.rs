@@ -313,11 +313,20 @@ mod content_id {
 	/// The crate's dependency contract, asserted against the manifest rather
 	/// than trusted.
 	///
-	/// `blake3` is the one unconditional dependency: p2's whole "one
+	/// `blake3` is the one **unconditional** dependency: p2's whole "one
 	/// dependency" claim. It is inherited from `[workspace.dependencies]`,
 	/// which is the dependency convention `lib.rs` commits this crate to
 	/// (mitosys's, per `AGENTS.md` §divergences), so the version pin is
-	/// asserted at the workspace manifest below.
+	/// asserted against the workspace manifest below.
+	///
+	/// `serde` is the one **optional** dependency, admitted by spec03 of this
+	/// ticket and gated behind the `serde` feature with `default = []`. It is
+	/// allowed a row here for exactly one reason: it is not in the default
+	/// build, so every sentence in the learnings about "one dependency" stays
+	/// literally true of the crate as built by default, and `../model` can
+	/// still put a `ContentId` where a serialized `[u8; 32]` stands. If
+	/// `serde` ever loses `optional = true`, or `default` stops being empty,
+	/// or a third name appears, that reasoning is gone and this fails.
 	#[test]
 	fn blake3_is_the_only_dependency() {
 		let manifest =
@@ -326,8 +335,29 @@ mod content_id {
 		let names: Vec<&str> = entries.iter().map(|(n, _)| n.as_str()).collect();
 		assert_eq!(
 			names,
-			vec!["blake3"],
-			"[dependencies] must name blake3 and nothing else"
+			vec!["blake3", "serde"],
+			"[dependencies] must name blake3 and an optional serde, nothing else"
+		);
+
+		let blake3 = &entries[0].1;
+		assert!(
+			!blake3.contains("optional"),
+			"blake3 is the unconditional dependency, got `{blake3}`"
+		);
+		let serde = &entries[1].1;
+		assert!(
+			serde.contains("optional = true"),
+			"serde must stay optional, got `{serde}`"
+		);
+
+		let features = section(&manifest, "[features]");
+		assert!(
+			features.contains(&"default = []".to_string()),
+			"the default feature set must stay empty, got {features:?}"
+		);
+		assert!(
+			features.contains(&"serde = [\"dep:serde\"]".to_string()),
+			"the serde feature must pull the optional dependency and nothing else, got {features:?}"
 		);
 
 		let workspace = std::fs::read_to_string(crate_root().join("..").join("Cargo.toml"))

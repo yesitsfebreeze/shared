@@ -58,8 +58,16 @@ use std::str::FromStr;
 ///
 /// Construct with [`ContentId::of`] (hash some bytes) or
 /// [`ContentId::from_bytes`] (adopt a digest that already exists, e.g. one read
-/// back out of storage). There is deliberately no `Default` — see the module
-/// documentation.
+/// back out of storage).
+///
+/// Two refusals, repeated here from the module documentation because they are
+/// the surface a caller meets:
+///
+/// - **No `Default`.** A zero id is not the hash of anything, and this type
+///   exists to make that value inexpressible.
+/// - **No `ed25519:` prefix tolerance on parse.** mitosys's hex decode strips
+///   that prefix, so one id has two spellings there. Stripping it is the
+///   caller's business at the call site.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ContentId([u8; 32]);
 
@@ -187,5 +195,111 @@ impl FromStr for ContentId {
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		decode_hex(s).map(Self)
+	}
+}
+
+// ---------------------------------------------------------------------------
+// serde — behind the optional `serde` feature, off by default.
+// ---------------------------------------------------------------------------
+
+/// Visits the human-readable form: a 64-character lowercase hex string.
+#[cfg(feature = "serde")]
+struct HexVisitor;
+
+#[cfg(feature = "serde")]
+impl serde::de::Visitor<'_> for HexVisitor {
+	type Value = ContentId;
+
+	fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		f.write_str("a content id as 64 lowercase hex characters")
+	}
+
+	fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
+		// Straight through `FromStr`: one rule, and one place it lives. The
+		// rejections tested against `FromStr` — uppercase, wrong length, an
+		// `ed25519:` or `0x` prefix — are therefore the deserializer's too.
+		v.parse().map_err(E::custom)
+	}
+}
+
+/// Visits the binary form: 32 elements of a fixed-size tuple.
+#[cfg(feature = "serde")]
+struct BytesVisitor;
+
+#[cfg(feature = "serde")]
+impl<'de> serde::de::Visitor<'de> for BytesVisitor {
+	type Value = ContentId;
+
+	fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		f.write_str("32 bytes")
+	}
+
+	fn visit_seq<A: serde::de::SeqAccess<'de>>(self, mut seq: A) -> Result<Self::Value, A::Error> {
+		let mut out = [0u8; 32];
+		for (i, slot) in out.iter_mut().enumerate() {
+			*slot = match seq.next_element()? {
+				Some(b) => b,
+				// A short frame must never quietly become an id.
+				None => return Err(serde::de::Error::invalid_length(i, &"32 bytes")),
+			};
+		}
+		Ok(ContentId(out))
+	}
+}
+
+/// A `ContentId` is a 64-character lowercase hex **string** in human-readable
+/// formats and the **32 raw bytes** in binary ones — byte-identical to a bare
+/// `[u8; 32]`, so the type can be substituted for one on an existing wire or
+/// in an existing key without moving a single byte.
+///
+/// Two things are deliberate here.
+///
+/// The binary form is a fixed 32-length **tuple**, not `serialize_bytes`.
+/// `learnings/content-addressing.md:77` says "bytes on a binary wire", and
+/// under serde `[u8; 32]` is a fixed-size tuple: postcard writes it as 32
+/// bytes with no length prefix, while `serialize_bytes` would write a varint
+/// length first — 33 bytes. Taking the sentence literally would silently move
+/// `../model`'s redb keys and its peer frames, which is the representation
+/// drift this whole type exists to prevent. `binary_encoding_is_identical_to_u8_32`
+/// and `struct_substitution_is_wire_compatible` pin it.
+///
+/// The JSON form is a **deliberate** divergence from `[u8; 32]`'s
+/// array-of-numbers. `../model`'s MCP surface already hands ids out as hex
+/// strings by hand (`src/mcp/tests/fold.rs:334`); this makes an existing
+/// convention typed rather than inventing a new one, and keeps a record
+/// readable by eye where it is already JSON.
+///
+/// The branch is on `is_human_readable()`, never on a format name — a third
+/// format gets the right form without this module learning its name.
+#[cfg(feature = "serde")]
+impl serde::Serialize for ContentId {
+	fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		if serializer.is_human_readable() {
+			let hex = encode_hex(&self.0);
+			let rendered = std::str::from_utf8(&hex).map_err(serde::ser::Error::custom)?;
+			serializer.serialize_str(rendered)
+		} else {
+			use serde::ser::SerializeTuple;
+			let mut tuple = serializer.serialize_tuple(32)?;
+			for byte in &self.0 {
+				tuple.serialize_element(byte)?;
+			}
+			tuple.end()
+		}
+	}
+}
+
+/// The mirror of [`Serialize`](serde::Serialize): hex string in, through
+/// [`FromStr`], from human-readable formats; a fixed 32-length tuple from
+/// binary ones. See that impl's documentation for why the binary form is a
+/// tuple and not `serialize_bytes`.
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for ContentId {
+	fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+		if deserializer.is_human_readable() {
+			deserializer.deserialize_str(HexVisitor)
+		} else {
+			deserializer.deserialize_tuple(32, BytesVisitor)
+		}
 	}
 }
