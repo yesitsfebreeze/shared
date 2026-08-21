@@ -1,5 +1,6 @@
 ---
-state: open
+state: analyzing
+claim: analyst-p6-scope-unwind
 mode: afk
 priority: 50
 repo: shared

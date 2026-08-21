@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p5-close
+state: done
 mode: afk
 priority: 46
 est: 2h
