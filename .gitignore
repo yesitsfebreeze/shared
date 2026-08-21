@@ -1,0 +1,8 @@
+# Build output
+/target
+
+# macOS
+.DS_Store
+
+# Local index/cache, regenerable, binary
+/.pi/kern/data/

@@ -1,0 +1,8 @@
+[package]
+name = "conserved"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Domain-free primitives shared by the Rust trees — deliberately empty at p0."
+
+[dependencies]

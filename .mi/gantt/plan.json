@@ -1,0 +1,132 @@
+{
+  "maxWorkers": 2,
+  "sizeHours": {
+    "S": 1,
+    "M": 2.5,
+    "L": 5,
+    "XL": 8
+  },
+  "tasks": [
+    {
+      "id": "p0-foundation",
+      "title": "P0 — foundation: git init, condemn scaffold, one crate/manifest, distribution decision",
+      "node": "p0-foundation",
+      "spec": ".mi/prd/p0-foundation/prd.md",
+      "size": "M",
+      "mode": "hitl",
+      "files": [
+        "Cargo.toml",
+        "conserved/",
+        "conserved-core/",
+        "conserved-alloc/",
+        "conserved-net/",
+        "conserved-deriv/",
+        "conserved-derive/",
+        ".mi/docs/memos/distribution.md",
+        ".git/"
+      ],
+      "deps": [],
+      "verify": "cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace && git rev-parse --git-dir",
+      "manual": "Human must answer the distribution-mechanism question framed in .mi/docs/memos/distribution.md (git dependency pinned by commit + vendored offline cache, vs. fully vendored copy) before status there can read decided; git init/initial commit is itself a one-time repo-state change worth a human's eyes since no version control exists yet.",
+      "notes": "Bundles requirements that are mechanically afk (git init, delete conserved-alloc/conserved-net/conserved-deriv/conserved-derive/conserved-core and the current conserved/src/lib.rs per .mi/docs/memos/scaffold-reset.md, rewrite root Cargo.toml to [workspace] resolver=2 member=conserved, create conserved/Cargo.toml edition2021 rust-version 1.94.0 + empty-but-compiling conserved/src/lib.rs + conserved/tests/) together with the one genuinely human decision (distribution mechanism). Kept as a single task under the id the board already gives it rather than inventing a sub-id, and marked hitl as a whole because the node's own acceptance line requires the memo to carry a decision, and every other node is blocked on this one regardless of which half is 'done' first."
+    },
+    {
+      "id": "p1-scope",
+      "title": "P1 — Scope/Handle: port util/effect from mitosys, prove the distribution mechanism",
+      "node": "p1-scope",
+      "spec": ".mi/prd/p1-scope/prd.md",
+      "size": "S",
+      "mode": "afk",
+      "files": [
+        "conserved/src/lib.rs",
+        "conserved/src/scope.rs",
+        "conserved/tests/scope.rs",
+        "conserved/Cargo.toml"
+      ],
+      "deps": [
+        "p0-foundation"
+      ],
+      "verify": "cargo test -p conserved scope && cargo tree -p conserved --edges normal | grep -cv conserved | grep -qx 1",
+      "manual": "Confirm the one consumer build proof (mitosys depending on conserved through the p0-decided distribution mechanism, in mitosys's own tree/container) actually happened and record the commit, since that half of acceptance lives outside this repo and cargo test here cannot see it.",
+      "notes": "Port source of truth is /Users/feb/dev/infra/mitosys/src/mitosys/util/effect/{effect.rs,tests/effect.rs} (262 lines, zero deps) per the spec. Deliberately not made a dependency of p2/p3/p4: the board's Order section sequences p1 before p2-p4 as a risk-reduction step ('prove the mechanism once... not on the record'), but each of p2-p4's own verify command is self-contained and does not require p1 to exist, so no edge was added for that."
+    },
+    {
+      "id": "p2-content-id",
+      "title": "P2 — ContentId: blake3 into [u8;32], hex private behind Display/FromStr",
+      "node": "p2-content-id",
+      "spec": ".mi/prd/p2-content-id/prd.md",
+      "size": "S",
+      "mode": "afk",
+      "files": [
+        "conserved/src/lib.rs",
+        "conserved/src/content_id.rs",
+        "conserved/tests/content_id.rs",
+        "conserved/Cargo.toml"
+      ],
+      "deps": [
+        "p0-foundation"
+      ],
+      "verify": "cargo test -p conserved content_id",
+      "manual": "",
+      "notes": "Spec: learnings/content-addressing.md (blake3 over SHA-256, [u8;32] over hex String) plus learnings/shared-crate.md §1. Only node introducing the blake3 dependency; if mitosys's dependency_tree.rs gate later objects to Scope consumers pulling blake3 transitively, the spec says split at 'conserved-id' then, not pre-split now — noted, not actioned here."
+    },
+    {
+      "id": "p3-clock",
+      "title": "P3 — Clock: Instant(i64), Clock trait, SystemClock, FixedClock",
+      "node": "p3-clock",
+      "spec": ".mi/prd/p3-clock/prd.md",
+      "size": "S",
+      "mode": "afk",
+      "files": [
+        "conserved/src/lib.rs",
+        "conserved/src/clock.rs",
+        "conserved/tests/clock.rs",
+        "conserved/Cargo.toml"
+      ],
+      "deps": [
+        "p0-foundation"
+      ],
+      "verify": "cargo test -p conserved clock",
+      "manual": "",
+      "notes": "Spec: learnings/clock.md. Instant must be a real epoch timestamp (the condemned scaffold's mistake was an incrementing tick counter) — epoch and resolution stated in the doc comment and pinned by a test. No dependencies; SystemClock reads std::time only. The clock-read-count ratchet is explicitly out of scope here (belongs to p5)."
+    },
+    {
+      "id": "p4-stats",
+      "title": "P4 — order statistics: percentile/median/min_median_max over sorted slices",
+      "node": "p4-stats",
+      "spec": ".mi/prd/p4-stats/prd.md",
+      "size": "S",
+      "mode": "afk",
+      "files": [
+        "conserved/src/lib.rs",
+        "conserved/src/stats.rs",
+        "conserved/tests/stats.rs",
+        "conserved/Cargo.toml"
+      ],
+      "deps": [
+        "p0-foundation"
+      ],
+      "verify": "cargo test -p conserved stats",
+      "manual": "",
+      "notes": "Spec: learnings/shared-crate.md §4. Which median definition wins (interpolating vs. llm's upper-median n/2) is a decision the spec requires be made and stated in the doc comment with the rejected alternative named, pinned by an even-length-slice test — a documentation/naming call within the task, not escalated as hitl since the spec already names both candidates and asks the implementer to pick and record, not the user."
+    },
+    {
+      "id": "p5-adoption",
+      "title": "P5 — adoption: mitosys, llm, realm each replace their duplicate with conserved",
+      "node": "p5-adoption",
+      "spec": ".mi/prd/p5-adoption/prd.md",
+      "size": "L",
+      "mode": "afk",
+      "files": [],
+      "deps": [
+        "p1-scope",
+        "p2-content-id",
+        "p3-clock",
+        "p4-stats"
+      ],
+      "verify": "echo 'proof lives in the consumer trees: just check in ../mitosys, cargo test in ../model and ../realm, each against a conserved dependency'",
+      "manual": "Each consumer swap (mitosys util/effect and SHA-256 ids, llm Scope/Clock/min_median_max adoption, realm Scope/ContentId adoption) happens in sibling repositories (/Users/feb/dev/infra/mitosys, /Users/feb/dev/infra/model, /Users/feb/dev/infra/realm) outside this repo's tree and its own board/gate — a human should confirm those trees' own gates (mitosys just check in its offline container in particular) actually go green against the real conserved dependency, not a stub.",
+      "notes": "This node's own files are empty because the substantive writes land in sibling repos not tracked by this board/surveyor scope (Repository: work only in the repo rooted at cwd). The board frames this node as 'the cross-tree ledger' — recording where each proof lives — while the actual edits happen under each consumer's own laws and boards. Depends on all four extraction modules per the node's own text ('Blocked on p1–p4 per module — adopt each module as it lands, do not wait for all four') — modeled as depending on all four since the ledger/adoption node as specified covers all consumers and all modules together; a finer per-module-per-consumer breakdown was not given ids by the source document."
+    }
+  ]
+}

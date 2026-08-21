@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = ["conserved"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.94.0"
+
+# Dependency convention (mitosys's, per AGENTS.md §divergences): every
+# external dependency is pinned once here and inherited by members.
+# Empty at p0 — blake3 enters in p2, behind ContentId.
+[workspace.dependencies]
