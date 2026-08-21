@@ -30,4 +30,6 @@
 
 #![forbid(unsafe_code)]
 
+mod content_id;
 pub mod scope;
+pub use content_id::{ContentId, ContentIdParseError};

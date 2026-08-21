@@ -9,5 +9,9 @@ rust-version = "1.94.0"
 
 # Dependency convention (mitosys's, per AGENTS.md §divergences): every
 # external dependency is pinned once here and inherited by members.
-# Empty at p0 — blake3 enters in p2, behind ContentId.
+# Empty at p0; blake3 entered in p2, behind ContentId.
 [workspace.dependencies]
+# The one dependency. `"1"` is the same version string `../model/Cargo.toml:19`
+# already declares, with blake3's default features, so no build behaviour new
+# to that tree enters with the crate.
+blake3 = "1"
