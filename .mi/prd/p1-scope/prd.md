@@ -1,5 +1,6 @@
 ---
-state: specced
+state: claimed
+claim: impl-p1-scope
 est: 3h
 mode: afk
 priority: 20
@@ -23,10 +24,10 @@ record. Blocked on `p0-foundation`.
 
 ## Requirements
 
-- [ ] **Port the module** — code and its tests, moved not rewritten. Renames
+- [x] **Port the module** — code and its tests, moved not rewritten. Renames
       only where the crate boundary forces them; every deviation from the
       mitosys source recorded at its site.
-- [ ] **Zero dependencies** — the verify line counts edges; `Scope` must not
+- [x] **Zero dependencies** — the verify line counts edges; `Scope` must not
       drag `blake3` in transitively (it cannot yet — p2 has not landed — keep
       it that way when it does: modules stay independent).
 - [ ] **Prove the mechanism once** — from one consumer tree (mitosys is the

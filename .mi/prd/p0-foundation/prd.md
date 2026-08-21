@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p0-foundation
+state: done
 est: 2.5h
 mode: afk
 priority: 10

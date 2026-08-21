@@ -124,30 +124,30 @@ frontmatter should fix it there too.
 
 ## Acceptance
 
-- [ ] `conserved/src/scope.rs` exists, and from its first
+- [x] `conserved/src/scope.rs` exists, and from its first
       `use std::collections::HashMap;` line to end of file it is byte-identical
       to `../mitosys/src/mitosys/util/effect/effect.rs` from the same line —
       `diff` reports no output.
-- [ ] `conserved/tests/scope.rs` exists, and from line 2 to end of file it is
+- [x] `conserved/tests/scope.rs` exists, and from line 2 to end of file it is
       byte-identical to `../mitosys/src/mitosys/util/effect/tests/effect.rs`
       from line 2; line 1 is exactly `use conserved::scope::*;`.
-- [ ] `conserved/src/lib.rs` contains the line `pub mod scope;` and declares no
+- [x] `conserved/src/lib.rs` contains the line `pub mod scope;` and declares no
       `pub use` re-export of anything in `scope`.
-- [ ] The module doc of `conserved/src/scope.rs` contains a `# Provenance`
+- [x] The module doc of `conserved/src/scope.rs` contains a `# Provenance`
       heading, the source path `src/mitosys/util/effect/effect.rs`, a 40-hex
       mitosys commit sha, and a line for each of the six deviations above.
-- [ ] `conserved/Cargo.toml` declares no dependency: the `[dependencies]` table
+- [x] `conserved/Cargo.toml` declares no dependency: the `[dependencies]` table
       is still empty and no `[dev-dependencies]` or `[build-dependencies]` table
       was added.
-- [ ] `cargo tree -p conserved --edges normal` prints exactly one line — the
+- [x] `cargo tree -p conserved --edges normal` prints exactly one line — the
       crate itself and nothing under it.
-- [ ] `cargo test -p conserved --test scope` runs 5 tests and all 5 pass:
+- [x] `cargo test -p conserved --test scope` runs 5 tests and all 5 pass:
       `close_unwinds_lifo`, `dispose_runs_once_and_deregisters`,
       `closed_scope_refuses_and_unwinds_late_effects`, `drop_unwinds`,
       `held_reports_live_effects`.
-- [ ] `cargo fmt --all --check` and
+- [x] `cargo fmt --all --check` and
       `cargo clippy --workspace --all-targets -- -D warnings` are both silent.
-- [ ] `../mitosys` is unchanged by this spec:
+- [x] `../mitosys` is unchanged by this spec:
       `git -C ../mitosys status --porcelain src/mitosys/util/effect` prints
       nothing.
 

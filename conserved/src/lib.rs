@@ -1,10 +1,14 @@
 //! `conserved` — the domain-free primitives shared by the Rust trees.
 //!
-//! This crate is **deliberately empty at p0**. The foundation ticket's job is
+//! This crate was **deliberately empty at p0**. The foundation ticket's job was
 //! a repository that can hold the crate, not the crate's contents: nothing is
 //! extracted until a candidate passes the admission test in
-//! `learnings/shared-crate.md`. The first real inhabitant, `ContentId`,
+//! `learnings/shared-crate.md`. The first inhabitant is [`scope`], moved from
+//! mitosys's `util/effect` in p1 and carrying no dependencies; `ContentId`
 //! arrives in p2 — with `blake3` behind it, and only if the gate lets it.
+//!
+//! Modules stay independent: `scope` depends on nothing, and nothing this
+//! crate later admits may be dragged in behind it.
 //!
 //! # The four divergences, resolved here
 //!
@@ -25,3 +29,5 @@
 //! pinned by commit rev (`.mi/docs/memos/distribution.md`).
 
 #![forbid(unsafe_code)]
+
+pub mod scope;
