@@ -30,6 +30,8 @@
 
 #![forbid(unsafe_code)]
 
+pub mod clock;
 mod content_id;
 pub mod scope;
+pub use clock::Instant;
 pub use content_id::{ContentId, ContentIdParseError};
