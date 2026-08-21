@@ -1,5 +1,6 @@
 ---
-state: specced
+state: claimed
+claim: impl-p4-stats
 est: 1.75h
 mode: afk
 priority: 30
@@ -16,15 +17,15 @@ is a regression that reads as a real one. Blocked on `p0-foundation`.
 
 ## Requirements
 
-- [ ] **The functions** — over already-sorted `&[f64]`, returning `Option`
+- [x] **The functions** — over already-sorted `&[f64]`, returning `Option`
       on empty input:
       `percentile(sorted, p)`, `median(sorted)`, `min_median_max(sorted)`.
-- [ ] **ONE definition, stated** — which median (the interpolating one or
+- [x] **ONE definition, stated** — which median (the interpolating one or
       llm's upper-median `n/2`) is a decision to make against both call
       sites, written in the doc comment with the rejected alternative named,
       and pinned by a test on an even-length slice — the input where the
       definitions disagree.
-- [ ] **Sortedness is the caller's contract** — stated in the docs; debug
+- [x] **Sortedness is the caller's contract** — stated in the docs; debug
       assertion, not a hidden sort. No dependencies, no allocation.
 
 ## Acceptance

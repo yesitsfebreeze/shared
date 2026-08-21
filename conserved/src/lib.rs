@@ -33,5 +33,6 @@
 pub mod clock;
 mod content_id;
 pub mod scope;
+pub mod stats;
 pub use clock::{Clock, FixedClock, Instant, SystemClock};
 pub use content_id::{ContentId, ContentIdParseError};

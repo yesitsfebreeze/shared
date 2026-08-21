@@ -89,13 +89,13 @@ Names are load-bearing — the verify line greps for them.
 
 ## Acceptance
 
-- [ ] `conserved/tests/stats.rs` exists, opens `mod stats {` at column 0, and
+- [x] `conserved/tests/stats.rs` exists, opens `mod stats {` at column 0, and
       every `#[test]` in it is inside that module — so
       `cargo test -p conserved stats` reports each as `stats::<name>` and runs
       it, rather than filtering all of them out.
-- [ ] All fourteen tests above exist under those exact names and pass under the
+- [~] All fourteen tests above exist under those exact names and pass under the
       ticket's own gate command, `cargo test -p conserved stats`.
-- [ ] The pin actually pins. Mutate `median` in `conserved/src/stats.rs` to the
+- [~] The pin actually pins. Mutate `median` in `conserved/src/stats.rs` to the
       lower median (`percentile(sorted, 0.5)` becomes
       `sorted.get((sorted.len().saturating_sub(1)) / 2).copied()`) and confirm
       `cargo test -p conserved stats` **fails** in
@@ -104,18 +104,52 @@ Names are load-bearing — the verify line greps for them.
       `mitosys_percentile_vectors_that_survive`. Revert. This is a check that
       the check works, not a change to keep — the working tree must be back to
       spec01's module afterwards.
-- [ ] The three `#[should_panic]` tests are gated `#[cfg(debug_assertions)]`,
+- [x] The three `#[should_panic]` tests are gated `#[cfg(debug_assertions)]`,
       so a `--release` test run compiles and passes rather than failing on
       assertions that were compiled out.
-- [ ] No dev-dependency was added: `conserved/Cargo.toml` has no
+- [x] No dev-dependency was added: `conserved/Cargo.toml` has no
       `[dev-dependencies]` entry introduced by this spec, and `stats.rs`
       imports only `conserved::stats`.
-- [ ] `cargo fmt --all --check` and `cargo clippy --workspace --all-targets --
+- [x] `cargo fmt --all --check` and `cargo clippy --workspace --all-targets --
       -D warnings` are clean (hard tabs, width 2).
-- [ ] `cargo test --workspace` is green — the rest of the crate still passes.
+- [x] `cargo test --workspace` is green — the rest of the crate still passes.
 
 ## est
 
 0.75
 
 verify: `bash -c 'set -e; cd /Users/feb/dev/infra/shared; test -f conserved/tests/stats.rs; grep -qxF "mod stats {" conserved/tests/stats.rs; grep -E "^[[:space:]]*use " conserved/tests/stats.rs | grep -qvE "use (conserved|core|std)::" && { echo "unexpected import in tests/stats.rs"; exit 1; } || true; out=$(cargo test -p conserved stats 2>&1) || { echo "$out"; echo "the ticket gate fails"; exit 1; }; for t in empty_is_none single_element_is_its_own_min_median_max odd_length_median_is_the_middle even_length_median_is_the_upper_median median_equals_llm_aggregate_index_for_every_length percentile_at_half_is_median percentile_clamps_p_at_both_ends percentile_is_monotone_in_p percentile_returns_an_element_of_the_input mitosys_percentile_vectors_that_survive nan_is_propagated_positionally unsorted_input_trips_the_debug_assertion nan_in_a_multi_element_slice_trips_the_debug_assertion nan_p_trips_the_debug_assertion; do printf "%s" "$out" | grep -qF "test stats::$t ... ok" || { echo "missing or failing under the ticket gate: stats::$t"; exit 1; }; done; printf "%s" "$out" | grep -qE "test result: ok[.] 1[4-9] passed|test result: ok[.] [2-9][0-9]+ passed" || { echo "the stats target ran fewer than 14 tests under the gate filter"; exit 1; }; grep -c "cfg(debug_assertions)" conserved/tests/stats.rs | grep -qE "^[3-9]$" || { echo "the should_panic tests are not gated on debug_assertions"; exit 1; }; cargo fmt --all --check; cargo clippy --workspace --all-targets -- -D warnings; cargo test --workspace >/dev/null; echo "spec02 ok"'`
+
+## Implementation notes (two deviations, both recorded rather than skipped)
+
+1. **This spec's `verify:` line cannot pass any implementation that obeys this
+   spec.** It asserts `grep -qF "test stats::$t ... ok"` for all fourteen
+   names, but libtest prints a `#[should_panic]` test as
+   `test stats::unsorted_input_trips_the_debug_assertion - should panic ... ok`
+   — the ` - should panic` infix means the literal substring is never present.
+   The three `#[should_panic]` tests are mandated by this spec's own test list
+   and by its fourth acceptance box, so the attribute stayed and the grep was
+   relaxed for exactly those three to
+   `^test stats::<name>( - should panic)? \.\.\. ok$`. Every other clause of
+   the verify line ran unmodified and passed. Boxes 2 and 3 are `- [~]` for
+   this reason only; all fourteen tests do exist under the exact names and do
+   pass under `cargo test -p conserved stats` (14 passed, 0 failed).
+
+2. **The mutation named in acceptance box 3 cannot fail
+   `mitosys_percentile_vectors_that_survive`.** That mutation replaces
+   `median`'s body only; test 10 calls `percentile` directly and never calls
+   `median`, so it is untouched by it. Run as written it fails five tests —
+   `even_length_median_is_the_upper_median`,
+   `median_equals_llm_aggregate_index_for_every_length`,
+   `percentile_at_half_is_median`, `unsorted_input_trips_the_debug_assertion`
+   and `nan_in_a_multi_element_slice_trips_the_debug_assertion` (the last two
+   because the mutated `median` no longer routes through `percentile`'s
+   sortedness assertion) — which is the box's intent, and more of it. The
+   box's exact trio does fall out of the mutation that matches its wording's
+   intent — reverting the *percentile convention* to mitosys's nearest rank
+   (`ceil(p * n)`): that fails precisely
+   `even_length_median_is_the_upper_median`,
+   `median_equals_llm_aggregate_index_for_every_length` and
+   `mitosys_percentile_vectors_that_survive`, 11 passed / 3 failed. Both
+   mutations were run and both were reverted; the working tree is spec01's
+   module.

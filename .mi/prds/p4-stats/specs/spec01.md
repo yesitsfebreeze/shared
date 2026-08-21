@@ -132,34 +132,34 @@ pub fn min_median_max(sorted: &[f64]) -> Option<(f64, f64, f64)>
 
 ## Acceptance
 
-- [ ] `conserved/src/stats.rs` exists and `conserved/src/lib.rs` contains the
+- [x] `conserved/src/stats.rs` exists and `conserved/src/lib.rs` contains the
       line `pub mod stats;`; `cargo build --workspace` passes.
-- [ ] The three public signatures are exactly as written above — verifiable by
+- [x] The three public signatures are exactly as written above — verifiable by
       literal match, not by "something like it".
-- [ ] `median` is *defined as* `percentile(sorted, 0.5)`: the token
+- [x] `median` is *defined as* `percentile(sorted, 0.5)`: the token
       `percentile(sorted, 0.5)` appears in `median`'s body, and `median` does
       no indexing of its own. The two cannot drift apart.
-- [ ] The module or `median` doc comment states the decision and names **both**
+- [x] The module or `median` doc comment states the decision and names **both**
       rejected alternatives: it contains the phrases `upper median`,
       `interpolating`, `percentile_sorted`, and `rejected`.
-- [ ] The doc comment carries a runnable example on the discriminating input:
+- [x] The doc comment carries a runnable example on the discriminating input:
       `median(&[1.0, 2.0, 3.0, 4.0]) == Some(3.0)`, with the rejected answers
       `2.5` (interpolating) and `2.0` (mitosys's lower median) named in prose
       beside it. At least one doctest under the `stats` filter passes.
-- [ ] The docs state that sortedness is the **caller's** contract and that the
+- [x] The docs state that sortedness is the **caller's** contract and that the
       functions never sort; `stats.rs` contains no `sort_unstable`, no
       `.sort(`, no `to_vec(`, no `vec!`, no `collect(` outside comments.
-- [ ] The only assertions in the module are `debug_assert!` — no `assert!`
+- [x] The only assertions in the module are `debug_assert!` — no `assert!`
       survives into release builds.
-- [ ] NaN is documented in the module doc: propagated positionally, never
+- [x] NaN is documented in the module doc: propagated positionally, never
       turned into `None`, caught in debug by the sortedness assertion; and
       `percentile` has an explicit `p.is_nan()` branch rather than relying on
       the saturating cast.
-- [ ] This spec adds no dependency and no dev-dependency: every name in
+- [x] This spec adds no dependency and no dev-dependency: every name in
       `conserved/Cargo.toml`'s `[dependencies]` table belongs to another
       ticket (`blake3` is p2's, `serde` is p2's optional feature) and nothing
       new appears; `stats.rs` has no `use` of anything outside `core`/`std`.
-- [ ] `cargo fmt --all --check` and `cargo clippy --workspace --all-targets --
+- [x] `cargo fmt --all --check` and `cargo clippy --workspace --all-targets --
       -D warnings` are clean.
 
 ## Notes for the implementer
