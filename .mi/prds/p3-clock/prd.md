@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p3-clock
+state: done
 est: 3.5h
 mode: afk
 priority: 30

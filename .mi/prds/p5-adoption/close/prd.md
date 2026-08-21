@@ -1,8 +1,8 @@
 ---
-state: open
+state: specced
 mode: afk
 priority: 46
-est: 1h
+est: 2h
 repo: shared
 verify: "grep -q '^status: decided' learnings/shared-crate.md && grep -q '^status: decided' learnings/clock.md"
 ---
