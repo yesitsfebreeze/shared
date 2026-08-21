@@ -55,21 +55,21 @@ fails).
 
 ## Acceptance
 
-- [ ] Root `Cargo.toml` contains no `[package]` section and no
+- [x] Root `Cargo.toml` contains no `[package]` section and no
       `conserved-workspace` anywhere; it declares `resolver = "2"` and
       `members = ["conserved"]`.
-- [ ] `cargo metadata --no-deps` reports the single package `conserved` with
+- [x] `cargo metadata --no-deps` reports the single package `conserved` with
       `"edition":"2021"` and `"rust_version":"1.94.0"`.
-- [ ] `conserved/src/lib.rs` exists, is doc-comment-and-attributes only (no
+- [x] `conserved/src/lib.rs` exists, is doc-comment-and-attributes only (no
       `pub fn`, no `pub struct`, no `mod`), and `cargo build --workspace`
       passes.
-- [ ] `conserved/tests/smoke.rs` exists, names the crate, and
+- [x] `conserved/tests/smoke.rs` exists, names the crate, and
       `cargo test --workspace` runs at least one passing test. There is no
       root-level `tests/` directory and no `conserved/src/*/tests/`.
-- [ ] `cargo fmt --all --check` passes against the repo's `rustfmt.toml`
+- [x] `cargo fmt --all --check` passes against the repo's `rustfmt.toml`
       (hard tabs, width 2) — the code was not written with spaces.
-- [ ] `cargo clippy --workspace --all-targets -- -D warnings` passes.
-- [ ] No dependency was added: `conserved/Cargo.toml`'s `[dependencies]` is
+- [x] `cargo clippy --workspace --all-targets -- -D warnings` passes.
+- [x] No dependency was added: `conserved/Cargo.toml`'s `[dependencies]` is
       empty and `cargo metadata` resolves zero external packages.
 
 ## est

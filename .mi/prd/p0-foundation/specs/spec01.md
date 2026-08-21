@@ -34,14 +34,14 @@ Not touched: `learnings/`, `.mi/`, `AGENTS.md`, `README.md`, root `Cargo.toml`
 
 ## Acceptance
 
-- [ ] `conserved-alloc/`, `conserved-net/`, `conserved-deriv/`,
+- [x] `conserved-alloc/`, `conserved-net/`, `conserved-deriv/`,
       `conserved-derive/`, `conserved-core/` do not exist on disk.
-- [ ] `conserved/doc/` does not exist.
-- [ ] The condemned source is gone, not moved: no file anywhere under
+- [x] `conserved/doc/` does not exist.
+- [x] The condemned source is gone, not moved: no file anywhere under
       `conserved/` contains `hash_bytes`, and no file in the repo is a copy of
       a deleted crate under a new name (`ls -d conserved*` lists exactly
       `conserved`).
-- [ ] Nothing under `learnings/` or `.mi/docs/memos/` was edited by this spec —
+- [x] Nothing under `learnings/` or `.mi/docs/memos/` was edited by this spec —
       the memo is the record and the record only grows.
 
 ## est

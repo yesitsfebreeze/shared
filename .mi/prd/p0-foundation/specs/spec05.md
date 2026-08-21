@@ -58,24 +58,24 @@ the implementer.
 
 ## Acceptance
 
-- [ ] `scripts/fresh-clone-check.sh` exists, is executable, and is tracked by
+- [x] `scripts/fresh-clone-check.sh` exists, is executable, and is tracked by
       git (`git ls-files` matches it).
-- [ ] Running it exits 0 and prints the short HEAD it verified.
-- [ ] It actually clones: the script contains `git clone` and builds in a
+- [x] Running it exits 0 and prints the short HEAD it verified.
+- [x] It actually clones: the script contains `git clone` and builds in a
       directory under `mktemp -d`, not in the repo. It does not run
       `cargo build` in the working tree.
-- [ ] It cannot be fooled by a shared target directory — `CARGO_TARGET_DIR` is
+- [x] It cannot be fooled by a shared target directory — `CARGO_TARGET_DIR` is
       unset inside the script, and the clone's `target/` is created fresh.
-- [ ] It fails loudly on a dirty tree: with an untracked file present, the
+- [x] It fails loudly on a dirty tree: with an untracked file present, the
       script exits non-zero and says the tree is dirty (a clone would have
       tested something other than what the implementer has).
-- [ ] It fails when the criterion is actually broken *and the working tree
+- [x] It fails when the criterion is actually broken *and the working tree
       looks fine*: temporarily add `conserved/src/` to `.gitignore`,
       `git rm -r --cached conserved/src`, commit (the tree is now clean, the
       in-place build still passes) — the script must exit non-zero because the
       clone cannot build. Then `git reset --hard HEAD~1` and confirm it passes
       again. This is a check that the check works, not a change to keep.
-- [ ] The whole ticket passes end to end: from the repo root,
+- [x] The whole ticket passes end to end: from the repo root,
       `cargo fmt --all --check`, `cargo clippy --workspace --all-targets -- -D
       warnings` and `scripts/fresh-clone-check.sh` all exit 0.
 

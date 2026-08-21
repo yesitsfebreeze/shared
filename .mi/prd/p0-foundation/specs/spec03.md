@@ -37,19 +37,19 @@ Explicitly NOT touched:
 
 ## Acceptance
 
-- [ ] `.mi/docs/memos/distribution.md` still reads `status: decided` and still
+- [x] `.mi/docs/memos/distribution.md` still reads `status: decided` and still
       contains its `## Decision` section naming the git dependency pinned by
       commit — unchanged by this spec (`git diff` would show no edit once the
       repo exists; before that, byte-identical content).
-- [ ] `AGENTS.md` no longer contains the string `open, decided by the user`,
+- [x] `AGENTS.md` no longer contains the string `open, decided by the user`,
       and its distribution row names the git-dependency-pinned-by-commit
       decision.
-- [ ] `README.md` no longer contains `The constraint is unresolved` or
+- [x] `README.md` no longer contains `The constraint is unresolved` or
       `the open distribution decision`.
-- [ ] `README.md` §"Where the shared code lives" states the chosen mechanism
+- [x] `README.md` §"Where the shared code lives" states the chosen mechanism
       and says who carries the offline cost (mitosys), and does not present
       three live options.
-- [ ] `learnings/shared-crate.md` is byte-identical to its pre-spec content.
+- [x] `learnings/shared-crate.md` is byte-identical to its pre-spec content.
 
 ## est
 

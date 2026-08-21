@@ -35,21 +35,21 @@ rather than globally.
 
 ## Acceptance
 
-- [ ] `git rev-parse --git-dir` succeeds from the repo root and resolves to
+- [x] `git rev-parse --git-dir` succeeds from the repo root and resolves to
       this repository's own `.git`, not a parent's.
-- [ ] `git log --oneline` shows at least one commit with a message that says
+- [x] `git log --oneline` shows at least one commit with a message that says
       what it is (the foundation: reset workspace, board, learnings).
-- [ ] `git status --porcelain` is empty — every file is either committed or
+- [x] `git status --porcelain` is empty — every file is either committed or
       deliberately ignored. No "I'll commit that later".
-- [ ] The commit carries the board and the learnings, not just the code:
+- [x] The commit carries the board and the learnings, not just the code:
       `git ls-files` includes `.mi/prd/prd.md`,
       `.mi/prd/p0-foundation/prd.md`, `.mi/docs/memos/distribution.md`,
       `.mi/docs/memos/scaffold-reset.md`, `learnings/shared-crate.md`,
       `conserved/Cargo.toml`, `conserved/src/lib.rs`,
       `conserved/tests/smoke.rs`.
-- [ ] Nothing regenerable or binary is tracked: `git ls-files` matches no
+- [x] Nothing regenerable or binary is tracked: `git ls-files` matches no
       `target/`, no `.DS_Store`, no `*.mdb`.
-- [ ] The deleted scaffold is absent from the tracked tree:
+- [x] The deleted scaffold is absent from the tracked tree:
       `git ls-files` matches no `conserved-core`, `conserved-alloc`,
       `conserved-net`, `conserved-deriv`, `conserved-derive`.
 
