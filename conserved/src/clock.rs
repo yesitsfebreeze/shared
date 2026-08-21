@@ -408,3 +408,63 @@ impl<C: Clock + ?Sized> Clock for std::sync::Arc<C> {
 		(**self).now()
 	}
 }
+
+// ---------------------------------------------------------------------------
+// serde — behind the optional `serde` feature p2 admitted, off by default.
+// ---------------------------------------------------------------------------
+
+/// An [`Instant`] serializes as its `i64` nanoseconds, **identically in every
+/// format** — no `is_human_readable()` branch. The transparency is the point:
+/// a field that is `i64` today can become an `Instant` without a wire change,
+/// which is the only way `../model`'s `created`, `until`, `heat_at` and
+/// `expires_at` can adopt the type at all.
+///
+/// This deliberately diverges from `ContentId`, which *does* branch. A
+/// `[u8; 32]` in JSON is an array of 32 integers and `../model` already hands
+/// ids out as hex by hand, so hex made an existing convention typed. There is
+/// no comparable convention for timestamps: every field this type replaces is
+/// already a JSON *number*, and a decimal string of the same digits is not
+/// more readable — an `Instant`'s readability problem is that it is not a
+/// date, and this module refuses a date formatter with a reason (refusal 3).
+///
+/// **The 2^53 note.** Nanoseconds since the epoch is ~1.8e18, past JSON's
+/// exact-integer range, so a JavaScript client that reads the number as a
+/// double loses precision. That hazard belongs to the JSON consumer, and the
+/// escape hatch is at the boundary, not in the representation: a surface
+/// handing a timestamp to a browser converts with
+/// [`Instant::as_unix_millis`], which is exact well past the year 285,000.
+/// One surface's problem does not move the whole family's encoding.
+///
+/// **Where transparency does not hold.**
+/// `../model/src/node/transactional.rs:47-62` types `Commit.timestamp` as
+/// `u64`, and postcard varint-encodes `u64` and `i64` differently (zigzag), so
+/// substituting an `Instant` *there* changes the commit's blake3 content hash.
+/// That is a deliberate decision for the adoption node to make; this module's
+/// job is to have said it out loud first. Note also that `Commit` is the
+/// **second** content hash in that tree fed by a live clock read (line 72) —
+/// `learnings/clock.md` names only `rec_now()`.
+///
+/// **No serde for the clocks.** [`SystemClock`] and [`FixedClock`] get no
+/// impls: a clock is not data, only the instant it produced is. Serializing a
+/// clock would put "which clock made this" on a wire that only ever needed
+/// "when".
+#[cfg(feature = "serde")]
+impl serde::Serialize for Instant {
+	fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
+		serializer.serialize_i64(self.0)
+	}
+}
+
+/// The mirror of [`Serialize`](serde::Serialize): the wire integer is
+/// **nanoseconds**, read straight through [`Instant::from_unix_nanos`].
+///
+/// Deferring to `i64`'s own `Deserialize` is what makes the rejections come
+/// for free and stay consistent with the serializer: a JSON string, a float,
+/// `null`, an array, and an integer past [`i64::MAX`] are all errors, in one
+/// representation and only one.
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for Instant {
+	fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+		<i64 as serde::Deserialize>::deserialize(deserializer).map(Instant::from_unix_nanos)
+	}
+}
