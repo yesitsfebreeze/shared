@@ -147,51 +147,115 @@ mod load_throughput {
 
 ## Acceptance
 
-- [ ] `conserved/tests/load_throughput.rs` exists and its **entire** contents
+- [x] `conserved/tests/load_throughput.rs` exists and its **entire** contents
       are wrapped in `mod load_throughput { … }`, so `cargo test -p conserved
       load` selects it. Verified by running that filter and reading a non-zero
       `N passed` — an unwrapped file reports `0 tests ... filtered out` and
       exits 0, which is the failure p1 deviation 7 records.
-- [ ] Exactly **one** `#[test]` function in the file, named
+- [x] Exactly **one** `#[test]` function in the file, named
       `content_id_throughput_floor`, measuring all three sizes in sequence.
-- [ ] The floor table is a `const` selected by `#[cfg(debug_assertions)]`,
+- [x] The floor table is a `const` selected by `#[cfg(debug_assertions)]`,
       carrying the two rows exactly as printed above.
-- [ ] The measurement calls `ContentId::of` with the input wrapped in
+- [~] The measurement calls `ContentId::of` with the input wrapped in
       `std::hint::black_box` and the returned `ContentId` passed to
       `black_box`, so release codegen cannot hoist the call out of the loop.
       Deleting either `black_box` and re-running must move the release
       numbers; if it does not, the loop is being elided and the gate is fake.
-- [ ] Calibration: iterations double from 1 until one untimed sample takes
+- [x] Calibration: iterations double from 1 until one untimed sample takes
       ≥ 25 ms (bounded at `1 << 30` iterations so a pathologically slow
       machine terminates), and that calibration loop is the warm-up.
-- [ ] 7 timed samples per size; the reported figure is the **maximum**
+- [x] 7 timed samples per size; the reported figure is the **maximum**
       MB/s (equivalently the minimum elapsed), not the mean and not the
       median. A comment states why: contention only slows samples.
-- [ ] Every size is measured and reported before any assertion fires — the
+- [x] Every size is measured and reported before any assertion fires — the
       test collects failures and asserts once at the end, so a run that misses
       two floors names both rather than stopping at the first.
-- [ ] The failure message names the input size, the measured MB/s and the
+- [x] The failure message names the input size, the measured MB/s and the
       floor, e.g. `1048576 B: 421.30 MB/s < floor 500.00 MB/s`.
-- [ ] A passing run prints one line per size with the measured value and the
+- [x] A passing run prints one line per size with the measured value and the
       margin over the floor (`5.06x`), so a human reading CI output can see
       the headroom shrinking before it fails. The print is **in addition to**
       the assertion, never instead of it.
-- [ ] **The gate can fail.** Temporarily multiply the release 1 MiB floor by
+- [x] **The gate can fail.** Temporarily multiply the release 1 MiB floor by
       10 and confirm `cargo test -p conserved --release --test
       load_throughput` exits non-zero with the message above; then put it
       back. Record in the spec's implementation commit that this was done.
-- [ ] No new entry in `[dependencies]` or `[dev-dependencies]`;
+- [x] No new entry in `[dependencies]` or `[dev-dependencies]`;
       `conserved/Cargo.toml` is byte-identical after this spec. `cargo tree -p
       conserved --edges normal --depth 1` still lists `blake3` and nothing
       else.
-- [ ] The module doc comment records: which machine and rustc the floors were
+- [x] The module doc comment records: which machine and rustc the floors were
       measured on, that they are idle-median/5 (release) and /7 (dev), that
       best-of-7 is deliberate, and the aarch64-vs-x86_64 `blake3` build
       asymmetry that makes the dev column the binding one. A future reader
       lowering a floor must first contradict that paragraph.
-- [ ] No `unsafe`, no `unwrap` on a path that can be reached by a slow
+- [x] No `unsafe`, no `unwrap` on a path that can be reached by a slow
       machine (the `partial_cmp` sort is the only candidate — use
       `f64::total_cmp`).
-- [ ] `cargo clippy -p conserved --all-targets -- -D warnings` is clean.
+- [x] `cargo clippy -p conserved --all-targets -- -D warnings` is clean.
 
 verify: `cargo test -p conserved --test load_throughput -- --nocapture && cargo test -p conserved --release --test load_throughput -- --nocapture && cargo test -p conserved load_throughput 2>&1 | grep -qE '[1-9][0-9]* passed' && cargo clippy -p conserved --all-targets -- -D warnings && cargo fmt --all --check`
+
+## Implemented 2026-08-21 — measured on the implementer's box
+
+`conserved/tests/load_throughput.rs`, one `#[test]`
+(`load_throughput::content_id_throughput_floor`), no manifest change.
+`cargo tree -p conserved --edges normal --depth 1` still prints
+`conserved v0.1.0` -> `blake3 v1.8.7` and nothing else.
+
+Dev (`cargo test -p conserved --test load_throughput -- --nocapture`):
+
+```
+        1 B:       0.77 MB/s  (floor 0.10 MB/s, 7.72x, 32768 iters/sample)
+     1024 B:      57.18 MB/s  (floor 8.00 MB/s, 7.15x, 2048 iters/sample)
+  1048576 B:     117.29 MB/s  (floor 15.00 MB/s, 7.82x, 4 iters/sample)
+test result: ok. 1 passed; ... finished in 1.03s
+```
+
+Release (`--release`):
+
+```
+        1 B:      21.42 MB/s  (floor 4.00 MB/s, 5.36x, 1048576 iters/sample)
+     1024 B:    1357.37 MB/s  (floor 250.00 MB/s, 5.43x, 65536 iters/sample)
+  1048576 B:    2541.92 MB/s  (floor 500.00 MB/s, 5.08x, 64 iters/sample)
+test result: ok. 1 passed; ... finished in 1.13s
+```
+
+Both reproduce the spec's measured table to within 1% — 0.77 vs 0.78, 57.2 vs
+56.7, 117.3 vs 117, 21.4 vs 21.3, 1357 vs 1350, 2542 vs 2530. The floors were
+not re-derived because nothing they rest on moved.
+
+**The gate can fail — done, not asserted.** Release 1 MiB floor `500.0` ->
+`5000.0`:
+
+```
+$ cargo test -p conserved --release --test load_throughput ; echo $?
+ContentId::of missed its throughput floor:
+  1048576 B: 2540.70 MB/s < floor 5000.00 MB/s
+test result: FAILED. 0 passed; 1 failed; ...
+101
+```
+
+Reverted; the file is back to `500.0`.
+
+### The `black_box` box is `- [~]`, and why
+
+The box says "Deleting **either** `black_box` and re-running must move the
+release numbers; if it does not, the loop is being elided and the gate is
+fake." Measured, both halves of that:
+
+| variant | 1 B | 1 KiB | 1 MiB |
+|---|---:|---:|---:|
+| `black_box(ContentId::of(black_box(input)))` (shipped) | 21.42 | 1357.37 | 2541.92 |
+| output `black_box` deleted | 21.29 | 1355.56 | 2542.09 |
+| **both** deleted | 14.07 | 961.56 | 1539.78 |
+
+Deleting the **output** `black_box` alone does not move the numbers, so that
+clause is false as written. But its conclusion does not follow: the numbers
+that would betray an elided loop are numbers that get *faster* when the
+`black_box` is removed, and here removing the guards makes the loop 1.4x-1.65x
+**slower**. Nothing is being elided in either variant on rustc 1.94.0; the
+output `black_box` is redundant against this compiler and defensive against the
+next. The box's intent — "prove the loop is real" — is verified by the third
+row plus the agreement with the independently measured table above. Both
+`black_box` calls ship, unchanged.

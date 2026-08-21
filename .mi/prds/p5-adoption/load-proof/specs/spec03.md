@@ -147,10 +147,10 @@ Three details, each verified against a running child rather than assumed:
 
 ## Acceptance
 
-- [ ] `conserved/tests/load_unwind_panic.rs` exists, entire contents wrapped
+- [x] `conserved/tests/load_unwind_panic.rs` exists, entire contents wrapped
       in `mod load_unwind_panic { … }`, and `cargo test -p conserved load`
       selects it (non-zero `N passed` under that filter).
-- [ ] `panicking_inverse_abandons_the_rest` — five effects, inverse index 3
+- [x] `panicking_inverse_abandons_the_rest` — five effects, inverse index 3
       panics, `close()` called inside `catch_unwind`. Asserts **all five** of
       the measured facts:
       - `catch_unwind` returned `Err` (the inverse's panic escaped `close`);
@@ -160,21 +160,21 @@ Three details, each verified against a running child rather than assumed:
       - a second `s.close()` runs nothing further;
       - the `Disposer` retained for effect `0` runs nothing when disposed
         after the fact.
-- [ ] A comment directly above that test states, in one paragraph: this
+- [x] A comment directly above that test states, in one paragraph: this
       asserts current behaviour, that behaviour contradicts the module doc's
       *"Leaving something behind is not expressible"*, the behaviour is
       inherited byte-for-byte from mitosys `util/effect`, and the test exists
       so that changing it is a decision rather than an accident. It names
       `.mi/prds/p5-adoption/load-proof/finding.md`.
-- [ ] `abandonment_scales_with_the_panic_position` — 10_000 effects where the
+- [x] `abandonment_scales_with_the_panic_position` — 10_000 effects where the
       inverse at registration index 5_000 panics; asserts exactly 5_000
       inverses ran (indices 9_999 down to 5_000) and exactly 5_000 did not.
       This is what makes the size of the hole visible: half the scope.
-- [ ] `first_panicking_inverse_wins` — two inverses panic (indices 3 and 1);
+- [x] `first_panicking_inverse_wins` — two inverses panic (indices 3 and 1);
       asserts the panic that escapes is the one from index 3, the later-
       registered of the two, i.e. the first reached in reverse order, and that
       index 1's inverse never ran at all.
-- [ ] `double_panic_aborts_the_process` — the subprocess test above. Asserts,
+- [x] `double_panic_aborts_the_process` — the subprocess test above. Asserts,
       on the child:
       - it did **not** exit successfully;
       - on unix, `ExitStatusExt::signal()` is `Some(6)` (SIGABRT) — not merely
@@ -184,29 +184,98 @@ Three details, each verified against a running child rather than assumed:
         during cleanup` and the outer panic's own message (both verified
         present with `--nocapture`, and the second verified absent without
         it — so the flag is load-bearing and the test proves it).
-- [ ] The child is invoked with `--nocapture` as well as `--exact`, and a
+- [x] The child is invoked with `--nocapture` as well as `--exact`, and a
       comment says why (without it the abort discards the harness's buffered
       output and the child's own panic message never arrives — measured).
-- [ ] **The subprocess test cannot pass vacuously.** It asserts the child's
+- [x] **The subprocess test cannot pass vacuously.** It asserts the child's
       **stdout** contains `running 1 test`, which a mis-filtered child does
       not print, in addition to the stderr assertions. Demonstrate the hole is
       closed: misspell the filter once, confirm every assertion fails and the
       test goes red rather than green, then put it back and say so in the
       implementation commit.
-- [ ] The parent branch of that test is guarded on an env var whose name
+- [x] The parent branch of that test is guarded on an env var whose name
       contains `CONSERVED_`, and the child branch returns before touching the
       `Command` path — no risk of unbounded re-exec.
-- [ ] `#[cfg(unix)]` guards the signal assertion; on non-unix the test still
+- [x] `#[cfg(unix)]` guards the signal assertion; on non-unix the test still
       asserts `!status.success()` and the stderr contents, so it does not
       silently vanish on another platform.
-- [ ] `.mi/prds/p5-adoption/load-proof/finding.md` exists and contains: the
+- [x] `.mi/prds/p5-adoption/load-proof/finding.md` exists and contains: the
       `close()` loop quoted, the `[4, 3]` transcript, the `held() == []`
       observation, the SIGABRT transcript, the sentence naming the invariant
       contradicted, and one paragraph stating that the fix is deliberately
       **not** taken here and why (the eighth-deviation argument above). It
       names no ticket that does not exist.
-- [ ] `conserved/Cargo.toml` byte-identical; no new dependency of any kind.
-- [ ] `cargo clippy -p conserved --all-targets -- -D warnings` is clean, and
+- [x] `conserved/Cargo.toml` byte-identical; no new dependency of any kind.
+- [x] `cargo clippy -p conserved --all-targets -- -D warnings` is clean, and
       `cargo fmt --all --check` passes.
 
 verify: `cargo test -p conserved --test load_unwind_panic && cargo test -p conserved --release --test load_unwind_panic && cargo test -p conserved load_unwind_panic 2>&1 | grep -qE '[1-9][0-9]* passed' && test -s .mi/prds/p5-adoption/load-proof/finding.md && grep -q 'panic in a destructor during cleanup' conserved/tests/load_unwind_panic.rs && cargo clippy -p conserved --all-targets -- -D warnings`
+
+## Implemented 2026-08-21 — measured on the implementer's box
+
+`conserved/tests/load_unwind_panic.rs` (four tests) and
+`.mi/prds/p5-adoption/load-proof/finding.md`. No manifest change, nothing under
+`conserved/src/` touched — the behaviour is **characterised, not fixed**, per
+the user's explicit decision of 2026-08-21.
+
+```
+$ cargo test -p conserved --test load_unwind_panic
+running 4 tests
+test load_unwind_panic::first_panicking_inverse_wins ... ok
+test load_unwind_panic::panicking_inverse_abandons_the_rest ... ok
+test load_unwind_panic::abandonment_scales_with_the_panic_position ... ok
+test load_unwind_panic::double_panic_aborts_the_process ... ok
+test result: ok. 4 passed; 0 failed; ... finished in 0.05s
+```
+
+Release: `4 passed ... finished in 0.01s`. Under `cargo test -p conserved load`
+the file reports `4 passed` in both profiles.
+
+Every measured fact in the spec reproduced exactly: `[4, 3]`, `held() == []`,
+the inert second `close()`, the inert retained `Disposer`, 5_000-of-10_000
+abandonment, and `"inverse 3 panics"` as the escaping payload.
+
+### The child, and the abort
+
+Raw transcript, run by hand against the built test binary:
+
+```
+$ CONSERVED_LOAD_DOUBLE_PANIC=1 ./load_unwind_panic-4c5f3542b2e0ce37 \
+    load_unwind_panic::double_panic_aborts_the_process --exact --nocapture ; echo $?
+
+running 1 test
+... panicked at conserved/tests/load_unwind_panic.rs:184:13: outer panic in flight
+... panicked at conserved/tests/load_unwind_panic.rs:179:33: inverse panics during unwind
+  20: conserved::scope::Scope::close           at conserved/src/scope.rs:198:5
+  21: <conserved::scope::Scope as Drop>::drop  at conserved/src/scope.rs:218:8
+... panicked at core/src/panicking.rs:233:5: panic in a destructor during cleanup
+thread caused non-unwinding panic. aborting.
+134
+```
+
+134 = 128 + 6, i.e. SIGABRT; `ExitStatusExt::signal()` reads `Some(6)`.
+
+**`--nocapture` is proved load-bearing by the test itself**, not only by a
+comment: `double_panic_aborts_the_process` spawns a **second** child *without*
+the flag and asserts that the runtime's `panic in a destructor during cleanup`
+still arrives while the child's own `outer panic in flight` does **not**. Both
+directions pass, so the day the flag stops mattering this test goes red rather
+than quietly relaxing.
+
+**The vacuity hole is closed — demonstrated.** Filter changed from the
+module-qualified `load_unwind_panic::double_panic_aborts_the_process` to the
+bare `double_panic_aborts_the_process`:
+
+```
+$ cargo test -p conserved --test load_unwind_panic double_panic ; echo $?
+the child selected no test — the filter is wrong, so nothing was proved.
+stdout:
+running 0 tests
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out;   <- the CHILD, exiting 0
+test result: FAILED. 0 passed; 1 failed; ...                                  <- the parent, caught it
+101
+```
+
+The child exited 0, exactly as the spec predicted, and the `running 1 test`
+stdout guard turned that into a red parent instead of an invented success.
+Reverted.
