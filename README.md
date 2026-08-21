@@ -52,6 +52,10 @@ The vision below is now claimable work: **`.mi/prd/`** holds the board
 in `learnings/`. Two memos in `.mi/docs/memos/` record the reset of the
 broken crate scaffold and the settled distribution decision.
 
+`scripts/fresh-clone-check.sh` is how p0's fresh-clone criterion is checked: it
+clones this repository into a temporary directory and builds and tests there,
+so a file that was never committed fails the check instead of passing quietly.
+
 ## The vision
 
 1. **Audit** every crate in all three projects — document what patterns repeat.
