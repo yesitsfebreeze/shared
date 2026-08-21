@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p2-content-id
+state: done
 est: 4.5h
 mode: afk
 priority: 30

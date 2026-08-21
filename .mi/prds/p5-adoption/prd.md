@@ -47,3 +47,56 @@ lands, do not wait for all four.
 `rg` across all three trees finds no second implementation of scope, content
 hashing, clock reads outside `SystemClock`, or median; each tree's own gate
 is what enforces that, and this node names where each proof lives.
+
+
+## Refined 2026-08-21 — six children
+
+This node held six separable contracts across four repositories, ~52h measured.
+It is now a parent; work flows to the leaves. Order (no all-four barrier, per
+the node's own "adopt each module as it lands"):
+
+`ratchets` (blocked on nothing — lands first, per `learnings/clock.md`'s
+"make it visible first") -> `load-proof` (needs p1+p2 only) ->
+`realm` || `mitosys` || `llm` -> `close` (last, per AGENTS.md's Close step).
+
+## Questions
+
+Three forks the children cannot settle. `mitosys`, `llm` and `realm` are held
+until 1 and 2 are answered.
+
+1. **Does this repo get a real git remote?** p1's proof pinned
+   `git = "file:///Users/feb/dev/infra/shared"` and recorded the URL as the
+   provisional half; this node was named as the swap. `git remote -v` is empty.
+   A `file://` URL cannot work inside mitosys's container or for realm on any
+   other machine. *Recommendation: name or create the remote before the consumer
+   children start; all three pin `{ git = <url>, rev = <sha> }` at the same rev.*
+2. **Are cross-tree adoption commits this board's to make?** mitosys and
+   `../model` each run their own `.mi/prds` board and laws; realm has neither.
+   This node's own text says "the work happens in the consumer trees under their
+   own laws and boards; this node is the cross-tree ledger."
+   *Recommendation: each consumer child produces a branch plus a node on that
+   tree's own board, and this board records where each proof lives.*
+3. **Two deliberate persisted-id breaks.** mitosys: SHA-256 hex doc ids ->
+   blake3, behind `store_core`'s `FORMAT_VERSION` wipe. llm: `Record.created`
+   seconds -> `Instant` nanoseconds, rewriting every `rec_id`, plus
+   `Commit.timestamp` u64 -> i64. Both are wipe-and-re-derive, not migrations.
+   *Recommendation: accept both explicitly, one version bump each, recorded in
+   the child's prd — but the user says so, not an analyst.*
+
+## Answers — 2026-08-21
+
+1. **Remote**: `https://github.com/inner-zirkle/shared`. Added as `origin`
+   locally; **not pushed** — publishing is the user's call. When the consumer
+   children eventually run, all three pin `{ git = "https://github.com/inner-zirkle/shared", rev = <sha> }`
+   at the same rev, replacing p1's provisional `file:///Users/feb/dev/infra/shared`.
+2. **No work lands in the sibling repos yet.** The user's instruction: finish
+   this shared repo's tools first, then reconcile the implementations once
+   everything is tested and works. So `ratchets`, `mitosys`, `llm` and `realm`
+   are **held** — they are fully written up and ready, but nothing is dispatched
+   into `../mitosys`, `../model` or `../realm` from this board. In scope now:
+   `load-proof` and `close`, both of which land here.
+3. **Both persisted-id breaks accepted, one version bump each**, recorded in the
+   `mitosys` and `llm` children for when they run. mitosys: SHA-256 hex doc ids
+   -> blake3 behind `store_core`'s `FORMAT_VERSION` wipe. llm: `Record.created`
+   seconds -> `Instant` nanoseconds (rewriting every `rec_id`) plus
+   `Commit.timestamp` u64 -> i64. Wipe and re-derive, not migrations.

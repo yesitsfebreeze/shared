@@ -1,0 +1,58 @@
+---
+state: open
+mode: afk
+priority: 44
+est: 20h
+repo: mitosys
+verify: "cd ../mitosys && just check"
+---
+
+# P5d — mitosys: four duplicates become one dependency, green in the container
+
+Purpose: mitosys is the strict consumer — edition 2021, pinned 1.94.0, offline
+dev container. Its `just check` going green in that container is the final proof
+of p0's distribution decision.
+
+## Requirements
+
+- [ ] **The offline container is this node's blocker, not a footnote.** p0's memo
+      scoped `cargo vendor` / a pre-populated registry cache as "mitosys-side
+      follow-up designed before p5's mitosys adoption step". That work IS this
+      node's acceptance and should be its FIRST spec, not its last.
+- [ ] **`util/effect` → `conserved::scope` is not one file.**
+      `pub use mitosys_util_effect::effect;` is re-exported by 10+ crates
+      (`api/plugin`, `api/plugin/lua`, `api/surface`, `api/agentic`,
+      `api/agentic/pool`, `api/service`, `api/engine`, `engine/record`,
+      `engine/layers`, `engine/channel`), and each of those crates' `//! May
+      import:` layer docs names `mitosys_util_effect`. The type is **`Disposer`**,
+      not `Handle`.
+- [ ] **`content_hash` has 26 non-test call sites and its output is a persisted
+      doc id** — `ingest_worker.rs`, `ingest_intake.rs`, `ingest_direct.rs`,
+      `ingest_file_watcher.rs`, `engine/identity/lib.rs:48` (truncates to 16
+      chars), `engine/record/oracle.rs:113` (oracle key). SHA-256 → blake3
+      **invalidates every stored id**, behind `store_core`'s `FORMAT_VERSION`
+      wipe policy. A deliberate store break — see the parent's `## Questions`.
+- [ ] **The `ed25519:` prefix shim lives here**, at the call sites that need it.
+      p2 deliberately refused to port it into the crate.
+- [ ] **`percentile_sorted` deletion** also deletes
+      `src/mitosys/util/tests/unit/util.rs:26`. Rewrite lines 31-34:
+      `Some(5.0), "ceil(0.5*10)=5 -> xs[4]"` becomes `Some(6.0)` under p4's
+      upper-median decision. Lines 37-39 use `u128`
+      (`percentile_sorted(&ns, 0.5) == Some(30u128)`) and `conserved::stats` is
+      `&[f64]`-only by p4's decision — those vectors have no home and go with
+      the function.
+- [ ] **Gate**: `dependency_tree.rs` accepts the crate (p1 proved it moves
+      exactly two lines: OWNERS + CLOSURE); `just check` green in the container.
+
+## Held — 2026-08-21
+
+**Not dispatchable from this board yet.** The user's instruction is to finish the
+shared repo's own tools first and reconcile the consumer implementations later,
+once everything here is tested and works. This node is fully specified and ready;
+do not start it, and do not write into the consumer trees, until that hold lifts.
+
+## Decided — persisted-id break accepted
+
+The user accepted this break explicitly on 2026-08-21, one version bump: SHA-256 hex doc ids -> blake3, behind `store_core`'s `FORMAT_VERSION` wipe.
+Wipe and re-derive, not a migration. It does not need re-escalating when this
+node runs.
