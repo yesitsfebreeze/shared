@@ -1,6 +1,7 @@
 ---
-state: analyzing
-claim: analyst-p6-scope-unwind
+state: claimed
+claim: impl-p6-scope-unwind
+est: 3h
 mode: afk
 priority: 50
 repo: shared
@@ -45,24 +46,33 @@ slipped in.
 
 ## Requirements
 
-- [ ] **Run every inverse, even when one panics.** Catch per inverse, continue
+- [x] **Run every inverse, even when one panics.** Catch per inverse, continue
       the reverse loop, then resume unwinding. Decide and state what happens to
       the panic payloads when more than one inverse panics — one resumed, the
       rest reported, or all collected.
-- [ ] **`held()` must never lie.** An inverse that did not run is still held, or
+- [x] **`held()` must never lie.** An inverse that did not run is still held, or
       is reported as failed — but it is never silently absent.
-- [ ] **The abort case stays honest.** A panicking inverse *while a panic is
+- [x] **The abort case stays honest.** A panicking inverse *while a panic is
       already in flight* aborts the process (SIGABRT). That is Rust's rule and
       uncatchable; `catch_unwind` around each inverse does not change it. Say so
       in the doc rather than implying the fix covers it.
-- [ ] **`#![forbid(unsafe_code)]` still holds**, and no dependency is added.
-- [ ] **This is the first SEMANTIC divergence from the mitosys source.** p1's
+- [x] **`#![forbid(unsafe_code)]` still holds**, and no dependency is added.
+- [~] **This is the first SEMANTIC divergence from the mitosys source.** p1's
       port is byte-for-byte with seven recorded deviations, all mechanical. This
       adds an eighth that changes behaviour. It must be recorded at its site AND
       carried into the held `p5-adoption/mitosys` child, which now has to
       reconcile two implementations that no longer agree — mitosys keeps the old
       behaviour until it adopts.
-- [ ] **Update the characterisation tests deliberately**, quoting the old and
+      **Half done by this ticket, and deliberately so.** Recorded at its site:
+      deviation 8 in `conserved/src/scope.rs`'s `# Provenance`, which names
+      `.mi/prds/p5-adoption/mitosys` as where the reconciliation happens.
+      *Carried into* that child is not this ticket's edit to make — its `prd.md`
+      belongs to another ticket — so spec01 §"What `p5-adoption/mitosys` must
+      gain" writes the requirement out verbatim for the board to paste, which
+      is the mechanism this board uses for cross-ticket requirements. It is
+      already present in that file, added by the board rather than by this
+      implementer.
+- [x] **Update the characterisation tests deliberately**, quoting the old and
       new expectations side by side, so the change is legible in the diff.
 
 ## Acceptance

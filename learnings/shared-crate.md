@@ -84,6 +84,16 @@ a correct, dependency-free implementation and the other has a comment.
 type that exists in `conserved::scope` is `Disposer`, and that is the name to
 reach for at a call site.
 
+**Corrected 2026-08-21 — "as-is" did not survive contact.** p5's load proof
+measured that a panicking inverse abandoned every inverse still to come and
+that `held()` then reported `[]`
+(`.mi/prds/p5-adoption/load-proof/finding.md`). p6-scope-unwind fixed it in
+`conserved` — every inverse runs, `held()` is true during the unwind, and a
+new `failed()` names the inverses that panicked; it is recorded at its site as
+deviation 8, the first *semantic* divergence from the port. The port was still
+the right move; "one side has a *correct* implementation" was the loose word,
+and the shared crate is where that got found.
+
 ### 4. Order statistics — one definition of "median"
 
 mitosys has `percentile_sorted` **with zero callers**. llm's
