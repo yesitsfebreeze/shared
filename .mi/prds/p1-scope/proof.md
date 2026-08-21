@@ -5,16 +5,18 @@ One crate, one build, one record. mitosys keeps its own `util/effect`; nothing
 in mitosys's committed tree changed, and reconciling the two copies is
 `p5-adoption`.
 
-rev: 0b2f964c060f379dd42089a23d13cd3b15547d97
+rev: 85dad040f5655b9b10a1e1ece98530d0dbc90937
 
 That is the `conserved` commit on `main` in `/Users/feb/dev/infra/shared` that
 carries `conserved/src/scope.rs` — the final spec01 state, not an earlier one.
-The proof was first run against `5313ca43bf5aedda81301a61ccaa489d3de3e46d`
-(the initial port) and then run again in full — fresh worktree, fresh lock,
-gate before and after — against this rev, once the `mod scope { … }` test
-wrapper landed on top. Both rounds gave identical results; only the later one
-is transcribed below, so the rev recorded here is a rev the proof actually
-used.
+The proof was run three times, each in its own fresh throwaway worktree with a
+fresh lock and the gate observed before and after: against
+`5313ca43bf5aedda81301a61ccaa489d3de3e46d` (the initial port), against
+`0b2f964c060f379dd42089a23d13cd3b15547d97` (after the `mod scope { … }` test
+wrapper), and against this rev (after a doc-comment correction). All three
+rounds gave identical results — 1 package locked, a two-line gate diff, the
+smoke test green. Only the last is transcribed below, so the rev recorded here
+is one the proof actually used **and** the final state of the port.
 
 - **mitosys HEAD the proof ran against:** `c96fdb9134eff9a7a575f28fd3bf9d358e880e81`
   (`ledger: session 2`).
@@ -34,7 +36,7 @@ declared straight in a member manifest would prove the mechanism against a
 convention mitosys does not use):
 
 ```toml
-conserved = { git = "file:///Users/feb/dev/infra/shared", rev = "0b2f964c060f379dd42089a23d13cd3b15547d97" }
+conserved = { git = "file:///Users/feb/dev/infra/shared", rev = "85dad040f5655b9b10a1e1ece98530d0dbc90937" }
 ```
 
 `src/mitosys/util/effect/Cargo.toml`, under `[dependencies]`:
@@ -50,13 +52,12 @@ conserved = { workspace = true }
 ```
     Updating git repository `file:///Users/feb/dev/infra/shared`
 From file:///Users/feb/dev/infra/shared
-   5313ca4..0b2f964  main       -> origin/main
-   5313ca4..0b2f964  HEAD       -> origin/HEAD
+   0b2f964..85dad04  HEAD       -> origin/HEAD
      Locking 1 package to latest compatible version
-      Adding conserved v0.1.0 (file:///Users/feb/dev/infra/shared?rev=0b2f964c060f379dd42089a23d13cd3b15547d97#0b2f964c)
-   Compiling conserved v0.1.0 (file:///Users/feb/dev/infra/shared?rev=0b2f964c060f379dd42089a23d13cd3b15547d97#0b2f964c)
+      Adding conserved v0.1.0 (file:///Users/feb/dev/infra/shared?rev=85dad040f5655b9b10a1e1ece98530d0dbc90937#85dad040)
+   Compiling conserved v0.1.0 (file:///Users/feb/dev/infra/shared?rev=85dad040f5655b9b10a1e1ece98530d0dbc90937#85dad040)
    Compiling mitosys-util-effect v0.1.0 (.../mitosys-p1-proof/src/mitosys/util/effect)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.31s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.27s
 ```
 
 `Locking 1 package` is the first consumer-side reading of requirement 2: the
@@ -79,7 +80,7 @@ loudly there. The lock entry confirms the same thing the gate does:
 [[package]]
 name = "conserved"
 version = "0.1.0"
-source = "git+file:///Users/feb/dev/infra/shared?rev=0b2f964c060f379dd42089a23d13cd3b15547d97#0b2f964c060f379dd42089a23d13cd3b15547d97"
+source = "git+file:///Users/feb/dev/infra/shared?rev=85dad040f5655b9b10a1e1ece98530d0dbc90937#85dad040f5655b9b10a1e1ece98530d0dbc90937"
 ```
 
 — no `dependencies` array under it.
