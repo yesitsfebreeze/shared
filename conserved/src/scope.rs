@@ -61,6 +61,18 @@
 //!    own copy untouched; reconciling the two is `p5-adoption`. The source
 //!    crate's README is about a mitosys crate and does not move — its two
 //!    invariants survive above, per deviation 4.
+//! 7. **`conserved/tests/scope.rs` is wrapped in `mod scope { … }`.** Added
+//!    after the port, at the board's request, and a wrapper rather than a
+//!    rewrite: strip the first line, the last line and one leading tab from
+//!    every line and the file is again byte-for-byte the source's from its
+//!    line 2. The reason is that this ticket's gate is
+//!    `cargo test -p conserved scope`, and cargo's filter matches **test
+//!    function names**, not file or target names. Unwrapped, four of the five
+//!    ported tests do not contain the substring `scope` and the gate reported
+//!    `1 passed; 4 filtered out` while exiting 0 — a gate that can pass having
+//!    run almost nothing. Wrapped, the tests report as `scope::close_unwinds_lifo`
+//!    and friends, and the filter selects all five. p3-clock and p4-stats
+//!    adopted the same convention independently.
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::{Arc, Mutex};

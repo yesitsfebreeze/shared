@@ -131,6 +131,17 @@ frontmatter should fix it there too.
 - [x] `conserved/tests/scope.rs` exists, and from line 2 to end of file it is
       byte-identical to `../mitosys/src/mitosys/util/effect/tests/effect.rs`
       from line 2; line 1 is exactly `use conserved::scope::*;`.
+
+      **Amended during implementation**, at the board's request, and the
+      `verify:` line below with it. The file is wrapped in `mod scope { … }` —
+      a seventh deviation, recorded in `scope.rs`'s Provenance block. Without
+      it this ticket's gate, `cargo test -p conserved scope`, filters on *test
+      function names* and reported `1 passed; 4 filtered out` while exiting 0:
+      a gate passing having run one test in five. Byte-identity is unchanged as
+      a property, only as a command — strip line 1, the last line, and one
+      leading tab from every line, and the diff is still empty. That is what
+      the verify now does. p3-clock and p4-stats adopted the same wrapper
+      independently, so it is the board-wide convention.
 - [x] `conserved/src/lib.rs` contains the line `pub mod scope;` and declares no
       `pub use` re-export of anything in `scope`.
 - [x] The module doc of `conserved/src/scope.rs` contains a `# Provenance`
@@ -155,4 +166,4 @@ frontmatter should fix it there too.
 
 1
 
-verify: `bash -c 'set -e; cd /Users/feb/dev/infra/shared; M=../mitosys/src/mitosys/util/effect; test -f conserved/src/scope.rs; test -f conserved/tests/scope.rs; grep -qx "pub mod scope;" conserved/src/lib.rs; grep -q "# Provenance" conserved/src/scope.rs; head -1 conserved/tests/scope.rs | grep -qx "use conserved::scope::\*;"; diff <(sed -n "/^use std::collections::HashMap;/,\$p" $M/effect.rs) <(sed -n "/^use std::collections::HashMap;/,\$p" conserved/src/scope.rs); diff <(tail -n +2 $M/tests/effect.rs) <(tail -n +2 conserved/tests/scope.rs); cargo fmt --all --check; cargo clippy --workspace --all-targets -- -D warnings; cargo test -p conserved --test scope 2>&1 | grep -q "5 passed"; n=$(cargo tree -p conserved --edges normal | wc -l | tr -d " "); [ "$n" = 1 ] || { echo "conserved gained $((n-1)) dependency edge(s)"; cargo tree -p conserved --edges normal; exit 1; }; [ -z "$(git -C ../mitosys status --porcelain src/mitosys/util/effect)" ] || { echo "the mitosys source was modified"; exit 1; }; echo "spec01 ok"'`
+verify: `bash -c 'set -e; cd /Users/feb/dev/infra/shared; M=../mitosys/src/mitosys/util/effect; test -f conserved/src/scope.rs; test -f conserved/tests/scope.rs; grep -qx "pub mod scope;" conserved/src/lib.rs; grep -q "# Provenance" conserved/src/scope.rs; head -1 conserved/tests/scope.rs | grep -qx "mod scope {"; sed -n "2p" conserved/tests/scope.rs | grep -qx "	use conserved::scope::\*;"; diff <(sed -n "/^use std::collections::HashMap;/,\$p" $M/effect.rs) <(sed -n "/^use std::collections::HashMap;/,\$p" conserved/src/scope.rs); diff <(tail -n +2 $M/tests/effect.rs) <(sed -e "1d" -e "\$d" conserved/tests/scope.rs | sed -e "s/^	//" | tail -n +2); cargo fmt --all --check; cargo clippy --workspace --all-targets -- -D warnings; cargo test -p conserved --test scope 2>&1 | grep -q "5 passed"; n=$(cargo tree -p conserved --edges normal | wc -l | tr -d " "); [ "$n" = 1 ] || { echo "conserved gained $((n-1)) dependency edge(s)"; cargo tree -p conserved --edges normal; exit 1; }; [ -z "$(git -C ../mitosys status --porcelain src/mitosys/util/effect)" ] || { echo "the mitosys source was modified"; exit 1; }; echo "spec01 ok"'`
