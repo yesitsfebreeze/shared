@@ -1,6 +1,6 @@
 ---
-state: analyzing
-claim: analyst-p4-stats
+state: specced
+est: 1.75h
 mode: afk
 priority: 30
 verify: "cargo test -p conserved stats"

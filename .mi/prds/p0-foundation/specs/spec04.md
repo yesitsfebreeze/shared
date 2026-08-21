@@ -42,8 +42,8 @@ rather than globally.
 - [x] `git status --porcelain` is empty — every file is either committed or
       deliberately ignored. No "I'll commit that later".
 - [x] The commit carries the board and the learnings, not just the code:
-      `git ls-files` includes `.mi/prd/prd.md`,
-      `.mi/prd/p0-foundation/prd.md`, `.mi/docs/memos/distribution.md`,
+      `git ls-files` includes `.mi/prds/prd.md`,
+      `.mi/prds/p0-foundation/prd.md`, `.mi/docs/memos/distribution.md`,
       `.mi/docs/memos/scaffold-reset.md`, `learnings/shared-crate.md`,
       `conserved/Cargo.toml`, `conserved/src/lib.rs`,
       `conserved/tests/smoke.rs`.
@@ -57,4 +57,4 @@ rather than globally.
 
 0.5
 
-verify: `sh -c 'set -e; git rev-parse --git-dir >/dev/null; test -n "$(git log --oneline)"; if [ -n "$(git status --porcelain)" ]; then echo "tree dirty"; git status --short; exit 1; fi; for f in .mi/prd/prd.md .mi/prd/p0-foundation/prd.md .mi/docs/memos/distribution.md .mi/docs/memos/scaffold-reset.md learnings/shared-crate.md conserved/Cargo.toml conserved/src/lib.rs conserved/tests/smoke.rs; do git ls-files --error-unmatch "$f" >/dev/null; done; if git ls-files | grep -qE "(^|/)target/|\.DS_Store|\.mdb$|^conserved-(core|alloc|net|deriv|derive)/"; then echo "tracked what must not be tracked"; exit 1; fi; echo "repository initialised and committed"'`
+verify: `sh -c 'set -e; git rev-parse --git-dir >/dev/null; test -n "$(git log --oneline)"; if [ -n "$(git status --porcelain)" ]; then echo "tree dirty"; git status --short; exit 1; fi; for f in .mi/prds/prd.md .mi/prds/p0-foundation/prd.md .mi/docs/memos/distribution.md .mi/docs/memos/scaffold-reset.md learnings/shared-crate.md conserved/Cargo.toml conserved/src/lib.rs conserved/tests/smoke.rs; do git ls-files --error-unmatch "$f" >/dev/null; done; if git ls-files | grep -qE "(^|/)target/|\.DS_Store|\.mdb$|^conserved-(core|alloc|net|deriv|derive)/"; then echo "tracked what must not be tracked"; exit 1; fi; echo "repository initialised and committed"'`

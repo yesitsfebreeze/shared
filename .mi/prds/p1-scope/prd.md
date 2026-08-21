@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p1-scope
+state: done
 est: 3h
 mode: afk
 priority: 20

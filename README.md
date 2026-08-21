@@ -47,7 +47,7 @@ implementation tested under load.
 
 ## The board
 
-The vision below is now claimable work: **`.mi/prd/`** holds the board
+The vision below is now claimable work: **`.mi/prds/`** holds the board
 (p0-foundation → p1-scope → p2/p3/p4 → p5-adoption), with the specs staying
 in `learnings/`. Two memos in `.mi/docs/memos/` record the reset of the
 broken crate scaffold and the settled distribution decision.

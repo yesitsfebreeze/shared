@@ -19,7 +19,7 @@ it rather than re-inventing it.
 
   ```bash
   #!/usr/bin/env bash
-  # The acceptance criterion of .mi/prd/p0-foundation, made runnable: a fresh
+  # The acceptance criterion of .mi/prds/p0-foundation, made runnable: a fresh
   # clone of this repository builds and tests green. Catches what an in-place
   # build cannot — a file the build needs that was never committed, or one
   # .gitignore excludes.
@@ -51,7 +51,7 @@ it rather than re-inventing it.
 - `README.md` — one line under §"The board" naming the script as how the
   fresh-clone criterion is checked. No other prose change.
 
-Not touched: `.mi/prd/p0-foundation/prd.md` frontmatter — the orchestrator owns
+Not touched: `.mi/prds/p0-foundation/prd.md` frontmatter — the orchestrator owns
 ticket state, including the `verify:` line. If that line is to be widened to
 `… && ./scripts/fresh-clone-check.sh`, the orchestrator makes that edit, not
 the implementer.

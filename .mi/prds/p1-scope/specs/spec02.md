@@ -3,7 +3,7 @@
 Prove the distribution mechanism once: from mitosys — the strict consumer tree —
 depend on `conserved` through the decided git-dependency-pinned-by-rev
 mechanism, build it, observe what mitosys's dependency gate says about it, and
-record the result with the rev in `.mi/prd/p1-scope/proof.md`.
+record the result with the rev in `.mi/prds/p1-scope/proof.md`.
 
 This is requirement 3 of the ticket. **It is not adoption.** One crate, one
 build, one record. mitosys keeps its own `util/effect`, nothing in mitosys's
@@ -45,7 +45,7 @@ proven — does not change. Record this deviation in `proof.md`.
 
 Written in this repository (the only lasting artifact of this spec):
 
-- `.mi/prd/p1-scope/proof.md` — the record. It must contain, at minimum:
+- `.mi/prds/p1-scope/proof.md` — the record. It must contain, at minimum:
   - a line `rev: <40-hex>` — the `conserved` commit that was pinned;
   - the mitosys HEAD sha the proof was run against;
   - the exact dependency lines added, both of them;
@@ -117,7 +117,7 @@ proof worth more than one `cargo build`.
 
 ## Acceptance
 
-- [x] `.mi/prd/p1-scope/proof.md` exists and contains a line matching
+- [x] `.mi/prds/p1-scope/proof.md` exists and contains a line matching
       `^rev: [0-9a-f]{40}$`.
 - [x] That rev is a real commit in this repository and its tree contains
       `conserved/src/scope.rs` — i.e. the pin points at the port, not at some
@@ -154,4 +154,4 @@ proof worth more than one `cargo build`.
 
 2
 
-verify: `bash -c 'set -e; cd /Users/feb/dev/infra/shared; P=.mi/prd/p1-scope/proof.md; test -f $P; REV=$(grep -m1 -E "^rev: [0-9a-f]{40}$" $P | grep -oE "[0-9a-f]{40}"); [ -n "$REV" ] || { echo "proof.md records no rev"; exit 1; }; git cat-file -e "$REV^{commit}"; git ls-tree -r --name-only "$REV" | grep -qx conserved/src/scope.rs || { echo "the recorded rev does not carry conserved/src/scope.rs"; exit 1; }; grep -q "mitosys-util-effect" $P; grep -qE "^gate: " $P; grep -q "file://" $P; [ -z "$(git -C ../mitosys diff --stat HEAD -- Cargo.toml Cargo.lock src/mitosys/util/effect src/mitosys/gates)" ] || { echo "mitosys was modified in place"; exit 1; }; n=$(cargo tree -p conserved --edges normal | wc -l | tr -d " "); [ "$n" = 1 ] || { echo "conserved is no longer dependency-free"; exit 1; }; D=$(mktemp -d); mkdir -p $D/src; printf "[package]\nname = \"p1-pin-recheck\"\nversion = \"0.0.0\"\nedition = \"2021\"\n\n[dependencies]\nconserved = { git = \"file:///Users/feb/dev/infra/shared\", rev = \"%s\" }\n" "$REV" > $D/Cargo.toml; printf "fn main() { let s = conserved::scope::Scope::new(); s.effect(\"x\", || Box::new(|| {})).unwrap(); s.close(); }\n" > $D/src/main.rs; ( cd $D && cargo build 2>&1 | tail -2 ); rm -rf $D; echo "spec02 ok"'`
+verify: `bash -c 'set -e; cd /Users/feb/dev/infra/shared; P=.mi/prds/p1-scope/proof.md; test -f $P; REV=$(grep -m1 -E "^rev: [0-9a-f]{40}$" $P | grep -oE "[0-9a-f]{40}"); [ -n "$REV" ] || { echo "proof.md records no rev"; exit 1; }; git cat-file -e "$REV^{commit}"; git ls-tree -r --name-only "$REV" | grep -qx conserved/src/scope.rs || { echo "the recorded rev does not carry conserved/src/scope.rs"; exit 1; }; grep -q "mitosys-util-effect" $P; grep -qE "^gate: " $P; grep -q "file://" $P; [ -z "$(git -C ../mitosys diff --stat HEAD -- Cargo.toml Cargo.lock src/mitosys/util/effect src/mitosys/gates)" ] || { echo "mitosys was modified in place"; exit 1; }; n=$(cargo tree -p conserved --edges normal | wc -l | tr -d " "); [ "$n" = 1 ] || { echo "conserved is no longer dependency-free"; exit 1; }; D=$(mktemp -d); mkdir -p $D/src; printf "[package]\nname = \"p1-pin-recheck\"\nversion = \"0.0.0\"\nedition = \"2021\"\n\n[dependencies]\nconserved = { git = \"file:///Users/feb/dev/infra/shared\", rev = \"%s\" }\n" "$REV" > $D/Cargo.toml; printf "fn main() { let s = conserved::scope::Scope::new(); s.effect(\"x\", || Box::new(|| {})).unwrap(); s.close(); }\n" > $D/src/main.rs; ( cd $D && cargo build 2>&1 | tail -2 ); rm -rf $D; echo "spec02 ok"'`

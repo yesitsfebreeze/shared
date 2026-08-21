@@ -155,7 +155,7 @@ contract, deciding the names and the API surface. Do it before writing code.
 
 | document | where | what it is |
 |---|---|---|
-| **The board** | `.mi/prd/` | claimable work for extracting `conserved` — p0 first, everything blocks on it |
+| **The board** | `.mi/prds/` | claimable work for extracting `conserved` — p0 first, everything blocks on it |
 | Scaffold reset memo | `.mi/docs/memos/scaffold-reset.md` | why the pre-split conserved-* crates are condemned |
 | Distribution memo | `.mi/docs/memos/distribution.md` | how the crate reaches consumers — **decided**: a git dependency pinned by commit rev; mitosys carries the offline cost |
 | Learnings admission rule | `learnings/README.md` | what belongs in learnings, what does not |

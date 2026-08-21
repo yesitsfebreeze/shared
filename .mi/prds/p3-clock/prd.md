@@ -1,6 +1,6 @@
 ---
-state: analyzing
-claim: analyst-p3-clock
+state: specced
+est: 3.5h
 mode: afk
 priority: 30
 verify: "cargo test -p conserved clock"
