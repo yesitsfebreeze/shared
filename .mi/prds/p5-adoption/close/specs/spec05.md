@@ -83,21 +83,21 @@ is the record; link it.
 
 ## Acceptance
 
-- [ ] `status:` still reads `decided` — this spec does not move it.
-- [ ] `code:` names `conserved/src/content_id.rs`, which is committed, and
+- [x] `status:` still reads `decided` — this spec does not move it.
+- [x] `code:` names `conserved/src/content_id.rs`, which is committed, and
       still names all three original sites (`util.rs:9`,
       `algebra/mod.rs:24`, `record/mod.rs:226`).
-- [ ] The document records that serde is an optional feature with
+- [x] The document records that serde is an optional feature with
       `default = []` and names how a consumer enables it.
-- [ ] It states that the binary encoding is the 32 raw bytes as a fixed-size
+- [x] It states that the binary encoding is the 32 raw bytes as a fixed-size
       tuple and **not** `serialize_bytes`, and says what taking the sentence
       literally would have cost.
-- [ ] It links `8e12122`, and that sha resolves.
-- [ ] **Erase-guard**: the original sentence
+- [x] It links `8e12122`, and that sha resolves.
+- [x] **Erase-guard**: the original sentence
       `Serde: bytes on a binary wire` is still present, and §"What this beat"
       is still present with all three rejected alternatives.
-- [ ] `cargo test -p conserved --features serde` passes — the document now
+- [x] `cargo test -p conserved --features serde` passes — the document now
       describes a feature, so the feature is exercised.
-- [ ] `README.md` is not modified by this spec.
+- [x] `README.md` is not modified by this spec.
 
 verify: `bash -c 'set -e; cd /Users/feb/dev/infra/shared; A=learnings/content-addressing.md; grep -q "^status: decided" $A || { echo "FAIL: status moved or was lost"; exit 1; }; grep -qE "^code:.*conserved/src/content_id\.rs" $A || { echo "FAIL: code: does not name the landed implementation"; exit 1; }; git ls-files --error-unmatch conserved/src/content_id.rs >/dev/null || { echo "FAIL: code: names a file that is not committed"; exit 1; }; for t in "util.rs:9" "algebra/mod.rs:24" "record/mod.rs:226"; do grep -qE "^code:.*$t" $A || { echo "FAIL: original code: site $t was dropped"; exit 1; }; done; grep -q "default = \[\]" $A || { echo "FAIL: the learning does not record that serde is off by default"; exit 1; }; grep -qE "features = \[.serde.\]|--features serde" $A || { echo "FAIL: the learning does not say how a consumer enables serde"; exit 1; }; grep -q "serialize_bytes" $A || { echo "FAIL: the fixed-tuple-not-serialize_bytes decision is not recorded"; exit 1; }; grep -q "8e12122" $A || { echo "FAIL: the landing commit is not linked"; exit 1; }; git cat-file -e 8e12122^{commit}; grep -q "Serde: bytes on a binary wire" $A || { echo "FAIL: the original sentence was erased rather than extended"; exit 1; }; grep -q "^## What this beat" $A || { echo "FAIL: the record of what the decision beat was erased"; exit 1; }; cargo test -p conserved --features serde >/dev/null || { echo "FAIL: the serde feature the document now describes does not pass its tests"; exit 1; }; grep -E "^\| .content-addressing\.md." README.md | grep -q "decided" || { echo "FAIL: README content-addressing row is not decided"; exit 1; }; echo "spec05 ok"'`

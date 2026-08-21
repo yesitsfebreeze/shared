@@ -89,19 +89,19 @@ Replacing the stale claim, and at minimum:
 
 ## Acceptance
 
-- [ ] `learnings/README.md` no longer contains the string
+- [x] `learnings/README.md` no longer contains the string
       `It is not version controlled`.
-- [ ] It names commit `ab154f7` as the commit that made the folder version
+- [x] It names commit `ab154f7` as the commit that made the folder version
       controlled, and that commit resolves.
-- [ ] It contains the word `shadow` (the mechanism) and `supersede` (the
+- [x] It contains the word `shadow` (the mechanism) and `supersede` (the
       reserved case), and states which kind of correction each applies to.
-- [ ] The first bullet of §"What is enforced" — the container bind-mount limit
+- [x] The first bullet of §"What is enforced" — the container bind-mount limit
       — is still present verbatim (`bind-mounts the repo and nothing else`),
       and the section still opens by stating that nothing is enforced. This
       spec corrects one false sentence; it does not rewrite the section.
-- [ ] §"What a gate would check, if one is ever written" is unchanged — this
+- [x] §"What a gate would check, if one is ever written" is unchanged — this
       spec adds no gate, and the folder is still ungated.
-- [ ] No file outside `learnings/README.md` is modified:
+- [x] No file outside `learnings/README.md` is modified:  <!-- true at spec01 landing; specs 02-05 modify the other files by design -->
       `git status --porcelain learnings/ README.md` names that file and nothing
       else.
 

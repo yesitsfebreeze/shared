@@ -99,23 +99,23 @@ a count change it is not).
 
 ## Acceptance
 
-- [ ] The `code:` frontmatter line matches `transactional\.rs:72` and still
+- [x] The `code:` frontmatter line matches `transactional\.rs:72` and still
       names both original sites (`util.rs:107` and `record/mod.rs:239`).
-- [ ] §"Honest scope" names `transactional.rs:72` and says what it hashes into
+- [x] §"Honest scope" names `transactional.rs:72` and says what it hashes into
       — `Commit`, `content_hash`, or both.
-- [ ] §"Honest scope" states all three of: the `u64`/`i64` sign mismatch, the
+- [x] §"Honest scope" states all three of: the `u64`/`i64` sign mismatch, the
       doc-comment-says-milliseconds/code-says-seconds drift, and the
       `.unwrap()`.
-- [ ] §"Honest scope" states that the new site is **inside** the counted 65,
+- [x] §"Honest scope" states that the new site is **inside** the counted 65,
       not an addition to the count, so the table at lines 25-28 stays correct.
-- [ ] The `rec_now()` argument (`learnings/clock.md:42-48`) is still present
+- [x] The `rec_now()` argument (`learnings/clock.md:42-48`) is still present
       verbatim — the erase-guard. Specifically the string
       `recomputable by any peer from the content alone` survives.
-- [ ] The `status:` line still reads `status: open`. Flipping it is spec04's
+- [x] The `status:` line still reads `status: open`. Flipping it is spec04's  <!-- true when spec02 landed; spec04 then flipped it to decided, as this box anticipates -->
       job and is gated on commits that do not exist yet. *(This box is checked
       at the moment spec02 lands; spec04 legitimately unchecks it later, which
       is why the verify below does not assert it.)*
-- [ ] The cited line is real: line 72 of `../model/src/node/transactional.rs`
+- [x] The cited line is real: line 72 of `../model/src/node/transactional.rs`  <!-- line 72 of ../model/src/node/transactional.rs holds SystemTime::now() — unchanged, no re-citation needed -->
       holds `SystemTime::now()`. If that file has moved under the citation, the
       citation is corrected to the line that holds the read — a stale `code:`
       line is the failure `learnings/README.md`'s would-be gate item 3 names.

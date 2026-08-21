@@ -3,9 +3,10 @@ type: learning
 learning: clock
 subject: both trees read the wall clock ~65 times each in non-test code while their shared law says time enters as recorded data and is never consulted live — a symmetric violation nothing gates in either tree
 binds: [mitosys, llm]
-status: open
+status: decided
 date: 2026-08-18
-code: mitosys src/mitosys/util/util.rs:107, llm src/record/mod.rs:239
+decided: 2026-08-21
+code: mitosys src/mitosys/util/util.rs:107, llm src/record/mod.rs:239, llm src/node/transactional.rs:72, shared conserved/src/clock.rs
 ---
 
 # Time is a parameter, and neither tree treats it as one
@@ -95,6 +96,70 @@ inside a fold from one inside a status bar. Step 1 costs almost nothing and
 buys exactly that distinction; steps 2 and 3 are then priced per site
 instead of as one migration.
 
-Two sites are known bugs today rather than candidates: `rec_now()` feeding
-`created` into the preimage, and any clock read reachable from
+Three sites are known bugs today rather than candidates: `rec_now()` feeding
+`created` into the preimage; `Commit::new` at llm's
+`src/node/transactional.rs:72`; and any clock read reachable from
 `replay(as_of, kinds)`.
+
+`Commit::new` is the same defect as `rec_now()`, in the more expensive place.
+It reads `SystemTime::now()` into `timestamp`, and `Commit::content_hash()`
+(same file, lines 104-109) is blake3 over the postcard encoding of the whole
+commit with `signature` set to `None` — `timestamp` included. That hash is the
+commit's own id, and `parent_heads: Vec<[u8; 32]>` carries it across the
+network, so a peer either re-derives the same id from the same content or the
+DAG does not join up. Three hazards ride on that one read, and this is the only
+place they are collected:
+
+- The field is `timestamp: u64` — **unsigned**, so it cannot hold a pre-1970
+  value at all, while `Instant` is `i64`. Substituting moves bytes as well as
+  units: postcard varint-encodes a `u64` and zigzag-encodes an `i64`, so it is
+  a format change, not only a type change.
+- The read is `.as_secs()` while the field's own doc comment, one line above
+  it, says *"unix epoch milliseconds"*. The unit has already drifted inside a
+  single struct, between the code and the prose describing it — which is the
+  argument for `Instant` pinning its unit by test rather than by doc comment.
+- The `.unwrap()` is a third spelling of the pre-epoch hazard: a clock behind
+  `UNIX_EPOCH` panics here rather than yielding a negative timestamp.
+
+This site is **inside** the counts in the table above, not an addition to them:
+it is one of llm's 66 reads, counted on 2026-08-18 and only now named. The
+table is unchanged; what changes is how many of those reads are known bugs
+rather than candidates.
+## Landed
+
+Step 2 of §"The fix" — *give time a type and one source* — is in
+`conserved/src/clock.rs`:
+
+| commit | what it landed |
+|---|---|
+| `cb49f4a` | `Instant` — unix nanoseconds, decided and pinned by test |
+| `b1fdcee` | `Clock`, `SystemClock`, `FixedClock` — time as a parameter |
+| `c74bd90` | `Instant` under serde: transparently the `i64` it replaces |
+
+**The implementation decided something this document left open.** The sketch
+above writes `pub struct Instant(i64); // unix, whatever precision the tree
+needs`. The landed type is **unix nanoseconds**, fixed, pinned by a test
+rather than by a comment — because "whatever precision the tree needs" is two
+precisions the day the second tree arrives, which is the same class of drift
+this folder exists to catch. `i64` nanoseconds spans roughly ±292 years around
+1970, which covers both trees' timestamps with room, and the sign is what lets
+a pre-epoch value exist rather than panic.
+
+**What is decided and what is merely possible.** The status above says the
+argument is settled and the compliant path exists — not that the reads are
+gone. On the day it flipped:
+
+- **Steps 1 and 3 have not landed anywhere.** No ratchet exists in any tree,
+  so a new `SystemTime::now()` still fails no check, and no allowlist has been
+  emptied from the leaves inward. Both are consumer-tree work by design: p3's
+  own third requirement keeps the ratchet out of this repo, and
+  `p5-adoption`'s `ratchets` child carries it in the trees themselves.
+- **No consumer tree reads `conserved::Clock`.** mitosys still ships
+  `now_nanos`/`now_ms`/`now_secs`; llm still ships `rec_now()`.
+- **Both content-hash sites are still live bugs** in llm: `rec_now()` feeding
+  `created` into the record preimage, and `Commit::new` at
+  `src/node/transactional.rs:72` feeding `SystemTime::now()` into a
+  network-visible commit id. The type that fixes them exists; nothing has been
+  threaded through either yet.
+- The counts in the table above are as of 2026-08-18 and have not been
+  recounted since.

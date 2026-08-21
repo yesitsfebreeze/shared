@@ -36,8 +36,8 @@ system, so one parser reads both.
 | `record-shape.md` | llm's record is ahead → port direction reverses | decided |
 | `content-addressing.md` | blake3 over SHA-256, `[u8; 32]` over hex `String` | decided |
 | `storage.md` | redb over LMDB, sequenced behind mitosys's fold rewrite | decided |
-| `clock.md` | both trees read wall clock ~65×; the fix and the ratchet | open |
-| `shared-crate.md` | proposal for `conserved` — what goes in, what stays out | partial |
+| `clock.md` | both trees read wall clock ~65×; the fix and the ratchet | decided |
+| `shared-crate.md` | proposal for `conserved` — what goes in, what stays out | decided |
 
 The learnings are prose today and nothing gates them. The goal is to turn them
 into executable truth: a shared crate (`conserved`, proposed in

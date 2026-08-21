@@ -3,9 +3,9 @@ type: learning
 learning: shared-crate
 subject: the concrete proposal — one small crate both trees depend on, holding ContentId, Clock, Scope and order statistics, with a stated admission test and everything it deliberately excludes
 binds: [mitosys, llm]
-status: partial
+status: decided
 date: 2026-08-18
-code: mitosys src/mitosys/util/, llm src/utils/
+code: mitosys src/mitosys/util/, llm src/utils/, shared conserved/src/scope.rs, shared conserved/src/content_id.rs
 ---
 
 # `conserved` — the crate both trees depend on
@@ -80,6 +80,10 @@ Ports as-is. This is the clearest case in the whole proposal — one side has
 a correct, dependency-free implementation and the other has a comment.
 **No dependencies.**
 
+**Landed as `Scope` / `Disposer`.** `Handle` above is the proposal's word; the
+type that exists in `conserved::scope` is `Disposer`, and that is the name to
+reach for at a call site.
+
 ### 4. Order statistics — one definition of "median"
 
 mitosys has `percentile_sorted` **with zero callers**. llm's
@@ -104,7 +108,10 @@ utility with two callers spelling it differently.
 ## Size and shape
 
 Roughly 600–800 lines including tests. One crate to start, with one
-dependency (`blake3`) reachable only through `ContentId`.
+dependency (`blake3`) reachable only through `ContentId` — still true of the
+crate as built by default, since p2 added `serde` as an **optional** feature
+with `default = []` rather than as a second dependency ([[content-addressing]]
+carries that argument).
 
 **If mitosys's dependency gate objects** to a core crate pulling `blake3`
 transitively for `Scope`, split at the obvious line: `conserved` (Clock,
@@ -123,7 +130,7 @@ for.
 | **the reload seam** | llm's `interface` crate is the right shape and mitosys's `abi.rs` needs it, but it is a *seam*, not a utility: its whole contract is what may cross a dylib boundary. It deserves its own crate, on its own schedule, once the swap work actually starts. |
 | **the grade envelope** | `Baseline`/`Target`/`Grade`/`normalized_ms`/`pass_window` is the highest-value thing llm has that mitosys lacks — but it is a *tool*, and it belongs in the port described by [[two-halves]] step 4, not in a floor crate. |
 
-## Where it lives — the one unresolved constraint
+## Where it lives — the one constraint, now resolved
 
 The learnings folder is prose, and a plain sibling directory costs it
 nothing but a gate. **Code is different.** A `path = "../conserved"`
@@ -151,10 +158,28 @@ made for prose. Three options, in the order they cost:
 3. **A path dependency to a sibling directory.** Simplest, and host-only:
    accepts that neither tree builds in the container or on a fresh clone.
 
-No recommendation is recorded here because the constraint that decides it —
-whether container and clone builds must keep working — is not a technical
-question. It is worth deciding **before** the first line is extracted, since
-each option implies a different repository layout.
+**Resolved: option 2 — a git dependency, pinned by commit rev.** The
+constraint that decides it was never a technical question, and the user
+settled it on 2026-08-20: the crate must be distributable to *every* Rust
+repo. That eliminates option 3, which is host-only by construction, and it
+prices option 1's manual sync against a pin that cannot silently drift. The
+argument in full lives in `.mi/docs/memos/distribution.md`
+(`status: decided`, `decided: 2026-08-21`), and `p0-foundation`'s answers
+close it: do not re-escalate this.
+
+It was **proven once before anything was extracted**, which is exactly what
+§"First move" asked for. In `9fff8ea`, mitosys resolved, locked, compiled and
+ran a test against `conserved` through a rev-pinned git dependency; the rev is
+recorded in `.mi/prds/p1-scope/proof.md`. The provisional half of that proof
+is the URL — it pinned `file:///Users/feb/dev/infra/shared`, and the board's
+answer of 2026-08-21 names `https://github.com/inner-zirkle/shared` as the
+real one, added as `origin` and not yet pushed.
+
+The cost option 2 carries is the one this section named against it: mitosys's
+dev container has no network at build time, so it needs vendoring or a
+pre-populated registry cache. That is scoped as mitosys-side follow-up in the
+`mitosys` child of `p5-adoption` — a cost of the chosen option, not a
+reopening of the choice.
 
 ## First move
 
@@ -163,3 +188,53 @@ already has it working and the other measurably lacks it, and it cannot fail
 in an interesting way — so what it actually tests is the *mechanism*: does
 the dependency resolve, in the container, on a clone, under both gates.
 Learn that on 262 lines, not on the record.
+## Landed
+
+Where the decision above turned into a crate. Every sha is on `main`.
+
+| commit | what it landed |
+|---|---|
+| `ab154f7` | `git init`; the reset workspace; the board; `.mi/docs/memos/distribution.md` |
+| `0d4bc10` | the fresh-clone gate (`scripts/fresh-clone-check.sh`) — p0's acceptance |
+| `eb55b49` | p0's acceptance ticks |
+| `5313ca4` | `Scope`/`Disposer` ported into `conserved::scope`, zero dependencies |
+| `0b2f964`, `85dad04` | the `mod scope` test wrapper and its deviation record |
+| `9fff8ea` | **the distribution mechanism proven once**, from mitosys |
+| `f7b454a` | the proof re-pinned at the final port rev |
+| `c122240`, `ec58a75`, `8e12122`, `c275645` | `ContentId`: blake3 in, 64 lowercase hex out; proptest round-trips; the optional `serde` feature; the deviation record |
+
+The two that carry the argument are `9fff8ea` (the constraint above, made
+real) and `5313ca4` (§"First move", done). The rest are the record.
+
+Against §"What goes in", item by item:
+
+1. **`ContentId`** — in the crate, `conserved/src/content_id.rs`.
+2. **`Clock`** — in the crate, `conserved/src/clock.rs`, landed after this
+   section was first drafted. [[clock]] carries its own record of what the
+   implementation decided.
+3. **`Scope` / `Disposer`** — in the crate, `conserved/src/scope.rs`.
+4. **Order statistics** — in the crate as `conserved::stats`, one definition
+   of median (the upper one), `conserved/src/stats.rs`.
+5. **`hex`** — in, folded into `ContentId`'s `Display`/`FromStr` exactly as
+   §5 said it would be, rather than as a public utility.
+
+## What is still outstanding
+
+`decided` here is about the **proposal** — the admission test, what goes in,
+where the code lives, how it reaches a consumer. It is not a claim that the
+extraction is finished, and the ladder's `decided` says so itself: *may still
+need extraction.* On the day this status flipped:
+
+- **No consumer tree has adopted anything.** mitosys still has `util/effect`
+  and its SHA-256 ids; llm still has `rec_now()` and the second live-clock
+  read at `src/node/transactional.rs:72`; realm has not been touched. Every
+  duplicate this document exists to remove is still there, in both places.
+- **The ratchets do not exist** in any tree — [[clock]] step 1, the check that
+  makes a new wall-clock read fail, is unwritten everywhere.
+- **The `code:` line above still names the duplicate sites** for that reason.
+  The day they go is the day `p5-adoption`'s held children run; the user's
+  answer of 2026-08-21 holds them until this repo's tools are finished and
+  tested.
+- The crate is not published: `origin` is set and nothing is pushed, so the
+  rev-pinned URL a consumer would write is not reachable from anywhere but
+  this machine yet.

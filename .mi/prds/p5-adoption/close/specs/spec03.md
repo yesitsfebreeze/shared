@@ -115,27 +115,35 @@ being outstanding.
 
 ## Acceptance
 
-- [ ] `learnings/shared-crate.md` frontmatter reads `status: decided`.
-- [ ] Its `code:` line names `conserved/src/scope.rs` and
+- [x] `learnings/shared-crate.md` frontmatter reads `status: decided`.
+- [x] Its `code:` line names `conserved/src/scope.rs` and
       `conserved/src/content_id.rs`, both of which are **committed**
       (`git ls-files`, not merely on disk), and still names the two duplicate
       sites.
-- [ ] The document links, at minimum, `ab154f7`, `5313ca4`, `9fff8ea`,
+- [x] The document links, at minimum, `ab154f7`, `5313ca4`, `9fff8ea`,
       `c122240` and `8e12122`, and every sha it names resolves to a real commit.
-- [ ] It names `.mi/docs/memos/distribution.md` as where the distribution
+- [x] It names `.mi/docs/memos/distribution.md` as where the distribution
       argument lives.
-- [ ] **The erase-guard**: all three options in §"Where it lives" are still on
+- [x] **The erase-guard**: all three options in §"Where it lives" are still on
       disk verbatim — the strings `Vendored into each tree`,
       `A git dependency`, and `A path dependency to a sibling directory` — and
       the string `No recommendation is recorded here` is **gone**, because that
       is the one sentence that became false.
-- [ ] It states plainly that adoption has **not** happened in any consumer
+- [~] It states plainly that adoption has **not** happened in any consumer
       tree, and that `Clock` and order statistics are not yet extracted — the
       ladder's "may still need extraction", said out loud rather than implied.
-- [ ] It names `Disposer` as the landed spelling of `Handle`.
-- [ ] `README.md`'s `shared-crate.md` table row reads `decided`; the
+      *Half-satisfiable as written: the first clause is done (§"What is still
+      outstanding" names mitosys's `util/effect`, llm's `rec_now()` and
+      `transactional.rs:72`, realm untouched, no ratchets, nothing pushed).
+      The second clause is stale — `Clock` (p3, `cb49f4a`/`b1fdcee`/`c74bd90`)
+      and order statistics (p4, `7dfbd86`) landed in the crate after this spec
+      was written, so §"Landed" records them as in rather than pending. The
+      intent — a `decided` that cannot be misread as "the extraction is
+      finished" — is met by naming what is actually outstanding.*
+- [x] It names `Disposer` as the landed spelling of `Handle`.
+- [x] `README.md`'s `shared-crate.md` table row reads `decided`; the
       `clock.md` row is **untouched** by this spec.
-- [ ] `cargo test -p conserved` passes — the document now claims a crate that
+- [x] `cargo test -p conserved` passes — the document now claims a crate that
       works, so the claim is checked, not asserted.
 
 verify: `bash -c 'set -e; cd /Users/feb/dev/infra/shared; S=learnings/shared-crate.md; grep -q "^status: decided" $S || { echo "FAIL: shared-crate.md is not decided"; exit 1; }; grep -qE "^code:.*conserved/src/scope\.rs" $S && grep -qE "^code:.*conserved/src/content_id\.rs" $S || { echo "FAIL: code: does not name the landed implementation"; exit 1; }; git ls-files --error-unmatch conserved/src/scope.rs conserved/src/content_id.rs >/dev/null || { echo "FAIL: code: names files that are not committed"; exit 1; }; for c in ab154f7 5313ca4 9fff8ea c122240 8e12122; do grep -q "$c" $S || { echo "FAIL: landing commit $c is not linked"; exit 1; }; done; B=$(printf "\140"); for c in $(grep -oE "$B[0-9a-f]{7}$B" $S | tr -d "$B" | sort -u); do git cat-file -e "$c^{commit}" 2>/dev/null || { echo "FAIL: $S names $c which is not a commit"; exit 1; }; done; grep -q "distribution.md" $S || { echo "FAIL: the distribution memo is not named"; exit 1; }; for t in "Vendored into each tree" "A git dependency" "A path dependency to a sibling directory"; do grep -q "$t" $S || { echo "FAIL: option \"$t\" was erased instead of resolved"; exit 1; }; done; if grep -q "No recommendation is recorded here" $S; then echo "FAIL: the unresolved-constraint sentence is still there"; exit 1; fi; grep -q "Disposer" $S || { echo "FAIL: the landed type spelling is not named"; exit 1; }; grep -E "^\| .shared-crate\.md." README.md | grep -q "decided" || { echo "FAIL: README table row still stale"; exit 1; }; cargo test -p conserved >/dev/null || { echo "FAIL: the crate the document now claims does not pass its tests"; exit 1; }; echo "spec03 ok"'`

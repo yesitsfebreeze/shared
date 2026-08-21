@@ -78,16 +78,44 @@ the drift check below possible at all.
 
 Stated plainly rather than left to be discovered, because law 3 is exactly
 that a rule nothing runs is a wish — so every document here is currently a
-wish, and should be read as one. Two specific limits behind that:
+wish, and should be read as one. Two specific limits stood behind that;
+the second has since been lifted:
 
 - The folder sits outside every consumer's tree. mitosys's dev container
   bind-mounts the repo and nothing else (`.mi/SYSTEM.md`, "no bind mount
   beyond the repo itself"), so a check over this folder can only ever run
   on the host — never in the container, never in CI as those are set up
   today.
-- It is not version controlled, so "the record only grows" has no subject
-  here: a correction overwrites its predecessor instead of shadowing it.
-  `git init` is one command if that changes.
+- The folder **is** version controlled, as of `ab154f7` — `p0-foundation`'s
+  first requirement, which quoted the sentence this bullet replaces as its
+  reason. So "the record only grows" now has a subject here: a correction
+  **shadows** its predecessor instead of overwriting it, and
+  `git log -p learnings/<doc>.md` is where the predecessor lives, permanently.
+
+### How a document is corrected
+
+Two rules, and the boundary between them is the whole of it:
+
+1. **An addition or a factual correction is an edit in place.** It reverses no
+   decision, and git holds what it replaced. An edit *adds*: it never deletes
+   the sentence it corrects — it extends, qualifies or resolves it, so a
+   reader sees both the claim and its correction on disk rather than having to
+   go to `git log -p` to learn there was one.
+2. **A reversal of a decision is a new document**, linked by `supersedes:` /
+   `superseded_by:`. `AGENTS.md`'s prohibition is scoped by its own first
+   clause — *"edited to erase a **decision**"* — and that is the case the
+   supersede ceremony exists for: the record of what a decision beat has to
+   survive the decision changing.
+
+Rule 1 is usable by anyone at any time; rule 2's reciprocal links are a
+ceremony, and a correction that has to wait for a ceremony is a correction
+that does not get made. That asymmetry is deliberate: the cheap path is the
+one that only adds.
+
+This section is itself a correction of this README under rule 1. The sentence
+it replaced — the claim that this folder was unversioned, naming `git init` as
+the one command that would lift the rule — is still readable in
+`git log -p learnings/README.md`, which is the rule demonstrating itself.
 
 ## What a gate would check, if one is ever written
 
@@ -126,14 +154,13 @@ it, this is a better-organised copy of the drift that is already there.
   decided-not-done, so the port direction reverses
 - [[content-addressing]] — blake3 over SHA-256, `[u8; 32]` over hex `String`
 - [[storage]] — redb over LMDB, sequenced behind mitosys's fold rewrite
-
-**Open** — found, argued, not yet settled:
-
 - [[clock]] — both trees read the wall clock ~65 times each against a shared
-  law that forbids it; the fix, and the ratchet that makes it affordable
+  law that forbids it; the fix, and the ratchet that makes it affordable.
+  Decided 2026-08-21; the type landed, the reads have not moved
 - [[shared-crate]] — the concrete proposal for `conserved`: what goes in,
-  what stays out, and the one constraint (where the code lives) that has to
-  be decided before the first line moves
+  what stays out, and where the code lives — the one constraint that had to
+  be decided before the first line moved, and was. Decided 2026-08-21; no
+  consumer has adopted the crate yet
 
 ## Reading order
 

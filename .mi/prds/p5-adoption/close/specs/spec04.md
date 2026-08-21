@@ -93,21 +93,21 @@ therefore belongs back in the learning.
 
 ## Acceptance
 
-- [ ] `conserved/src/clock*` is committed and `cargo test -p conserved clock`
+- [x] `conserved/src/clock*` is committed and `cargo test -p conserved clock`
       passes — checked, not assumed.
-- [ ] `.mi/prds/p3-clock/prd.md` reads `state: done`.
-- [ ] `learnings/clock.md` reads `status: decided`.
-- [ ] Every commit touching `conserved/src/clock*` is linked in
+- [x] `.mi/prds/p3-clock/prd.md` reads `state: done`.
+- [x] `learnings/clock.md` reads `status: decided`.
+- [x] Every commit touching `conserved/src/clock*` is linked in
       `learnings/clock.md` (short sha), derived from `git log` at verify time.
-- [ ] Its `code:` line names the committed clock module **and** still names
+- [x] Its `code:` line names the committed clock module **and** still names
       `transactional.rs:72` from spec02.
-- [ ] The document states that the `Instant` unit landed as unix nanoseconds.
-- [ ] The document states that steps 1 and 3 of §"The fix" have not landed and
+- [x] The document states that the `Instant` unit landed as unix nanoseconds.
+- [x] The document states that steps 1 and 3 of §"The fix" have not landed and
       that no consumer tree reads `conserved::Clock` yet.
-- [ ] §"The fix, in the order it should be done" and §"Honest scope" are still
+- [x] §"The fix, in the order it should be done" and §"Honest scope" are still
       on disk — the erase-guard. Specifically `Make it visible` and
       `Empty the allowlist from the leaves inward` survive.
-- [ ] `README.md`'s `clock.md` table row reads `decided`; the
+- [x] `README.md`'s `clock.md` table row reads `decided`; the
       `shared-crate.md` row is untouched by this spec.
 - [ ] **The counter-check**: if `conserved/src/clock*` is *not* committed, the
       verify fails with a message saying the status was flipped ahead of the

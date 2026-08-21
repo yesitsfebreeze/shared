@@ -5,7 +5,7 @@ subject: mitosys hashes content with SHA-256 into a hex String and llm with blak
 binds: [mitosys, llm]
 status: decided
 date: 2026-08-18
-code: mitosys src/mitosys/util/util.rs:9, llm src/utils/algebra/mod.rs:24, llm src/record/mod.rs:226
+code: mitosys src/mitosys/util/util.rs:9, llm src/utils/algebra/mod.rs:24, llm src/record/mod.rs:226, shared conserved/src/content_id.rs
 ---
 
 # One content hash: blake3, `[u8; 32]`
@@ -76,6 +76,31 @@ impl FromStr for ContentId;                   // rejects anything else
 
 Serde: bytes on a binary wire, hex string in JSON, so a record stays
 readable by eye where it is already JSON.
+
+**What p2 landed against that sentence** (`8e12122`, "serde for ContentId,
+behind an optional feature"). Four things a consumer needs and cannot infer
+from the sentence itself:
+
+- Serde is an **optional feature** with `default = []`. A consumer writes
+  `conserved = { git = "…", rev = "…", features = ["serde"] }`. Without that,
+  `ContentId` has no `Serialize`/`Deserialize` at all, and putting one inside
+  a `#[derive(Serialize)]` struct is a compile error whose cause is the
+  feature flag, not the code.
+- **The default dependency contract does not move.**
+  `cargo tree -p conserved --edges normal` still shows exactly one edge,
+  `blake3`, which is why this is not a second dependency in the sense
+  [[shared-crate]] §"Size and shape" means.
+- **"Bytes on a binary wire" means the 32 raw bytes as a fixed-size tuple —
+  not `serialize_bytes`.** Under serde, `[u8; 32]` is a fixed-size tuple and
+  postcard writes it with no length prefix, while `serialize_bytes` prepends
+  a varint length: 33 bytes where the tree writes 32. Taking the sentence
+  above literally would have silently moved llm's redb keys and its peer
+  wire — a format change wearing the clothes of a type substitution, and the
+  reason this clause is worth four lines.
+- The branch is on **`is_human_readable()`**, never on a format name: any
+  human-readable format gets the 64-character hex string, any binary format
+  gets the 32 bytes, and a third format the trees have not chosen yet lands
+  on the correct side without an edit here.
 
 ## What this beat
 
