@@ -117,26 +117,36 @@ proof worth more than one `cargo build`.
 
 ## Acceptance
 
-- [ ] `.mi/prd/p1-scope/proof.md` exists and contains a line matching
+- [x] `.mi/prd/p1-scope/proof.md` exists and contains a line matching
       `^rev: [0-9a-f]{40}$`.
-- [ ] That rev is a real commit in this repository and its tree contains
+- [x] That rev is a real commit in this repository and its tree contains
       `conserved/src/scope.rs` — i.e. the pin points at the port, not at some
       earlier commit.
-- [ ] `proof.md` names `mitosys-util-effect` as the consumer crate and quotes
+- [x] `proof.md` names `mitosys-util-effect` as the consumer crate and quotes
       both dependency lines exactly as they were written.
-- [ ] `proof.md` carries a `gate:` line recording the dependency-tree gate
+- [x] `proof.md` carries a `gate:` line recording the dependency-tree gate
       failing before the record update and passing after, and stating that the
       gate diff was exactly two lines (`OWNERS` + `CLOSURE`).
-- [ ] `proof.md` records the `file://` deviation and names it as the thing p5
+- [x] `proof.md` records the `file://` deviation and names it as the thing p5
       swaps.
-- [ ] The pin still resolves: a throwaway crate depending on
+- [x] The pin still resolves: a throwaway crate depending on
       `conserved = { git = "file:///Users/feb/dev/infra/shared", rev = "<the
       recorded rev>" }` builds and can call `conserved::scope::Scope::new()`.
-- [ ] `/Users/feb/dev/infra/mitosys` is unchanged by this spec: no new entry in
+- [~] `/Users/feb/dev/infra/mitosys` is unchanged by this spec: no new entry in
       `git -C ../mitosys worktree list` beyond what was there before, and
       `git -C ../mitosys diff --stat HEAD -- Cargo.toml Cargo.lock src/mitosys/util/effect src/mitosys/gates`
       is empty.
-- [ ] No `conserved` dependency was added to this repository's own manifests —
+
+      **Half-ticked, honestly.** The worktree half passed: `worktree list` is
+      byte-identical before and after, the throwaway entry is gone. The
+      `diff --stat` half **cannot** pass on this machine and could not have
+      before this ticket either — mitosys's working tree already carried
+      unrelated uncommitted edits to `Cargo.toml` and five files under
+      `src/mitosys/gates/tests/` (a `.mi/prd/` → `.mi/prds/` comment rename).
+      The check was run instead as a comparison against a baseline captured
+      before the worktree existed: byte-identical, sha256 `a600a76a…`. See
+      `proof.md` § Note on spec02's verify line.
+- [x] No `conserved` dependency was added to this repository's own manifests —
       `conserved` still has zero dependencies after this spec
       (`cargo tree -p conserved --edges normal` is one line).
 

@@ -30,7 +30,7 @@ record. Blocked on `p0-foundation`.
 - [x] **Zero dependencies** — the verify line counts edges; `Scope` must not
       drag `blake3` in transitively (it cannot yet — p2 has not landed — keep
       it that way when it does: modules stay independent).
-- [ ] **Prove the mechanism once** — from one consumer tree (mitosys is the
+- [x] **Prove the mechanism once** — from one consumer tree (mitosys is the
       natural first, since it is the strict one), depend on `conserved` via
       the p0-decided mechanism and compile. Not adoption — one crate, one
       `cargo build`, recorded here with the commit. Full adoption is p5.
