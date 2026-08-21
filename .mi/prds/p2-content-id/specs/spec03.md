@@ -95,53 +95,53 @@ not a stand-in.
 
 ## Acceptance
 
-- [ ] `cargo build -p conserved` with **no** features compiles, and
+- [x] `cargo build -p conserved` with **no** features compiles, and
       `cargo tree -p conserved --edges normal --depth 1` lists `blake3` and
       no `serde`.
-- [ ] spec01's manifest gate test is amended (not deleted) to assert
+- [x] spec01's manifest gate test is amended (not deleted) to assert
       `[dependencies]` holds exactly `blake3` unconditional and `serde`
       carrying `optional = true`, and that `[features]` has `default = []`.
       Its comment names this spec and the reason the second entry is allowed.
       A third dependency, or `serde` losing `optional`, fails it.
-- [ ] `serde_json::to_string(&ContentId::of(b"abc"))` is
+- [x] `serde_json::to_string(&ContentId::of(b"abc"))` is
       `"\"6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85\""`
       — a JSON string, not an array of numbers.
-- [ ] `serde_json::from_str::<ContentId>` round-trips every spec01 vector, and
+- [x] `serde_json::from_str::<ContentId>` round-trips every spec01 vector, and
       **rejects** the same inputs `FromStr` rejects: uppercase, 63/65 chars,
       `0x`-prefixed, non-hex, and — as its own named case —
       `"\"ed25519:<64 hex>\""`. The deserializer goes through `FromStr`, so
       there is one rule and one place it lives.
-- [ ] `serde_json::from_str::<ContentId>("[1,2,3]")` and `from_str::<ContentId>("5")`
+- [x] `serde_json::from_str::<ContentId>("[1,2,3]")` and `from_str::<ContentId>("5")`
       are `Err` — the human-readable form is the hex string and only that.
-- [ ] A test named `binary_encoding_is_identical_to_u8_32` asserts, for at
+- [x] A test named `binary_encoding_is_identical_to_u8_32` asserts, for at
       least three ids including `ContentId::of(b"")` and one all-`0xff` value,
       that `postcard::to_stdvec(&id)? == postcard::to_stdvec(id.as_bytes())?`
       and that both are exactly 32 bytes long. This is the test that stops
       `../model`'s redb keys and gossip frames from moving under it.
-- [ ] `postcard::from_bytes::<ContentId>(&postcard::to_stdvec(&id)?)` equals
+- [x] `postcard::from_bytes::<ContentId>(&postcard::to_stdvec(&id)?)` equals
       `id`, for the same values.
-- [ ] `postcard::from_bytes::<ContentId>` on 31 bytes is `Err`, and on 33
+- [x] `postcard::from_bytes::<ContentId>` on 31 bytes is `Err`, and on 33
       bytes either errs or consumes exactly 32 — a short frame must never
       silently produce an id.
-- [ ] A test named `struct_substitution_is_wire_compatible` postcard-encodes
+- [x] A test named `struct_substitution_is_wire_compatible` postcard-encodes
       a `struct A { keys: Vec<[u8; 32]>, n: u64 }` and a
       `struct B { keys: Vec<ContentId>, n: u64 }` holding the same values and
       asserts the two byte strings are equal — the substitution `../model`'s
       `SyncSummary` will perform in p5, proven here rather than discovered
       there.
-- [ ] The `Serialize`/`Deserialize` impls branch on
+- [x] The `Serialize`/`Deserialize` impls branch on
       `serializer.is_human_readable()` / `deserializer.is_human_readable()`,
       not on a format name, and both branches are exercised by tests.
-- [ ] The doc comment on the impls states the split in one sentence and states
+- [x] The doc comment on the impls states the split in one sentence and states
       that the JSON form is a **deliberate** divergence from `[u8; 32]`'s
       array-of-numbers — `../model`'s MCP surface already hands ids out as hex
       strings by hand (`src/mcp/tests/fold.rs:334`), so this makes an existing
       convention typed rather than inventing one.
-- [ ] `cargo test -p conserved` (no features) passes and
+- [x] `cargo test -p conserved` (no features) passes and
       `cargo test -p conserved --features serde` passes.
-- [ ] `cargo clippy -p conserved --all-targets --features serde -- -D warnings`
+- [x] `cargo clippy -p conserved --all-targets --features serde -- -D warnings`
       is clean, and so is the same command without `--features serde`.
-- [ ] spec01's `blake3_is_reachable_only_through_content_id` still passes: the
+- [x] spec01's `blake3_is_reachable_only_through_content_id` still passes: the
       serde impls live in `content_id.rs`, not a new module.
 
 verify: `cargo test -p conserved --features serde && cargo test -p conserved && cargo clippy -p conserved --all-targets --features serde -- -D warnings && cargo tree -p conserved --edges normal --depth 1`

@@ -213,6 +213,34 @@ mod content_id {
 		assert_eq!(err("zzz"), ContentIdParseError::WrongLength { got: 3 });
 	}
 
+	/// The derive list, exercised rather than eyeballed: `Copy` (no move on
+	/// use), `Ord`/`PartialOrd` (a sortable key), `Hash` (a map key), `Eq`.
+	/// A `ContentId` has to be usable everywhere a `[u8; 32]` was.
+	#[test]
+	fn the_derives_are_usable() {
+		use std::collections::{BTreeSet, HashSet};
+
+		let a = ContentId::of(b"a");
+		let copied = a; // Copy, not a move
+		assert_eq!(copied, a);
+
+		let ids = [
+			ContentId::of(b"a"),
+			ContentId::of(b"b"),
+			ContentId::of(b"c"),
+		];
+		let sorted: BTreeSet<ContentId> = ids.iter().copied().collect();
+		assert_eq!(sorted.len(), 3);
+		let mut in_order: Vec<ContentId> = sorted.into_iter().collect();
+		in_order.dedup();
+		assert_eq!(in_order.len(), 3);
+		assert!(in_order[0] < in_order[1] && in_order[1] < in_order[2]);
+
+		let hashed: HashSet<ContentId> = ids.iter().copied().collect();
+		assert_eq!(hashed.len(), 3);
+		assert!(hashed.contains(&a));
+	}
+
 	// ----- the gates -------------------------------------------------------
 
 	fn crate_root() -> std::path::PathBuf {
