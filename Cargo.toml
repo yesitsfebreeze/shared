@@ -15,3 +15,10 @@ rust-version = "1.94.0"
 # already declares, with blake3's default features, so no build behaviour new
 # to that tree enters with the crate.
 blake3 = "1"
+
+# Dev-only. `proptest` is the family's property-test crate —
+# `../model/Cargo.toml:80` already declares "1.11" — so this introduces no
+# second generator into the family. Dev-dependencies do not appear in
+# `cargo tree --edges normal`, so the crate's one-dependency contract is
+# untouched.
+proptest = "1.11"

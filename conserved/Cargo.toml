@@ -7,3 +7,6 @@ description = "Domain-free primitives shared by the Rust trees."
 
 [dependencies]
 blake3 = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
