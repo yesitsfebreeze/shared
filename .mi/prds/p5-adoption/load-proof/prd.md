@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p5-load-proof
+state: done
 mode: afk
 priority: 42
 est: 3.25h
