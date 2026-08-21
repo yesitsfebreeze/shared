@@ -37,11 +37,12 @@
 //!    is "a crate is its directory" (`[lib] path = "lib.rs"`, no `src/`);
 //!    `conserved` resolved that divergence dimension in favour of the cargo
 //!    default (`AGENTS.md` §divergences, p0-foundation).
-//! 3. **Test import path.** `conserved/tests/scope.rs` line 1 reads
+//! 3. **Test import path.** `conserved/tests/scope.rs`'s import line reads
 //!    `use conserved::scope::*;` where the source read
 //!    `use mitosys_util_effect::effect::*;`. Forced by 1 and 2. Nothing else
 //!    in the test file changed — not a name, not an assertion, not a blank
-//!    line.
+//!    line. (It is the file's first line in the source and its second here,
+//!    because of deviation 7.)
 //! 4. **Doc-comment framing.** The source doc opened "the plugin contract's
 //!    foundation" and `lib.rs` carried the layer line and the `src/core/src/`
 //!    split history. `conserved` is domain-free, so that framing moved *into*
