@@ -1,5 +1,6 @@
 ---
-state: specced
+state: claimed
+claim: impl-p3-clock
 est: 3.5h
 mode: afk
 priority: 30
@@ -17,15 +18,15 @@ each in non-test code against a shared law that forbids it, and llm's
 
 ## Requirements
 
-- [ ] **The types** — `Instant(i64)` (a real timestamp, not a tick counter —
+- [x] **The types** — `Instant(i64)` (a real timestamp, not a tick counter —
       the condemned scaffold got this wrong), `trait Clock { fn now(&self) ->
       Instant }`, `SystemClock` as the ONE implementation permitted to read
       the OS, `FixedClock(Instant)` for folds and tests. No dependencies —
       `SystemClock` reads `std::time`, not `chrono`.
-- [ ] **The unit, stated** — `Instant`'s epoch and resolution written in the
+- [x] **The unit, stated** — `Instant`'s epoch and resolution written in the
       type's doc comment and pinned by a test, so the two trees cannot adopt
       it meaning different things.
-- [ ] **The ratchet stays out** — the count-of-clock-reads ratchet described
+- [x] **The ratchet stays out** — the count-of-clock-reads ratchet described
       in `learnings/clock.md` is a consumer gate, not crate code. p5 carries
       it; this node only makes the compliant path exist.
 

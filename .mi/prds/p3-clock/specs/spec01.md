@@ -165,15 +165,15 @@ clock` filters on **test names**, not file names (verified: a test named
 `plain_name` in `tests/clockfile.rs` is filtered *out* by that command), so a
 test without the prefix is invisible to the ticket's own gate.
 
-- [ ] `conserved/src/clock.rs` exists; `Instant` is a newtype over `i64` whose
+- [x] `conserved/src/clock.rs` exists; `Instant` is a newtype over `i64` whose
       field is **private**, deriving `Clone, Copy, Debug, PartialEq, Eq, Hash,
       PartialOrd, Ord`.
-- [ ] `conserved/src/lib.rs` gained exactly `pub mod clock;` and
+- [x] `conserved/src/lib.rs` gained exactly `pub mod clock;` and
       `pub use clock::Instant;` — no other line of that file changed by this spec. (p1 already added `pub mod scope;` there; append, do not rewrite.)
-- [ ] `conserved/Cargo.toml` is byte-identical to its p0 content: `[dependencies]`
+- [x] `conserved/Cargo.toml` is byte-identical to its p0 content: `[dependencies]`
       still empty, and `cargo tree -p conserved --edges normal` still resolves
       zero external packages.
-- [ ] `clock_instant_unit_is_unix_nanoseconds` — the unit-pinning test the
+- [x] `clock_instant_unit_is_unix_nanoseconds` — the unit-pinning test the
       ticket's acceptance names. Asserts **all** of:
       `Instant::EPOCH.as_unix_nanos() == 0`;
       `Instant::from_unix_secs(1).as_unix_nanos() == 1_000_000_000`;
@@ -183,71 +183,106 @@ test without the prefix is invisible to the ticket's own gate.
       `Instant::from_unix_nanos(1_787_270_400_123_456_789).as_unix_secs() == 1_787_270_400`.
       Its comment states that changing the resolution is a wire-format change
       for both trees, not a refactor.
-- [ ] `clock_instant_epoch_is_unix_not_boot_and_not_a_counter` — asserts
+- [x] `clock_instant_epoch_is_unix_not_boot_and_not_a_counter` — asserts
       `Instant::EPOCH.to_system_time() == std::time::UNIX_EPOCH` and
       `Instant::from_system_time(std::time::UNIX_EPOCH).as_unix_nanos() == 0`.
       This is the test that fails if someone reintroduces the condemned
       scaffold's tick-counter reading of `Instant`
       (`.mi/docs/memos/scaffold-reset.md`).
-- [ ] `clock_instant_range_bounds` — `Instant::MIN.as_unix_nanos() ==
+- [x] `clock_instant_range_bounds` — `Instant::MIN.as_unix_nanos() ==
       i64::MIN`, `Instant::MAX.as_unix_nanos() == i64::MAX`, and
       `Instant::MIN < Instant::EPOCH && Instant::EPOCH < Instant::MAX`. The
       comment names the two calendar dates.
-- [ ] `clock_instant_as_unix_secs_floors_before_the_epoch` — the truncation
+- [x] `clock_instant_as_unix_secs_floors_before_the_epoch` — the truncation
       trap, as its own named test:
       `Instant::from_unix_nanos(-1_500_000_000).as_unix_secs() == -2` (Rust's
       `/` truncates toward zero and would give `-1`; the accessor must use
       `div_euclid`), `Instant::from_unix_nanos(-1).as_unix_secs() == -1`,
       `Instant::from_unix_nanos(-1_500_000_000).as_unix_millis() == -1_500`,
       and `Instant::from_unix_nanos(1_999_999_999).as_unix_secs() == 1`.
-- [ ] `clock_instant_conversions_saturate_rather_than_wrap` —
+- [x] `clock_instant_conversions_saturate_rather_than_wrap` —
       `Instant::from_unix_secs(i64::MAX) == Instant::MAX`,
       `Instant::from_unix_secs(i64::MIN) == Instant::MIN`,
       `Instant::from_unix_millis(i64::MAX) == Instant::MAX`,
       `Instant::MAX.saturating_add(Duration::from_secs(1)) == Instant::MAX`,
       `Instant::MIN.saturating_sub(Duration::from_secs(1)) == Instant::MIN`.
       No test in this file may panic on overflow in debug mode.
-- [ ] `clock_instant_signed_nanos_since_is_signed` —
+- [x] `clock_instant_signed_nanos_since_is_signed` —
       `later.signed_nanos_since(earlier) > 0`,
       `earlier.signed_nanos_since(later) < 0`,
       `t.signed_nanos_since(t) == 0`, and
       `Instant::MIN.signed_nanos_since(Instant::MAX) == i64::MIN` (saturating,
       not a wrap and not a panic).
-- [ ] `clock_instant_system_time_round_trip` — for
+- [x] `clock_instant_system_time_round_trip` — for
       `Instant::EPOCH`, one instant in 2026, one pre-1970 instant, and
       `Instant::MAX`: `Instant::from_system_time(i.to_system_time()) == i`.
       The pre-1970 case is its own assertion, because
       `SystemTime::duration_since(UNIX_EPOCH)` returns `Err` there and a naive
       `.unwrap_or_default()` silently yields the epoch.
-- [ ] `clock_instant_ordering_is_chronological` — a `Vec<Instant>` built from
+- [x] `clock_instant_ordering_is_chronological` — a `Vec<Instant>` built from
       out-of-order unix seconds sorts into ascending chronological order, and
       pre-epoch instants sort before `Instant::EPOCH`. (Derived `Ord` on `i64`
       gives this; the test is what stops a later `Ord` impl on an unsigned
       representation from silently reversing it.)
-- [ ] `clock_instant_has_no_default` — reads `conserved/src/clock.rs` as text
+- [x] `clock_instant_has_no_default` — reads `conserved/src/clock.rs` as text
       and asserts it contains neither `derive(` … `Default` on `Instant` nor
       `impl Default for Instant`, and that the refusal paragraph is present
       (the file contains the string `Instant::EPOCH` inside a `//!`- or
       `///`-prefixed line). The comment says why: the epoch and "unset" must
       not share a spelling.
-- [ ] `clock_src_never_uses_std_time_instant` — reads every `*.rs` under
+- [x] `clock_src_never_uses_std_time_instant` — reads every `*.rs` under
       `conserved/src/` and asserts none contains `std::time::Instant` or
       `use std::time::Instant`. Its comment names the collision: `conserved::
       Instant` is wall-clock, `std::time::Instant` is monotonic, and the ~47
       monotonic sites across the two trees must not be converted.
-- [ ] `cargo test -p conserved clock` reports at least 10 tests passing and
+- [x] `cargo test -p conserved clock` reports at least 10 tests passing and
       **0 failed** — i.e. every test this spec adds is reachable through the
       ticket's own frontmatter gate, not merely through `--test clock_instant`.
-- [ ] The module doc comment on `conserved/src/clock.rs` states the epoch, the
+- [x] The module doc comment on `conserved/src/clock.rs` states the epoch, the
       resolution, the representable range, and all five refusals above.
-- [ ] No `unsafe` (the crate already `#![forbid(unsafe_code)]`), no `unwrap`,
+- [x] No `unsafe` (the crate already `#![forbid(unsafe_code)]`), no `unwrap`,
       no `expect`, and no `panic!` on any path reachable from a public method —
       including `from_system_time` on a pre-epoch or far-future `SystemTime`.
       The two trees currently spell this hazard three different ways
       (`.unwrap_or(0)`, `.unwrap_or_default()`,
       `.expect("system clock is after the epoch")`); this type has one answer
       and it is never a panic.
-- [ ] `cargo fmt --all --check` passes (hard tabs, width 2) and
+- [x] `cargo fmt --all --check` passes (hard tabs, width 2) and
       `cargo clippy -p conserved --all-targets -- -D warnings` is clean.
 
 verify: `cargo fmt --all --check && cargo clippy -p conserved --all-targets -- -D warnings && cargo test -p conserved --test clock_instant && cargo test -p conserved clock && cargo test -p conserved clock 2>&1 | grep -qE "[1-9][0-9]* passed"`
+
+## Notes from the implementation
+
+Every box above was run; the output is quoted in the implementer's report.
+Three of them needed amending because the spec's "what p0 leaves behind"
+section is older than the board:
+
+- **`conserved/Cargo.toml` is byte-identical to its p0 content.** It is not:
+  p2 landed `blake3 = { workspace = true }` and an optional
+  `serde = { workspace = true, optional = true }` in it. What this spec can
+  and does attest is the part that still means something — **this ticket
+  changed no line of it**: `git diff --stat conserved/Cargo.toml` is empty
+  across all three commits, and `cargo tree -p conserved --edges normal`
+  resolves `blake3 v1.8.7` and nothing else. Zero dependencies entered here.
+- **`[dependencies]` still empty / zero external packages.** Same amendment:
+  read as "unchanged by p3", which it is.
+- **`lib.rs` gained exactly `pub mod clock;` and `pub use clock::Instant;`.**
+  It did, in the spec01 commit (`cb49f4a`). spec02 then widened that one
+  re-export line to `pub use clock::{Clock, FixedClock, Instant, SystemClock};`,
+  exactly as spec02's own Files section instructs. `pub mod scope;`, `mod
+  content_id;` and the `ContentId` re-export were appended to, never rewritten.
+
+One implementation detail worth recording, because it looks like a style
+choice and is not: the `SystemTime` clamps are written as `u128` comparisons
+rather than `i64::try_from(..).unwrap_or(..)`. `unwrap_or` never panics, but
+spec02's acceptance greps this file for the string `unwrap`, and clippy's
+`manual_unwrap_or` rejects the `match` spelling — so the arithmetic avoids the
+word entirely. `grep -n "unwrap\|expect" conserved/src/clock.rs` matches only
+comment lines.
+
+`clock_instant_from_system_time_never_panics_at_the_edges` is an eleventh test
+this spec did not name: it is the pre-epoch and far-future `SystemTime` edge,
+which spec02's acceptance also asks for. It builds the far-future point with
+`SystemTime::checked_add` rather than `+`, because `SystemTime`'s own `Add`
+panics on overflow and the test must not be the thing that panics.

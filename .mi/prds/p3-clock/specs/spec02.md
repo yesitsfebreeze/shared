@@ -100,36 +100,36 @@ Every test function lives in `conserved/tests/clock_source.rs` and is named with
 a `clock_` prefix — `cargo test -p conserved clock` filters on test names, not
 file names, so an unprefixed test is invisible to the ticket's own gate.
 
-- [ ] `Clock`, `SystemClock`, `FixedClock` are public from `conserved` and
+- [x] `Clock`, `SystemClock`, `FixedClock` are public from `conserved` and
       declared in `conserved/src/clock.rs`. `FixedClock`'s field is private and
       reachable only through `instant()`.
-- [ ] `conserved/Cargo.toml` still has an empty `[dependencies]` table and
+- [x] `conserved/Cargo.toml` still has an empty `[dependencies]` table and
       `cargo tree -p conserved --edges normal` still resolves zero external
       packages. No `chrono` anywhere in the repo.
-- [ ] `clock_system_clock_returns_a_real_timestamp_not_a_counter` — asserts
+- [x] `clock_system_clock_returns_a_real_timestamp_not_a_counter` — asserts
       `SystemClock.now().as_unix_secs() > 1_767_225_600` (2026-01-01T00:00:00Z)
       and `< 4_102_444_800` (2100-01-01T00:00:00Z). A tick counter starting at
       0 or 1 — what `conserved-core` shipped and what
       `.mi/docs/memos/scaffold-reset.md` condemns — fails this test on its
       first call. The comment names the condemned scaffold.
-- [ ] `clock_system_clock_agrees_with_system_time` — takes `SystemTime::now()`,
+- [x] `clock_system_clock_agrees_with_system_time` — takes `SystemTime::now()`,
       then `SystemClock.now()`, then `SystemTime::now()` again, and asserts the
       clock's reading lies between the two `Instant::from_system_time`
       conversions (inclusive). This is what pins `SystemClock` to the wall
       clock rather than to any other monotonic source.
-- [ ] `clock_system_clock_is_the_only_reader` — reads every `*.rs` file under
+- [x] `clock_system_clock_is_the_only_reader` — reads every `*.rs` file under
       `conserved/src/` and asserts the substrings `SystemTime::now()` and
       `Instant::now()` appear in exactly one file, `clock.rs`, and that
       `SystemTime::now()` appears **at most once** in it. Its comment states
       that this is a crate-internal check and explicitly **not** p5's consumer
       ratchet.
-- [ ] `clock_fixed_clock_is_constant` — `FixedClock::new(t).now() == t` for
+- [x] `clock_fixed_clock_is_constant` — `FixedClock::new(t).now() == t` for
       `t` = `Instant::EPOCH`, a 2026 instant, a pre-1970 instant and
       `Instant::MAX`; and 100 successive `now()` calls on one `FixedClock` all
       return the identical value.
-- [ ] `clock_fixed_clock_round_trips_its_instant` —
+- [x] `clock_fixed_clock_round_trips_its_instant` —
       `FixedClock::new(t).instant() == t`.
-- [ ] `clock_fold_is_reproducible_under_a_fixed_clock` — the ticket's
+- [x] `clock_fold_is_reproducible_under_a_fixed_clock` — the ticket's
       acceptance criterion, made runnable. Define a small fold in the test file:
       ```rust
       fn fold(inputs: &[&str], clock: &dyn Clock) -> Vec<u8>
@@ -145,30 +145,63 @@ file names, so an unprefixed test is invisible to the ticket's own gate.
       object-safe. Do **not** assert that two `SystemClock` folds differ: that
       would be a flaky test, and the point is not that the system clock is
       unstable but that a fixed one is available.
-- [ ] `clock_trait_is_object_safe_and_shareable` — constructs
+- [x] `clock_trait_is_object_safe_and_shareable` — constructs
       `let c: std::sync::Arc<dyn Clock + Send + Sync> = Arc::new(SystemClock);`
       and `let b: Box<dyn Clock> = Box::new(FixedClock::new(Instant::EPOCH));`,
       calls `now()` through both, and asserts a `fn assert_send_sync<T: Send +
       Sync + 'static>() {}` instantiated at `SystemClock` and `FixedClock`
       compiles. This is the spelling p5 needs in `../model`'s `Arc`-held
       substrate; it is proven here, not discovered there.
-- [ ] `clock_blanket_impls_forward` — `(&FixedClock::new(t)).now() == t`,
+- [x] `clock_blanket_impls_forward` — `(&FixedClock::new(t)).now() == t`,
       `Box::new(FixedClock::new(t)).now() == t`,
       `Arc::new(FixedClock::new(t)).now() == t`.
-- [ ] `clock_system_clock_never_panics_on_conversion` — asserts
+- [x] `clock_system_clock_never_panics_on_conversion` — asserts
       `Instant::from_system_time(std::time::UNIX_EPOCH - Duration::from_secs(1))`
       returns `Instant::from_unix_secs(-1)` and does not panic, and that
       `Instant::from_system_time(UNIX_EPOCH + Duration::from_secs(u64::MAX / 2))`
       saturates to `Instant::MAX` rather than wrapping. (spec01 supplies the
       behaviour; this test is the one that fails if spec02's `SystemClock`
       bypasses `from_system_time` and does its own `duration_since().unwrap()`.)
-- [ ] `cargo test -p conserved clock` reports **0 failed** and at least 18 tests
+- [x] `cargo test -p conserved clock` reports **0 failed** and at least 18 tests
       passing (spec01's ≥10 plus this spec's ≥8), proving both files are
       reachable through the ticket's frontmatter gate.
-- [ ] No `unwrap`, `expect`, or `panic!` on any path reachable from
+- [x] No `unwrap`, `expect`, or `panic!` on any path reachable from
       `SystemClock::now()`. `grep -n "unwrap\|expect" conserved/src/clock.rs`
       returns nothing outside comments.
-- [ ] `cargo fmt --all --check` passes and
+- [x] `cargo fmt --all --check` passes and
       `cargo clippy -p conserved --all-targets -- -D warnings` is clean.
 
 verify: `cargo fmt --all --check && cargo clippy -p conserved --all-targets -- -D warnings && cargo test -p conserved --test clock_source && cargo test -p conserved clock && cargo test -p conserved clock 2>&1 | grep -qE "[1-9][0-9]* passed" && ! grep -rq "chrono" conserved/`
+
+## Notes from the implementation
+
+Every box above was run; the output is quoted in the implementer's report.
+Two amendments:
+
+- **`conserved/Cargo.toml` still has an empty `[dependencies]` table.** Stale:
+  p2 landed blake3 plus an optional serde there. Read as "unchanged by p3",
+  which it is — `git diff --stat` on the manifest is empty across all three
+  commits, and `cargo tree -p conserved --edges normal` resolves `blake3
+  v1.8.7` alone. `SystemClock` reads `std::time` and nothing else.
+- **`! grep -rq "chrono" conserved/` (the last clause of `verify:`).** This
+  clause cannot be satisfied, and not because of a dependency. Two things this
+  ticket's own specs *require* contain the substring:
+  spec01's mandated refusal 4 ("**No `chrono`, no dependency of any kind**",
+  which spec01's acceptance requires the module doc comment to state) and
+  spec01's mandated test name `clock_instant_ordering_is_chronological`.
+  The intent — no chrono **dependency** — was verified in the form that can be
+  true: `grep -rn "chrono" conserved/Cargo.toml Cargo.toml Cargo.lock` finds
+  nothing, and `clock_uses_no_date_library` reads every `*.rs` under
+  `conserved/src/` with line comments stripped and asserts none of them
+  reaches for it. Everything the literal grep finds is prose refusing chrono
+  or a test whose name contains "chronological".
+
+`clock_blanket_impls_forward` calls `Clock::now(&owned)` on
+`let owned: Box<FixedClock>` rather than `Box::new(FixedClock::new(t)).now()`.
+The spec's spelling auto-dereferences to `FixedClock::now` — which is rustc's
+`unused_allocation` lint, denied by `-D warnings`, and would not have
+exercised the blanket impl anyway. The bound form resolves at `Box<C>`, which
+is the impl under test. `Arc` likewise.
+
+The tenth test, `clock_uses_no_date_library`, is the chrono half of the
+amendment above, kept as a test so it holds after this file stops being read.
