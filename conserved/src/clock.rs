@@ -1,4 +1,12 @@
-//! `Instant` — one timestamp, one unit, decided here.
+//! Time as a parameter: [`Instant`], [`Clock`], [`SystemClock`],
+//! [`FixedClock`].
+//!
+//! Law 2's verification — *serialize the record, fold from empty, compare* —
+//! is impossible wherever a fold reads the wall clock. This module is the
+//! compliant path: the timestamp is a value, the clock is a parameter, and
+//! exactly one implementation of that parameter is permitted to ask the
+//! operating system. `learnings/clock.md` counts ~65 non-test clock reads in
+//! each tree against a shared law that forbids them.
 //!
 //! # The unit
 //!
@@ -286,4 +294,117 @@ fn shift_from_epoch(nanos: u64, forward: bool) -> SystemTime {
 		bit >>= 1;
 	}
 	out
+}
+
+// ---------------------------------------------------------------------------
+// The clock: one trait, one reader of the operating system, one fixed source.
+// ---------------------------------------------------------------------------
+
+/// The one way to ask what time it is.
+///
+/// A fold that needs a timestamp takes one of these instead of reading the
+/// wall clock, which is what makes *serialize the record, fold from empty,
+/// compare* possible at all: substitute a [`FixedClock`] and the fold's output
+/// is a function of its inputs again.
+///
+/// The trait carries **no `Send + Sync` supertrait**. Bounding it would forbid
+/// a single-threaded test clock; a consumer that shares one across tasks
+/// spells `Arc<dyn Clock + Send + Sync>`, which works because both concrete
+/// implementations here are `Send + Sync`. `clock_trait_is_object_safe_and_shareable`
+/// proves that spelling compiles, so the adoption node does not discover it.
+pub trait Clock {
+	/// The current instant, according to this clock.
+	fn now(&self) -> Instant;
+}
+
+/// The **one** implementation permitted to read the operating system.
+///
+/// Everything else in either tree takes a [`Clock`]. Concentrating the read
+/// here is what makes the count-of-clock-reads gate a countable thing at all.
+///
+/// `SystemClock` derives `Default` and [`Instant`] does not: a unit struct's
+/// default is itself and carries no ambiguity, whereas a default *timestamp*
+/// would be the epoch wearing the sentinel's clothes (see the module's
+/// refusal 1).
+///
+/// # Panics
+///
+/// None. [`Clock::now`] goes through [`Instant::from_system_time`], which
+/// saturates. The two trees currently spell that hazard three ways —
+/// `.unwrap_or(0)` (`../mitosys/src/mitosys/util/util.rs:130`),
+/// `.unwrap_or_default()` (line 122), and
+/// `.expect("system clock is after the epoch")`
+/// (`../model/src/daemon/leases.rs:367`, `../model/src/gossip/routing.rs:340`),
+/// the last of which aborts a process because a machine's clock is wrong.
+/// This type has one answer and it is never a panic.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct SystemClock;
+
+impl Clock for SystemClock {
+	fn now(&self) -> Instant {
+		Instant::from_system_time(SystemTime::now())
+	}
+}
+
+/// A clock that answers the same instant every time.
+///
+/// This is the type the ticket exists for: a fold parameterised over a
+/// `FixedClock` is reproducible, so its output can be compared byte for byte
+/// against a replay. `clock_fold_is_reproducible_under_a_fixed_clock` runs
+/// that argument.
+///
+/// **No advancing clock.** `FixedClock` is `Copy`, so a test that wants a
+/// later instant writes
+/// `FixedClock::new(c.instant().saturating_add(d))`. A clock that advances
+/// itself through interior mutability would be a second source of truth about
+/// what time it is, and it has no call site in either tree today.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct FixedClock(Instant);
+
+impl FixedClock {
+	/// A clock stopped at `at`.
+	pub const fn new(at: Instant) -> Self {
+		Self(at)
+	}
+
+	/// The instant this clock is stopped at.
+	pub const fn instant(self) -> Instant {
+		self.0
+	}
+}
+
+impl Clock for FixedClock {
+	fn now(&self) -> Instant {
+		self.0
+	}
+}
+
+/// Borrowed clocks are clocks.
+///
+/// The three forwarding impls below exist because `../model` holds its
+/// substrate in `Arc` across tokio tasks (`src/daemon/`, `src/gossip/`) and
+/// mitosys shares state across threads. Without them every consumer that
+/// stores a clock behind a pointer re-derives this forwarding, which is two
+/// implementations of one thing inside the crate whose admission test is
+/// "one implementation is genuinely better than two".
+impl<C: Clock + ?Sized> Clock for &C {
+	fn now(&self) -> Instant {
+		(**self).now()
+	}
+}
+
+/// Boxed clocks are clocks — including `Box<dyn Clock>`, which is why
+/// [`Clock`] is kept object-safe.
+impl<C: Clock + ?Sized> Clock for Box<C> {
+	fn now(&self) -> Instant {
+		(**self).now()
+	}
+}
+
+/// Shared clocks are clocks: the `Arc<dyn Clock + Send + Sync>` spelling
+/// `../model`'s task-held substrate needs.
+impl<C: Clock + ?Sized> Clock for std::sync::Arc<C> {
+	fn now(&self) -> Instant {
+		(**self).now()
+	}
 }

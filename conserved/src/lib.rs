@@ -33,5 +33,5 @@
 pub mod clock;
 mod content_id;
 pub mod scope;
-pub use clock::Instant;
+pub use clock::{Clock, FixedClock, Instant, SystemClock};
 pub use content_id::{ContentId, ContentIdParseError};
