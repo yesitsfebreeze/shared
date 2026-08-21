@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p4-stats
+state: done
 est: 1.75h
 mode: afk
 priority: 30

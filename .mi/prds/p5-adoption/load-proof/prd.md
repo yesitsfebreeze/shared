@@ -1,8 +1,8 @@
 ---
-state: open
+state: specced
 mode: afk
 priority: 42
-est: 3h
+est: 3.25h
 repo: shared
 verify: "cargo test -p conserved load -- --include-ignored"
 ---
