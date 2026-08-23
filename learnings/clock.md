@@ -21,12 +21,14 @@ and, in the same law's *connects*:
 > whatever cannot be re-derived — clock, model output, embedding, hash
 > iteration order — enters as recorded data and is never consulted live.
 
-Counted 2026-08-18, non-test code only:
+Counted 2026-08-23, non-test code only — substrings `SystemTime::now` and
+`Instant::now`, no parentheses; comment lines, `tests/` paths,
+`tests.rs`/`*_tests.rs` files, and `#[cfg(test)]` blocks excluded:
 
 | tree | `SystemTime::now()` / `Instant::now()` call sites |
 |---|---|
-| mitosys | **65** |
-| llm | **66** |
+| mitosys | **66** |
+| llm | **69** |
 
 Both trees also ship the read as a blessed utility:
 
@@ -161,5 +163,4 @@ gone. On the day it flipped:
   `src/node/transactional.rs:72` feeding `SystemTime::now()` into a
   network-visible commit id. The type that fixes them exists; nothing has been
   threaded through either yet.
-- The counts in the table above are as of 2026-08-18 and have not been
-  recounted since.
+- The counts in the table above are as of 2026-08-23.
