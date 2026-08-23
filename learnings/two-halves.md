@@ -1,10 +1,10 @@
 ---
 type: learning
 learning: two-halves
-subject: mitosys is the record-half and llm is the learner-half of one system; the join is law 1, and the three couplings in order of value are corpus, grading, and the reload seam
+subject: mitosys and model are two halves of one system; the seam is the origin vocabulary plus four ported shapes, each type with one owner; the merge is a seven-step sequence, every step carried
 binds: [mitosys, llm]
-status: open
-date: 2026-08-18
+status: decided
+date: 2026-08-23
 code: mitosys src/mitosys/engine/record/, llm src/record/
 ---
 
@@ -28,6 +28,60 @@ Neither is complete alone, and law 1 is already the join: both are built on
 one append-only record with every view a pure fold over it. That is not a
 convenient similarity to exploit later — it is load-bearing on both sides
 today.
+
+## The seam
+
+Which types cross, which tree owns each, how each crosses. Decided
+2026-08-23 (`prds/two-halves-merge`).
+
+| type | owner | crosses as |
+|---|---|---|
+| `LearnOrigin` | model | one declaration, one home (`model/prds/one-learn-origin`); moves into `conserved` only when mitosys ships signal — [[shared-crate]] criterion 1 admits today's need, never a speculative one |
+| `ContentId`, `Clock`, `Scope`/`Disposer`, order stats | shared | `conserved`, landed — a rev-pinned git dependency in each tree ([[shared-crate]] §Where it lives) |
+| record shape — preimage, bitemporal supersede, lazy decay, replay-as-fold | model | ported shape, not file: mitosys's `engine/record` adopts it, direction per [[record-shape]] (`mitosys/prds/record-shape-port`) |
+| grade envelope — `Baseline`/`Grade`/`normalized_ms`/`pass_window` | model | ported shape per [[ratchet]]; the carrier is mitosys `prds/p9-perf-floor` |
+| reload seam — `interface` + loader | model | its own crate when mitosys's swap work starts, not before ([[shared-crate]] §What stays out) |
+| `LlmFunc`/`EmbedFunc` (`mitosys/src/mitosys/engine/model/lib.rs:48`) | mitosys | model satisfies the two closure types; zero wiring change on the mitosys side (`model/prds/back-llmfunc`) |
+| corpus signal — mitosys record → model door | mitosys produces, model admits | a future master-board PRD, admitted after the origin vocabulary and the record shape converge (steps 4 and 6) |
+
+### One `LearnOrigin`
+
+model declares the seam's one word twice: `src/node/mod.rs:48` (Corpus ·
+Prompt · Correction · Teacher · Peer · ModelOutput) and `src/record/mod.rs:94`
+(Human · Corpus · Peer · Tool · ModelOutput, `#[repr(u8)]`, `try_from_u8`).
+The canonical set is the node six — the doctrine set (paper §4.1, Table 4)
+both doors claim to share:
+
+**Corpus · Prompt · Correction · Teacher · Peer · ModelOutput**
+
+Two constraints bound the choice, both already decided by the couplings:
+
+- Prompt, Correction and Teacher stay distinct variants — coupling A filters
+  on exactly that discrimination, and Correction is the signal mitosys
+  produces as exhaust.
+- `ModelOutput` stays a variant and stays refused: `learn_trains` returns
+  `false` for it, and both doors count the refusal.
+
+The mapping, every variant of both current spellings:
+
+| current variant | site | canonical |
+|---|---|---|
+| `Corpus` | `src/node/mod.rs:48` | `Corpus` |
+| `Prompt` | `src/node/mod.rs:48` | `Prompt` |
+| `Correction` | `src/node/mod.rs:48` | `Correction` |
+| `Teacher` | `src/node/mod.rs:48` | `Teacher` |
+| `Peer` | `src/node/mod.rs:48` | `Peer` |
+| `ModelOutput` | `src/node/mod.rs:48` | `ModelOutput`, refused |
+| `Human = 0` | `src/record/mod.rs:94` | retired; a stored `0` decodes as `Prompt` — the least a `Human` byte proves |
+| `Corpus = 1` | `src/record/mod.rs:94` | `Corpus`; byte `1` keeps its meaning |
+| `Peer = 2` | `src/record/mod.rs:94` | `Peer`; byte `2` keeps its meaning |
+| `Tool = 3` | `src/record/mod.rs:94` | retired; a stored `3` decodes as `Teacher` — an external answer, verifiable at its source |
+| `ModelOutput = 4` | `src/record/mod.rs:94` | `ModelOutput`; byte `4` keeps its meaning, still refused |
+
+The `u8` discriminants are data on disk. A retired discriminant decodes by
+the table above and is never reassigned. The code and format consequences —
+the decode mapping in `try_from_u8`, or a format-version bump — are
+`model/prds/one-learn-origin`'s work.
 
 ## The three couplings, in order of value
 
@@ -109,30 +163,39 @@ fold and replay, the reload `interface` + loader, content-addressed ids.
 
 ## What must not converge
 
-llm's thesis — self-specialization, the precision ladder, seed/leech,
-perturbation-pair training — and mitosys's ACP/surface/board stack.
-Convergence that reaches into either produces one slow project instead of
-two fast ones.
+Six things stay apart — convergence that reaches into any of them produces
+one slow project instead of two fast ones:
+
+- model's thesis — self-specialization, the precision ladder, seed/leech,
+  perturbation-pair training.
+- mitosys's ACP/surface/board stack.
+- The event spine — mitosys's is `std` (`Arc`/`Mutex`/`Condvar`), model's is
+  `tokio::sync::broadcast`; sharing it picks a runtime for both trees.
+- The triple projection (`s`/`p`/`o` term ids, `ONT_ANY`) — model's
+  vocabulary, not shared ([[record-shape]]).
+- Each tree's fold — domain-entangled on both sides; the record shape ports,
+  the fold does not.
+- The repositories themselves.
 
 ## Sequencing
 
-Both trees are mid-flight: mitosys's engine merge/fold rewrite is "decided,
-not done", llm is on phase-8 real-peers. Nothing here should stall either,
-and the repositories should not be merged.
+The merge as it stands on 2026-08-23, one carrier per step:
 
-1. Settle the four contradictions in [[divergences]].
-2. Port `gates/` to llm — cheapest high-value move, and it finds llm's
-   duplicate `LearnOrigin` rather than anyone taking it on faith.
-3. Extract `util/effect` as the first shared crate. It imports nothing,
-   which is why it was mitosys's first extraction and why it should be the
-   first shared one: it proves the mechanism on something that cannot fail
-   interestingly.
-4. Port the grade harness into mitosys as a plugin-grading gate.
-5. Then the record convergence, and only then llm behind `LlmFunc`.
-
-That last step is the easy one and worth not mistaking for the goal:
-mitosys's `engine/model` is already the right seam — two closure types,
-`Fn(&str) -> String` and `Fn(&str) -> Result<Vec<f32>, String>`, no HTTP,
-no vendor, imports nothing. llm satisfying it means it can back mitosys's
-`reason`/`embed` with no wiring change anywhere. The plumbing is trivial;
-the co-evolution loop lives in steps 1–4.
+1. **Divergences** — done. [[divergences]] is decided; the model children
+   `adopt-test-law`, `pin-toolchain`, `workspace-deps` are open on
+   `model/prds`.
+2. **Gates port** — carried by master `prds/propagate-gates` (analyzing).
+3. **First shared crate** — done. `conserved` landed ([[shared-crate]]
+   §Landed); consumer adoption is held under shared `p5-adoption`.
+4. **Origin vocabulary** — carried by model child
+   `model/prds/one-learn-origin`. No prerequisite; lands now.
+5. **Grade shape into mitosys** — carried by mitosys `prds/p9-perf-floor`
+   under master `prds/one-ratchet` ([[ratchet]]).
+6. **Record convergence** — direction per [[record-shape]]; carried by
+   mitosys child `mitosys/prds/record-shape-port`, sequenced with the fold
+   rewrite `p6k10` (`mitosys/prds/p6-rust-core/p6k-kern-merge/
+   p6k10-production-fold`). Unblocks master `prds/storage-convergence`.
+7. **model behind `LlmFunc`/`EmbedFunc`** — carried by model child
+   `model/prds/back-llmfunc`. Last on purpose: the plumbing is small and it
+   is not the goal. Then corpus flow — a future master-board PRD, admitted
+   when steps 4 and 6 hold.
