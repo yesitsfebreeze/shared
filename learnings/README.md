@@ -161,6 +161,9 @@ it, this is a better-organised copy of the drift that is already there.
   what stays out, and where the code lives — the one constraint that had to
   be decided before the first line moved, and was. Decided 2026-08-21; no
   consumer has adopted the crate yet
+- [[ratchet]] — one measurement discipline arrived at twice: model's floor
+  and mitosys's ceiling are the same shape; each tree's missing half is
+  filed on its own board
 
 ## Reading order
 
