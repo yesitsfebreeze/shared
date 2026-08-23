@@ -230,21 +230,54 @@ Against §"What goes in", item by item:
 
 ## What is still outstanding
 
-`decided` here is about the **proposal** — the admission test, what goes in,
-where the code lives, how it reaches a consumer. It is not a claim that the
-extraction is finished, and the ladder's `decided` says so itself: *may still
-need extraction.* On the day this status flipped:
+`decided` covers the proposal — the admission test, what goes in, where the
+code lives, how it reaches a consumer. The extraction is complete; adoption
+is not. The admission audit of 2026-08-23, every admitted item:
 
-- **No consumer tree has adopted anything.** mitosys still has `util/effect`
-  and its SHA-256 ids; llm still has `rec_now()` and the second live-clock
-  read at `src/node/transactional.rs:72`; realm has not been touched. Every
-  duplicate this document exists to remove is still there, in both places.
-- **The ratchets do not exist** in any tree — [[clock]] step 1, the check that
-  makes a new wall-clock read fail, is unwritten everywhere.
-- **The `code:` line above still names the duplicate sites** for that reason.
-  The day they go is the day `p5-adoption`'s held children run; the user's
-  answer of 2026-08-21 holds them until this repo's tools are finished and
-  tested.
-- The crate is not published: `origin` is set and nothing is pushed, so the
-  rev-pinned URL a consumer would write is not reachable from anywhere but
-  this machine yet.
+| admitted item | in `conserved` | mitosys still carries | model still carries |
+|---|---|---|---|
+| `ContentId` | `conserved/src/content_id.rs` | `util/util.rs` `content_hash` + `digest` (SHA-256) | `utils/algebra` `content_id`, `utils/fs` `blake3_hash`/`compute_version_hash`, `record` `rec_id` — blake3 already, local copies |
+| `Clock` | `conserved/src/clock.rs` | `util/util.rs` `now_nanos`/`now_ms`/`now_secs` + direct wall reads | `record` `rec_now()`, `src/node/transactional.rs:72` |
+| `Scope`/`Disposer` | `conserved/src/scope.rs` | `util/effect` (semantics diverged — deviation 8) | prose site `src/main.rs:126` |
+| order statistics | `conserved/src/stats.rs` | `util/util.rs` `percentile_sorted`, zero callers | `src/grade/measure.rs:203` `aggregate` |
+| `hex` | behind `ContentId`'s `Display`/`FromStr` | `util/util.rs` `pub mod hex` | — |
+
+One exemption — the only admitted item a tree keeps a copy of:
+
+- mitosys `util::hex` stays for its **non-id** callers: `decode` tolerates
+  the `ed25519:` prefix for key strings, p2 refused that prefix into the
+  crate, and the shim lives at mitosys call sites
+  (`.mi/prds/p5-adoption/mitosys/prd.md`). `ContentId::from_str` replaces
+  only the id renderings.
+
+One migration — named, not an exemption:
+
+- mitosys re-keys its SHA-256 hex ids to blake3 `ContentId`. The user
+  accepted both persisted-id breaks on 2026-08-21
+  (`.mi/prds/p5-adoption/prd.md` §Answers, item 3): wipe and re-derive
+  behind `store_core`'s `FORMAT_VERSION` bump, one version bump each tree.
+- The re-key is lossless through the export escape hatch:
+  `id == content_hash(text)` (`mitosys/src/mitosys/engine/graph/merge.rs:96`),
+  so every id re-derives from exported content. `apply_import`
+  (`commands_export.rs`) unions by stored id and never recomputes — the
+  mitosys child re-keys at import or bumps `EXPORT_VERSION` and names the
+  fate of v1 exports.
+- When the swap completes, `sha2` leaves `mitosys-util` — one hash per
+  tree, the argument `mitosys/src/mitosys/engine/record/Cargo.toml`
+  already makes.
+
+Where adoption lives now:
+
+- One child PRD per consumer tree: `mitosys/prds/adopt-conserved` and
+  `model/prds/adopt-conserved`. They carry the requirements written in
+  `.mi/prds/p5-adoption/{mitosys,llm}/prd.md`; this board stays the
+  cross-tree ledger and dispatches nothing into the trees — the user's
+  answer 2 of 2026-08-21 stands.
+- Both trees pin the same rev:
+  `conserved = { git = "https://github.com/inner-zirkle/shared", rev = <sha> }`.
+  The pin is unreachable until the user pushes `origin` — publishing is
+  the user's call (answer 1 of 2026-08-21); the children name that event
+  and do not push.
+- realm adoption is `p5-adoption`'s `realm` child, outside the
+  master-board `conserved-crate` PRD — its done condition names mitosys
+  and model only.
