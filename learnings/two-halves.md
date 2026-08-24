@@ -161,6 +161,41 @@ First candidates, all dependency-light today: `util/effect`
 (install-with-inverse, imports nothing), the event spine, `engine/record`'s
 fold and replay, the reload `interface` + loader, content-addressed ids.
 
+### Amendment (2026-08-24) — the no-third-repo sentence is superseded
+
+The opening sentence of this section — *"mitosys owns the shared crates;
+llm depends on them. Not a third repository — another board, another gate
+runner, another toolchain pin, for two consumers."* — is **superseded by
+the third repository's existence**. The original sentence stays on disk
+above per `learnings/README.md` rule 1; this block records what changed
+the answer.
+
+- **When it became measurable.** Commit `ab154f7` on `shared/` (2026-08-21),
+  recorded in [[shared-crate]] §"Landed" as the `git init` of the `shared/`
+  repository. The third repository existed from that commit onward: own
+  git tree, own board of seven nodes at `shared/prds/`, own
+  `rust-version` pin, own `Cargo.toml`, own `conserved/` crate, own remote
+  at `https://github.com/inner-zirkle/shared`.
+- **What changed the answer.** Three consumers now exist, not two: the
+  decision binds `realm` as well as `mitosys` and `llm` —
+  [[gates]] carries `binds: [mitosys, model, realm]`, and [[shared-crate]]
+  §"What is still outstanding" names realm adoption under
+  `p5-adoption`. A domain-free crate with **one** dependency (`blake3`,
+  optional `serde` feature) has no board-and-gate-runner cost worth the
+  coupling it avoids: the admission test in [[shared-crate]] §"The
+  admission test" — *both trees need it today, it is domain-free, it
+  passes `dependency_tree.rs`, one implementation is better than two* — is
+  mechanical, and it does the work the no-third-repo rule was reaching
+  for. The user's distribution requirement of 2026-08-20 — *"the crate
+  must be distributable to every Rust repo"* — closed the option of a
+  path dependency from each tree, which is the only technical
+  justification the no-third-repo argument ever had.
+- **What this amendment does not do.** It does not delete the sentence
+  above. It does not re-open the distribution decision ([[shared-crate]]
+  §"Where it lives" closed that on 2026-08-21: option 2, a rev-pinned
+  git dependency). It does not bind `llm` vs `model`; that is the
+  naming fork owned by its own PRD and named out of scope here.
+
 ## What must not converge
 
 Six things stay apart — convergence that reaches into any of them produces
