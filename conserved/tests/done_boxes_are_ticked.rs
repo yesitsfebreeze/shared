@@ -78,12 +78,7 @@ fn walk(dir: &Path, out: &mut Vec<PathBuf>) {
 /// unticked acceptance boxes while carrying `state: done`. The reason
 /// column is recorded so a future shrink can find the work that removes
 /// the entry.
-const EXEMPT: &[(&str, &str)] = &[
-	(
-		"prds/p0-foundation/prd.md",
-		"closed by this node's master-board lane",
-	),
-];
+const EXEMPT: &[(&str, &str)] = &[];
 
 /// Reads the first frontmatter block and returns the value for `key:` if
 /// present. A `state:` line is read byte-for-byte — no YAML, no

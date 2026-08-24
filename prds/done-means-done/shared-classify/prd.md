@@ -1,9 +1,9 @@
 ---
-state: open
+state: done
 mode: afk
 priority: 7
-complexity: 0
-blast-radius: high
+complexity: 8
+blast-radius: mid
 repo: shared
 origin: derived
 from: done-means-done
