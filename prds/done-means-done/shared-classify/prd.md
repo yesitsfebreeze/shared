@@ -7,6 +7,7 @@ blast-radius: mid
 repo: shared
 origin: derived
 from: done-means-done
+commit: 5e2ab385b347c79204ec57c0d45ab09f47ea3db7
 ---
 
 # shared-classify — the per-PRD verdict for the one `done` shared PRD with unticked acceptance boxes
