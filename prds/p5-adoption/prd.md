@@ -100,3 +100,40 @@ until 1 and 2 are answered.
    -> blake3 behind `store_core`'s `FORMAT_VERSION` wipe. llm: `Record.created`
    seconds -> `Instant` nanoseconds (rewriting every `rec_id`) plus
    `Commit.timestamp` u64 -> i64. Wipe and re-derive, not migrations.
+
+## Answers — 2026-08-26, the hold lifts
+
+4. **The hold of Answer 2 is lifted, in full** (user decision, 2026-08-26).
+Its condition was "finish this shared repo's tools first, then reconcile the
+implementations once everything is tested and works." That condition is now
+met and measured: `p0-foundation`, `p1-scope`, `p2-content-id`, `p3-clock`,
+`p4-stats`, `p6-scope-unwind`, and this node's own `load-proof` and `close`
+children are all `state: done`. Nothing is left in this repository but the
+four children the hold itself parked.
+
+`ratchets`, `realm`, `llm` and `mitosys` are dispatchable from this board from
+now on, in the order this node's `## Refined` section already fixed:
+
+```
+ratchets  ->  realm || llm || mitosys  ->  close
+```
+
+`close` is already `done` and is re-opened only if an adoption changes what it
+recorded.
+
+5. **Answer 1's remote is stale — use the repository's own.** Answer 1
+(2026-08-21) pinned `https://github.com/inner-zirkle/shared`. Measured
+2026-08-26: `git remote -v` in this repository reports
+`https://github.com/yesitsfebreeze/shared.git` (reproduced; the repositories
+moved off the `inner-zirkle` organization on 2026-08-23). Every consumer child
+pins **that** URL at a common `rev`, not the one Answer 1 names.
+
+Two things a consumer child must check before it pins, neither settled here:
+
+- `git -C ../shared log origin/main..HEAD` — this repository has commits that
+  have never been pushed, and a `rev` that is not on the remote cannot be
+  fetched by mitosys's container or by realm on another machine. Pushing is
+  the user's act, not the board's.
+- `../mitosys` has **no** git remote at all (`git remote get-url origin` →
+  empty, reproduced). That does not block it consuming `shared`, but it does
+  mean mitosys's own adoption commit lives only on this machine.

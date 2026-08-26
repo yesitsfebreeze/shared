@@ -1,10 +1,12 @@
 ---
-state: open
+state: specced
 mode: afk
 priority: 44
 est: 20h
 repo: mitosys
 verify: "cd ../mitosys && just check"
+complexity: 88
+blast-radius: high
 ---
 
 # P5d — mitosys: four duplicates become one dependency, green in the container
@@ -66,12 +68,24 @@ of p0's distribution decision.
       Also: `.mi/prds/p1-scope/specs/spec01.md`'s byte-for-byte `verify:` diff
       no longer holds, by design.
 
-## Held — 2026-08-21
+## Held — 2026-08-21 — LIFTED 2026-08-26
 
 **Not dispatchable from this board yet.** The user's instruction is to finish the
 shared repo's own tools first and reconcile the consumer implementations later,
 once everything here is tested and works. This node is fully specified and ready;
 do not start it, and do not write into the consumer trees, until that hold lifts.
+
+**The hold lifted on 2026-08-26** (user decision, recorded in full at the
+parent's `## Answers — 2026-08-26`). Its condition is met: every other PRD in
+this repository — `p0-foundation`, `p1-scope`, `p2-content-id`, `p3-clock`,
+`p4-stats`, `p6-scope-unwind`, `load-proof`, `close` — is `state: done`. This
+node is dispatchable, and writing into the consumer tree is now in scope.
+
+Before pinning `conserved`, read the parent's Answer 5: the remote recorded in
+Answer 1 (`inner-zirkle`) is stale, the live one is
+`https://github.com/yesitsfebreeze/shared.git`, and this repository holds
+commits that have never been pushed — a `rev` that is not on the remote cannot
+be fetched from a container or another machine.
 
 ## Decided — persisted-id break accepted
 

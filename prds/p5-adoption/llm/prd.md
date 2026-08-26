@@ -1,10 +1,12 @@
 ---
-state: open
+state: specced
 mode: afk
 priority: 45
 est: 18h
 repo: model
 verify: "cd ../model && cargo test --workspace"
+complexity: 62
+blast-radius: high
 ---
 
 # P5e — llm: the content-hash preimage first, it is the dangerous one
@@ -48,12 +50,24 @@ starting with the content-hash preimage, and calls `min_median_max`.
 - [ ] **Record** that an edition-2024 tree (`../model/Cargo.toml`, no pin)
       consumes an edition-2021 crate.
 
-## Held — 2026-08-21
+## Held — 2026-08-21 — LIFTED 2026-08-26
 
 **Not dispatchable from this board yet.** The user's instruction is to finish the
 shared repo's own tools first and reconcile the consumer implementations later,
 once everything here is tested and works. This node is fully specified and ready;
 do not start it, and do not write into the consumer trees, until that hold lifts.
+
+**The hold lifted on 2026-08-26** (user decision, recorded in full at the
+parent's `## Answers — 2026-08-26`). Its condition is met: every other PRD in
+this repository — `p0-foundation`, `p1-scope`, `p2-content-id`, `p3-clock`,
+`p4-stats`, `p6-scope-unwind`, `load-proof`, `close` — is `state: done`. This
+node is dispatchable, and writing into the consumer tree is now in scope.
+
+Before pinning `conserved`, read the parent's Answer 5: the remote recorded in
+Answer 1 (`inner-zirkle`) is stale, the live one is
+`https://github.com/yesitsfebreeze/shared.git`, and this repository holds
+commits that have never been pushed — a `rev` that is not on the remote cannot
+be fetched from a container or another machine.
 
 ## Decided — persisted-id break accepted
 

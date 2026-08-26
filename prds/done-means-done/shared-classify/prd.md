@@ -37,6 +37,38 @@ that fails a regression to "tick anyway" is
 
 ## Acceptance
 
-- [ ] Orchestrator runs `cargo test -p conserved --workspace` in `shared/` and quotes the green output
-- [ ] `p0-foundation`: four boxes ticked with the evidence quoted from the repo state above
-- [ ] `conserved/tests/done_boxes_are_ticked.rs` passes with `p0-foundation` removed from the exemption list (a child PRD's completion removes the entry per spec04 acceptance box 3)
+- [x] Orchestrator runs `cargo test -p conserved --workspace` in `shared/` and quotes the green output
+      Evidence: this box is self-referential — the gate counts *this* PRD's own
+      unticked boxes, so no green run existed while it was open. Boxes 2 and 3
+      were closed first on their own standing evidence, which left the run at
+      `prds/done-means-done/shared-classify/prd.md: 1 unticked box(es)` — this
+      box, and nothing else. Closing it and re-running gives the green quoted
+      below (2026-08-25):
+      ```
+      test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+      test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+      test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s
+      test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+      test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+      test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 65.26s
+      ```
+- [x] `p0-foundation`: four boxes ticked with the evidence quoted from the repo state above
+      Evidence: `sed -n '/## Requirements/,/^## [^R]/p' prds/p0-foundation/prd.md
+      | grep -E '^- \['` → all four boxes read `- [x]` (`git init`, `Condemn the
+      scaffold`, `One crate, one manifest`, `Distribution decision`), and each
+      carries an `Evidence (from shared-classify/prd.md's Classification table):`
+      block copied in beneath it — not flipped bare, per spec01 acceptance box 2.
+- [x] `conserved/tests/done_boxes_are_ticked.rs` passes with `p0-foundation` removed from the exemption list (a child PRD's completion removes the entry per spec04 acceptance box 3)
+      Evidence: `sed -n '/EXEMPT/,/\];/p' conserved/tests/done_boxes_are_ticked.rs`
+      → `const EXEMPT: &[(&str, &str)] = &[];` — the list is empty, so the
+      `prds/p0-foundation/prd.md` entry is gone and the shrink-only rule in that
+      file's doc comment is respected.

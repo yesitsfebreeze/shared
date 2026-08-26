@@ -16,25 +16,45 @@ sit where the proposal says one crate belongs. `cargo build` does not pass.
 
 ## Requirements
 
-- [ ] **git init** — `git init` + an initial commit of the board, the
+- [x] **git init** — `git init` + an initial commit of the board, the
       learnings, and the reset workspace. The board protocol claims by
       commit, and `learnings/README.md` already notes "the record only grows"
       has no subject without version control. Without this, no node on this
       board is claimable.
-- [ ] **Condemn the scaffold** — delete `conserved-alloc/`, `conserved-net/`,
+      Evidence (from `shared-classify/prd.md`'s Classification table):
+      `git log --reverse --oneline | head -1` → `ab154f7 foundation: the
+      reset workspace, the board, the learnings` (the repo's first commit,
+      2026-08-21). The shared tree is under version control with the board
+      and learnings in the same initial commit.
+- [x] **Condemn the scaffold** — delete `conserved-alloc/`, `conserved-net/`,
       `conserved-deriv/`, `conserved-derive/`, `conserved-core/`, and the
       current `conserved/src/lib.rs`. None of it compiles (see
       `.mi/docs/memos/scaffold-reset.md` for the itemized evidence) and the
       pre-split directly contradicts the proposal's "one crate to start — do
       not pre-split; let the gate decide". The memo is the record; the
       deletion is the act.
-- [ ] **One crate, one manifest** — `conserved/` with a valid `Cargo.toml`
+      Evidence (from `shared-classify/prd.md`'s Classification table):
+      negative evidence — `find . -maxdepth 2 -name 'conserved-alloc' -o
+      -name 'conserved-net' -o -name 'conserved-deriv' -o -name
+      'conserved-derive' -o -name 'conserved-core'` returns nothing on
+      2026-08-24 (run at `/Users/feb/dev/infra/shared`). The five condemned
+      crates do not exist on disk.
+- [x] **One crate, one manifest** — `conserved/` with a valid `Cargo.toml`
       (edition 2021, `rust-version = "1.94.0"`), an empty-but-compiling
       `src/lib.rs`, tests at `conserved/tests/` (the mitosys shape, per
       `AGENTS.md` §divergences — the shared crate resolves each dimension
       explicitly). Root manifest becomes `[workspace]` only, `resolver = "2"`,
       member `conserved`.
-- [ ] **Distribution decision — put to the user, not guessed.** The user
+      Evidence (from `shared-classify/prd.md`'s Classification table):
+      `head -5 /Users/feb/dev/infra/shared/Cargo.toml` → `[workspace] /
+      resolver = "2" / members = ["conserved"]`. `ls
+      /Users/feb/dev/infra/shared/conserved/tests/` → `clock_instant.rs,
+      clock_serde.rs, clock_source.rs, content_id_props.rs,
+      content_id_serde.rs, content_id.rs, load_scope.rs, load_throughput.rs,
+      load_unwind_panic.rs, scope.rs, smoke.rs, stats.rs` (12 test files).
+      The root manifest is `[workspace]`-only and `conserved` is the single
+      member.
+- [x] **Distribution decision — put to the user, not guessed.** The user
       settled the *requirement* 2026-08-20: the crate must be distributable
       to all other Rust repos, which rules out path-dependency-only (option 3
       of `learnings/shared-crate.md` §"Where it lives"). The *mechanism* —
@@ -43,6 +63,12 @@ sit where the proposal says one crate belongs. `cargo build` does not pass.
       dev container (a git dep needs a vendored registry cache to build
       there). Frame both in `.mi/docs/memos/distribution.md`, escalate,
       record the answer there with status `decided`.
+      Evidence (from `shared-classify/prd.md`'s Classification table):
+      `grep '^status:\|^decided:' /Users/feb/dev/infra/shared/.mi/docs/memos/
+      distribution.md` → `status: decided` / `decided: 2026-08-21`. The
+      distribution memo carries the decision (`Option A, git dependency
+      pinned by commit rev`); the `## Answers` section on this PRD already
+      names the mechanism as settled.
 
 ## Acceptance
 
