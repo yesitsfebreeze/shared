@@ -7,6 +7,8 @@ repo: model
 verify: "cd ../model && cargo test --workspace"
 complexity: 62
 actual: 1h40m
+commit: de74214
+commit-model: 5397c508
 blast-radius: high
 ---
 
