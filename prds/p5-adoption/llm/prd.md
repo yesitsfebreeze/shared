@@ -1,5 +1,5 @@
 ---
-state: blocked
+state: done
 mode: afk
 priority: 45
 est: 18h
@@ -78,12 +78,28 @@ The user accepted this break explicitly on 2026-08-21, one version bump: `Record
 Wipe and re-derive, not a migration. It does not need re-escalating when this
 node runs.
 
-## Blocked — 2026-08-26, by the board
+## Answers — 2026-08-26
 
-`state: blocked`, not `done`. Every requirement in `## Requirements` is met and
-19 of the 20 acceptance boxes across the four specs are closed against runs.
-One box is open and cannot be closed from inside this node, which is what
-`blocked` is for.
+**Q1** — *`spec04` box 1 names four acquisitions for the scope. Should the two
+swarm listener binds be registered on it, when Rust's `Drop` already frees
+those ports exactly once and no test could tell the two mechanisms apart?*
+
+**Close box 1 on the three filesystem acquisitions.** The scope carries what
+`Drop` does not — a directory and two files a failed boot would otherwise
+leave behind — and the spec's line is read as naming the acquisitions rather
+than mandating a second teardown mechanism per acquisition. The `boot`
+restructure is NOT funded, here or as a node of its own; a second mechanism
+for a property ownership already guarantees is not work this board wants.
+
+The `## Blocked` section below is kept as the record of what was asked and
+why. The block lifted with this answer and the node is `done`.
+
+## Blocked — 2026-08-26, LIFTED the same day by the answer above
+
+Written while one box was open. Every requirement in `## Requirements` was met
+and 19 of the 20 acceptance boxes across the four specs were closed against
+runs; the twentieth could not be closed from inside this node. It is closed
+now, by the user's answer above, and all 20 stand.
 
 | open box | spec | what closes it |
 |---|---|---|

@@ -21,7 +21,7 @@ each type's own `Drop`, not by a recorded, ordered, DOGMA-13-shaped inverse.
 
 ## Acceptance
 
-- [ ] `boot`'s fallible resource-acquisition sequence (registry open,
+- [x] `boot`'s fallible resource-acquisition sequence (registry open,
       identity load/create, discovery listener bind, data-plane net
       listener bind) registers each successfully-acquired resource's
       teardown on a `conserved::Scope` as it happens, via `Scope::effect`.
@@ -61,7 +61,11 @@ order:
 `dispose()`d and `debug_assert!(scope.held().is_empty())` states the
 post-condition.
 
-**Box 1 is LEFT OPEN — three of its four acquisitions, not four.** Registered:
+**Box 1 — CLOSED 2026-08-26 by the user's answer, on three of its four named
+acquisitions.** The question below was put to the user and answered: read the
+box as naming the acquisitions rather than mandating a second teardown
+mechanism per acquisition. The scope carries what `Drop` does not; the two
+swarm listener binds stay off it. Registered:
 the data directory (not named in the box, but the same shape), the registry
 file, the identity file. NOT registered: the discovery listener bind and the
 data-plane listener bind, which the box names explicitly. The wall is below,
@@ -102,10 +106,10 @@ pull apart.**
      `boot`'s event loop — well outside this spec's footprint, and a redesign
      of a boot path to satisfy a property `Drop` already guarantees.
 
-   **The question for the user**, since a spec is not a worker's to redefine:
-   accept this reading and close box 1 on the three filesystem acquisitions,
-   or fund the `boot` restructure as its own node. Nothing else in this PRD
-   waits on the answer.
+   **Put to the user, since a spec is not a worker's to redefine, and
+   ANSWERED 2026-08-26**: close box 1 on the three filesystem acquisitions.
+   The `boot` restructure is not funded, here or as its own node. Recorded in
+   full at the PRD's `## Answers — 2026-08-26`.
 
 **Box 2 — the late failure, and the reverse order, both observed.**
 `daemon::tests::boot_scope` forces `net.listen_on` to fail synchronously with
