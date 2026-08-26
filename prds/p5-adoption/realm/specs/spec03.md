@@ -54,13 +54,65 @@ Why zero matches settles it, per the parent's own admission criterion 1
 
 ## Acceptance
 
-- [ ] `grep -rniE "blake3|sha2|Sha256|ContentId" ../realm/src ../realm/Cargo.toml`
+- [x] `grep -rniE "blake3|sha2|Sha256|ContentId" ../realm/src ../realm/Cargo.toml`
       (run from `../shared`) exits with no matches.
-- [ ] `grep -rniE "median|percentile" ../realm/src` exits with no matches.
-- [ ] If either grep above finds a match when this spec is next run, the
+
+      Re-run 2026-08-26, from `/Users/feb/dev/infra/shared`, **after**
+      `spec01` and `spec02` had landed `conserved` in every manifest:
+
+      ```
+      $ grep -rniE "blake3|sha2|Sha256|ContentId" ../realm/src ../realm/Cargo.toml
+      $ echo $?
+      1
+      ```
+
+      No output, exit 1 — grep's "no lines selected". Reproduced.
+
+- [x] `grep -rniE "median|percentile" ../realm/src` exits with no matches.
+
+      ```
+      $ grep -rniE "median|percentile" ../realm/src
+      $ echo $?
+      1
+      ```
+
+      No output, exit 1. Reproduced.
+
+- [x] If either grep above finds a match when this spec is next run, the
       check **fails** rather than silently passing — that is the signal that
       this refusal is stale and the requirement needs re-litigating with a
       real call site named, not a re-statement of "still nothing here."
+
+      The `## Verify and Proof` block below is the check, and it fails by
+      construction: each line is `! grep …`, so a match makes the command
+      exit non-zero and the block stops before `echo "spec03 ok"`. Run whole
+      on 2026-08-26 from `../realm`, it printed exactly:
+
+      ```
+      spec03 ok: no ContentId or stats call site in realm
+      ```
+
+      Negative control, so the check is known to fire rather than be assumed
+      to: substituting `blake3|Scope` for the first pattern — `Scope` matches
+      in `../realm/src` now that `spec01` has landed — makes the `! grep`
+      exit 1 and the block stop before the `echo`. Reproduced 2026-08-26.
+
+## One thing changed under this record, and it is not a call site
+
+`spec01` and `spec02` add `conserved` to realm's manifests, and `conserved`
+depends on `blake3`. `blake3` therefore now appears in `../realm/Cargo.lock`
+(lines 126 and 252) as a transitive dependency of the `conserved` package.
+
+`Cargo.lock` is in neither acceptance grep, and that is correct rather than
+convenient: the refusal is about **call sites**, and the admission test the
+parent PRD sets is "both trees need it today". realm reaches for
+`conserved::scope` and `conserved::clock`; nothing in `../realm/src` names
+`ContentId`, and `conserved`'s own `default = []` feature set does not change
+that. A hash function reachable through a dependency graph is not a call site.
+
+The day `../realm/src` names `ContentId`, the first grep matches and this
+record fails — which is the whole point of it being a check and not a
+paragraph.
 
 ## Verify and Proof
 

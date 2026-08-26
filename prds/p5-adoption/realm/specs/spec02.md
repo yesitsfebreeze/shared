@@ -103,32 +103,131 @@ other file.
 
 ## Acceptance
 
-- [ ] `grep -c "SystemTime::now" src/drivers/linux/src/state.rs
+- [x] `grep -c "SystemTime::now" src/drivers/linux/src/state.rs
       src/cli/src/lib.rs src/cli/src/state.rs` is `0` for all three files —
       the direct reads are gone.
-- [ ] `grep -c "conserved::SystemClock\|SystemClock" src/drivers/linux/src/state.rs
+
+      ```
+      src/drivers/linux/src/state.rs:0
+      src/cli/src/lib.rs:0
+      src/cli/src/state.rs:0
+      ```
+
+- [x] `grep -c "conserved::SystemClock\|SystemClock" src/drivers/linux/src/state.rs
       src/cli/src/lib.rs src/cli/src/state.rs` is at least 1 for each.
-- [ ] The five non-test callers of `unix_now()`
+
+      ```
+      src/drivers/linux/src/state.rs:2
+      src/cli/src/state.rs:1
+      src/cli/src/lib.rs:2
+      ```
+
+- [x] The five non-test callers of `unix_now()`
       (`state.rs:140`, `drivers/linux/src/lib.rs:956`, `cli/lib.rs:632`,
       `cli/lib.rs:1206`, `cli/lib.rs:1229`) and `uptime_secs`'s own callers
       are **byte-unchanged**: `git diff --unified=0 -- src/drivers/linux/src/state.rs`
       touches only the `unix_now` function body (not `age_secs`), and
       `git diff --unified=0 -- src/cli/src/lib.rs` touches only the
       `unix_now` function body (not any of its three call sites).
-- [ ] `grep -rn "Instant::now()" src/` (across the whole realm tree) returns
+
+      `git diff --unified=0` names four hunks in `state.rs` — the dropped
+      `use std::time::{SystemTime, UNIX_EPOCH};`, the added
+      `use conserved::Clock;`, the added doc comment at `@@ -200,0 +201,10 @@`
+      and the body at `@@ -202,4 +212 @@ pub fn unix_now()`. No hunk touches
+      `age_secs`. In `cli/src/lib.rs`, two hunks:
+      `@@ -1329,0 +1330,5 @@ fn valid_workspace_name` (the doc comment) and
+      `@@ -1331,4 +1336,2 @@ fn unix_now()` (the body). Lines 632, 1206 and
+      1229 are in no hunk.
+
+- [x] `grep -rn "Instant::now()" src/` (across the whole realm tree) returns
       the exact same set of file:line pairs before and after this spec —
       `net/src/dns.rs` (4), `drivers/linux/src/lib.rs` (4, non-test),
       `zfs/src/cli.rs` (2), `ssh/src/driver.rs` (1, test), plus the test
       files named in the grep at analysis time. None of these become
       `conserved::Instant`.
-- [ ] A test asserting `unix_now()` (both crates) and `uptime_secs()` still
+
+      ```
+      src/net/tests/unit/dns.rs:175   src/net/src/dns.rs:80,94,105
+      src/drivers/linux/tests/overlay.rs:224
+      src/drivers/linux/tests/linux_container.rs:966
+      src/drivers/linux/src/lib.rs:970,973,1084,1285,1301
+      src/zfs/tests/zfs_integration.rs:166
+      src/zfs/tests/unit/cli.rs:337,361,377,417,427,476
+      src/zfs/src/cli.rs:439,449
+      src/ssh/tests/unit/driver.rs:148
+      ```
+
+      Not one of those files appears in `git status --porcelain`, so the set
+      is unchanged by construction, not by re-derivation. Two corrections to
+      the analysis-time list, both bookkeeping: `net/src/dns.rs` holds 3, not
+      4 (the 4th "dns" site is `net/tests/unit/dns.rs:175`), and
+      `drivers/linux/src/lib.rs` holds 5 non-test sites, not 4.
+
+- [x] A test asserting `unix_now()` (both crates) and `uptime_secs()` still
       return a plausible current-unix-seconds value (e.g. within a wide
       sanity window of the test's own wall-clock read) — a regression guard
       against the `as u64` clamp silently returning `0` for all normal-range
       dates.
-- [ ] `cargo check -p realm-linux-driver -p realm-cli` succeeds.
-- [ ] `cargo test -p realm-linux-driver -p realm-cli` passes.
+
+      Three tests, each also asserting `!= 0` separately from the window, so
+      a fired clamp is reported as the epoch rather than as "off by 1.7e9":
+
+      ```
+      test state::tests::unix_now_is_current_wall_clock_seconds ... ok   (realm-linux-driver)
+      test tests::unix_now_is_current_wall_clock_seconds ... ok          (realm-cli)
+      test state::tests::uptime_secs_counts_from_created_at ... ok       (realm-cli)
+      ```
+
+- [x] `cargo check -p realm-linux-driver -p realm-cli` succeeds.
+
+      ```
+          Checking realm-linux-driver v0.1.0 (/Users/feb/dev/infra/realm/src/drivers/linux)
+          Checking realm-cli v0.1.0 (/Users/feb/dev/infra/realm/src/cli)
+          Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.47s
+      ```
+
+- [x] `cargo test -p realm-linux-driver -p realm-cli` passes.
+
+      ```
+      realm-cli            lib   41 passed; 0 failed
+      realm-cli            tests/cli.rs   9 passed; 0 failed
+      realm-linux-driver   lib   85 passed; 0 failed
+      doc-tests            2 passed; 0 failed
+      ```
+
+      Every other target in both crates reports `0 passed; 0 failed` — the
+      integration suites are behind `linux_integration` / `zfs_integration` /
+      `ssh_integration`, off by default.
+
 - [ ] `cargo fmt --all --check` is silent.
+
+      **Refuted, and not by this spec.** `cargo fmt --all --check` is red on
+      `HEAD` before any file here was touched. Measured by extracting the
+      four offending files at `git show HEAD:<path>` into a scratch directory
+      with realm's own `rustfmt.toml` and running
+      `rustfmt --check --edition 2021`:
+
+      ```
+      DIRTY dependency_tree.rs        (src/gates/tests/)
+      DIRTY done_boxes_are_ticked.rs  (src/gates/tests/)
+      DIRTY one_vocabulary.rs         (src/gates/tests/)
+      DIRTY lib.rs                    (src/cli/tests/unit/)
+      ```
+
+      None of the four is in this spec's footprint and three are in no
+      footprint of this PRD at all. Every file this spec *does* touch is
+      `rustfmt --check` clean, run file by file with the repo's config:
+
+      ```
+      CLEAN src/drivers/linux/src/state.rs
+      CLEAN src/cli/src/state.rs
+      CLEAN src/cli/src/lib.rs          (its only diff is the #[path]-included pre-existing test file)
+      CLEAN src/drivers/linux/tests/unit/state.rs
+      CLEAN src/cli/tests/unit/state.rs
+      ```
+
+      Left unticked rather than tightened: the box as written cannot pass
+      without editing files this spec must not edit.
 
 ## Verify and Proof
 
@@ -146,3 +245,15 @@ git status --porcelain -- Cargo.toml Cargo.lock src/drivers/linux/Cargo.toml \
   src/drivers/linux/src/state.rs src/cli/Cargo.toml src/cli/src/lib.rs src/cli/src/state.rs
 git status --porcelain
 ```
+
+## Footprint deviation — three files, each forced by an acceptance box
+
+| file | why |
+|---|---|
+| `src/drivers/linux/tests/unit/state.rs` | the `unix_now` regression guard the fifth box demands. `src/gates/tests/source_layout.rs` forbids an inline `mod tests` in an implementation file, so the test cannot live in `state.rs` itself. |
+| `src/cli/tests/unit/lib.rs` | the same guard for `cli`'s private `unix_now`, which only a `#[path]`-included module can see. |
+| `src/cli/tests/unit/state.rs` | the `uptime_secs` guard. |
+
+`src/gates/tests/dependency_tree.rs` is a fourth, shared with `spec01` and
+recorded there — `conserved` is a new third-party name and that gate's own
+failure message orders it updated in the same commit as the manifest change.

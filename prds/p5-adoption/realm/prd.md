@@ -1,5 +1,5 @@
 ---
-state: specced
+state: blocked
 mode: afk
 priority: 43
 est: 6h
@@ -7,6 +7,27 @@ repo: realm
 verify: "cd ../realm && just check"
 complexity: 35
 blast-radius: mid
+needs:
+  - "@realm/16-fmt-gate"
+footprint:
+  - ../realm/Cargo.toml
+  - ../realm/Cargo.lock
+  - ../realm/src/cli/Cargo.toml
+  - ../realm/src/cli/src/lib.rs
+  - ../realm/src/cli/src/state.rs
+  - ../realm/src/cli/tests/unit/lib.rs
+  - ../realm/src/cli/tests/unit/state.rs
+  - ../realm/src/drivers/linux/Cargo.toml
+  - ../realm/src/drivers/linux/src/overlay.rs
+  - ../realm/src/drivers/linux/src/state.rs
+  - ../realm/src/drivers/linux/src/zfs_volumes.rs
+  - ../realm/src/drivers/linux/tests/unit/overlay.rs
+  - ../realm/src/drivers/linux/tests/unit/state.rs
+  - ../realm/src/drivers/linux/tests/unit/zfs_volumes.rs
+  - ../realm/src/gates/tests/dependency_tree.rs
+  - ../realm/src/net/Cargo.toml
+  - ../realm/src/net/src/lib.rs
+  - ../realm/src/net/tests/unit/lib.rs
 ---
 
 # P5c — realm: adopt what there is a call site for, record what there is not
@@ -55,3 +76,32 @@ Answer 1 (`inner-zirkle`) is stale, the live one is
 `https://github.com/yesitsfebreeze/shared.git`, and this repository holds
 commits that have never been pushed — a `rev` that is not on the remote cannot
 be fetched from a container or another machine.
+
+## Blocked — 2026-08-26
+
+The work is done and verified. Three boxes stay open, none of them this
+node's to close.
+
+| box | what closes it |
+|---|---|
+| `spec01` — `cargo fmt --all --check` clean | `@realm/16-fmt-gate`. Red on `HEAD` before this run, on `src/gates/tests/{done_boxes_are_ticked,one_vocabulary}.rs` and `src/cli/tests/unit/lib.rs` — files outside this footprint. Every file this node touched is `rustfmt --check` clean |
+| `spec02` — same command | the same PRD, the same three files |
+| `spec01` — the footprint box | nothing. The footprint was wrong and is corrected in the frontmatter above, per `@references/parts/commits.md`: a path the worker wrote outside its footprint is a wrong footprint, committed with the rest and said out loud |
+
+**The footprint deviation, named.** Four files beyond the specs' declared
+paths: `src/cli/tests/unit/lib.rs`, `src/drivers/linux/tests/unit/state.rs`,
+`src/net/tests/unit/lib.rs` and `src/gates/tests/dependency_tree.rs`. The
+first three were forced — realm's `source_layout` gate forbids inline
+`mod tests`, so the unit tests those specs' acceptance boxes demand cannot
+live in the source files the specs listed. The fourth is the `OWNERS` entry
+the `dependency_tree` gate required once `conserved` entered the tree. Each
+was recorded by the implementer rather than argued away.
+
+**Verified on a real Linux kernel**, not merely cross-checked: unprivileged
+`rust:1-bookworm`, `89 / 35 / 41 / 9 / 2`. The 89-vs-92 gap is three
+pre-existing `cfg(not(linux))` refusal tests, diffed name by name.
+
+**One finding is filed, not fixed:** the `conserved` pin resolves from a
+**private** remote, so this tree no longer builds on a machine without the
+user's credentials. `@infra/shared-remote-is-private`, which names
+`@shared/p5-adoption/mitosys` as the PRD it would otherwise get wrong.
