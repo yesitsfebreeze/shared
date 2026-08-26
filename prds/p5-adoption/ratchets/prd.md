@@ -1,5 +1,5 @@
 ---
-state: specced
+state: done
 mode: afk
 priority: 41
 est: 4h
