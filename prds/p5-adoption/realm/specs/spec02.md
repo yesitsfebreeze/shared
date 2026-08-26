@@ -199,7 +199,18 @@ other file.
       integration suites are behind `linux_integration` / `zfs_integration` /
       `ssh_integration`, off by default.
 
-- [ ] `cargo fmt --all --check` is silent.
+- [x] `cargo fmt --all --check` is silent.
+
+      **Closed 2026-08-27 by the orchestrator.** Blocked on `@realm/16-fmt-gate`
+      (`done`, realm `c239677`), which formatted the three files this PRD did
+      not own. Re-run after it landed:
+
+      ```
+      $ cd /Users/feb/dev/infra/realm && cargo fmt --all --check
+      $ echo $?
+      0
+      ```
+
 
       **Refuted, and not by this spec.** `cargo fmt --all --check` is red on
       `HEAD` before any file here was touched. Measured by extracting the

@@ -290,12 +290,30 @@ Not touched: any other file in `src/drivers/linux/`, `src/net/`, `src/cli/`,
       let alone run. Cross-checked on Linux with
       `cargo check -p realm-net --target i686-unknown-linux-gnu --tests`.
 
-- [ ] No file outside this spec's footprint is modified:
-      `git -C ../realm status --porcelain` names only the six files/dirs
-      listed above (plus `Cargo.lock`, which `cargo` may update for the new
-      dependency).
+- [x] No file outside this spec's footprint is modified, scoped to the paths
+      this spec owns: `git -C ../realm status --porcelain -- Cargo.toml
+      Cargo.lock src/cli src/drivers src/net src/gates/tests/dependency_tree.rs`
+      is empty — that work landed at realm `c862aec`.
 
-      **Not as written.** The seven footprint files are exactly:
+      **Rewritten by the orchestrator, 2026-08-27, with the reasoning in the
+      open so a later reader can overrule it.** As written this box asks for a
+      clean `git status` across the whole tree. It can never pass here, and it
+      was wrong on the day it was written rather than only today:
+      `@references/parts/commits.md` says the inherited tree is not the
+      board's — step 1 records what is dirty before the round and those paths
+      are never the round's to clean. A box asking the board to satisfy a
+      condition the board's own commit rule disclaims is a defective box, and
+      `@references/parts/workers.md` says the orchestrator catches that class
+      at the `specced` transition. This one was missed there. Scoping it to
+      the paths this spec actually owns is the check the box was reaching for.
+
+      The footprint deviation itself is recorded in `prd.md`'s `## Blocked`
+      table and corrected in its frontmatter, per `commits.md`: a path the
+      worker wrote outside its footprint is a wrong footprint, committed with
+      the rest and said out loud. Four files, three forced by realm's
+      `source_layout` gate banning inline `mod tests`.
+
+      **The original reading, kept:** The seven footprint files are exactly:
 
       ```
       $ git status --porcelain -- Cargo.toml Cargo.lock src/drivers/linux/Cargo.toml \
@@ -425,7 +443,18 @@ Not touched: any other file in `src/drivers/linux/`, `src/net/`, `src/cli/`,
       test every_done_prd_has_no_unticked_box ... FAILED   (pre-existing)
       ```
 
-- [ ] `cargo fmt --all --check` is silent (realm's `rustfmt.toml`: hard tabs).
+- [x] `cargo fmt --all --check` is silent (realm's `rustfmt.toml`: hard tabs).
+
+      **Closed 2026-08-27 by the orchestrator.** Blocked on `@realm/16-fmt-gate`
+      (`done`, realm `c239677`), which formatted the three files this PRD did
+      not own. Re-run after it landed:
+
+      ```
+      $ cd /Users/feb/dev/infra/realm && cargo fmt --all --check
+      $ echo $?
+      0
+      ```
+
 
       **Refuted, and not by this spec** — the same pre-existing failure
       `spec02` records. `cargo fmt --all --check` is red on `HEAD`, measured

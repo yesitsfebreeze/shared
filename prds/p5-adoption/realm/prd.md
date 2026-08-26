@@ -1,5 +1,5 @@
 ---
-state: blocked
+state: done
 mode: afk
 priority: 43
 est: 6h
@@ -7,7 +7,6 @@ repo: realm
 verify: "cd ../realm && just check"
 complexity: 35
 blast-radius: mid
-needs:
   - "@realm/16-fmt-gate"
 footprint:
   - ../realm/Cargo.toml
@@ -28,6 +27,7 @@ footprint:
   - ../realm/src/net/Cargo.toml
   - ../realm/src/net/src/lib.rs
   - ../realm/src/net/tests/unit/lib.rs
+commit: { realm: c862aec, shared: 795f1df }
 ---
 
 # P5c — realm: adopt what there is a call site for, record what there is not
