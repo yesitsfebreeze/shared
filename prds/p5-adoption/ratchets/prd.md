@@ -9,6 +9,7 @@ needs:
 verify: "see specs — each tree's own gate must fail on a new wall-clock read"
 complexity: 30
 blast-radius: low
+commit: { mitosys: e0e4cdd, realm: 01254aa, model: b5ea9b2d, shared: 02d1889 }
 ---
 
 # P5a — ratchets: a clock-read count that may only go down

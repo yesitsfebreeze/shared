@@ -27,7 +27,7 @@ footprint:
   - ../realm/src/net/Cargo.toml
   - ../realm/src/net/src/lib.rs
   - ../realm/src/net/tests/unit/lib.rs
-commit: { realm: c862aec, shared: 795f1df }
+commit: { realm: c862aec + c239677, shared: 795f1df + ad1b3b4 }
 ---
 
 # P5c — realm: adopt what there is a call site for, record what there is not
