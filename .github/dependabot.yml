@@ -1,0 +1,14 @@
+# Dependency updates arrive as PRs; the ci + quality workflows validate them;
+# merge when green. Nothing to maintain — this file is the whole setup.
+version: 2
+updates:
+  - package-ecosystem: cargo
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3

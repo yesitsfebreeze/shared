@@ -1,0 +1,6 @@
+# `mis-filtered` / `mis-cited` — the family's own idiom for "wrongly
+# filtered", used consistently across PRDs and test comments. Not a typo
+# of "miss": "a mis-filtered run" means a run filtered by the wrong
+# filter, which "miss-filtered" does not say.
+[default]
+extend-words = { "mis" = "mis" }

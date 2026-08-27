@@ -108,8 +108,10 @@ fn unticked_boxes_in_acceptance(text: &str) -> usize {
 	let mut count = 0usize;
 	for line in text.lines() {
 		if line.starts_with("## ") {
-			in_acceptance = line.trim_start_matches('#').trim().to_ascii_lowercase()
-				== "acceptance";
+			in_acceptance = line
+				.trim_start_matches('#')
+				.trim()
+				.eq_ignore_ascii_case("acceptance");
 			continue;
 		}
 		if !in_acceptance {
@@ -186,7 +188,9 @@ fn exemption_list_only_names_done_prds() {
 	for (rel, _reason) in EXEMPT {
 		let path = root.join(rel);
 		let Ok(text) = fs::read_to_string(&path) else {
-			bad.push(format!("  {rel}: file missing — exemption names a path that does not exist"));
+			bad.push(format!(
+				"  {rel}: file missing — exemption names a path that does not exist"
+			));
 			continue;
 		};
 		let state = frontmatter_state(&text).unwrap_or_default();

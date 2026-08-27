@@ -75,6 +75,29 @@ sit where the proposal says one crate belongs. `cargo build` does not pass.
 `cargo build --workspace && cargo test --workspace` passes from a fresh clone
 of this repository, and the distribution memo carries a decision, not options.
 
+## Questions
+
+*One round, put to the user 2026-08-21 and answered the same day. Written back
+2026-08-28 — the fork lived in `.mi/docs/memos/distribution.md` and in the
+fourth requirement above, never under this heading, which left an `## Answers`
+section with no question above it. The requirement itself is the round's
+authority: "put to the user, not guessed."*
+
+1. **The crate must be distributable to every other Rust repo — path-only is
+   already ruled out. Which mechanism: a git dependency pinned by commit rev,
+   or a vendored copy with a recorded source hash?** The deciding constraint is
+   mitosys's offline dev container, which has no network at build time and so
+   needs a vendored registry cache to resolve a git dep at all.
+
+   - **(a) Git dependency pinned by commit rev. (recommended)** One source of
+     truth, one rev every consumer pins, and an update is a rev bump. Cost:
+     mitosys's offline container needs a `cargo vendor` or a pre-populated
+     registry cache — scoped as mitosys-side follow-on work, designed before
+     p5's mitosys adoption step, and not a reason to reopen the mechanism here.
+   - **(b) Vendored copy with a recorded source hash.** Builds offline
+     everywhere with no container work. Cost: every consumer carries a copy,
+     and "which rev is this" becomes a hash to check rather than a rev to read.
+
 ## Answers
 
 1. **Distribution mechanism** — settled 2026-08-21: **Option A, git dependency

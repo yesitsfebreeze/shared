@@ -76,7 +76,7 @@ until 1 and 2 are answered.
    own laws and boards; this node is the cross-tree ledger."
    *Recommendation: each consumer child produces a branch plus a node on that
    tree's own board, and this board records where each proof lives.*
-3. **Two deliberate persisted-id breaks.** mitosys: SHA-256 hex doc ids ->
+3. **Two deliberate persisted-id breaks — are both accepted, one version bump each?** mitosys: SHA-256 hex doc ids ->
    blake3, behind `store_core`'s `FORMAT_VERSION` wipe. llm: `Record.created`
    seconds -> `Instant` nanoseconds, rewriting every `rec_id`, plus
    `Commit.timestamp` u64 -> i64. Both are wipe-and-re-derive, not migrations.

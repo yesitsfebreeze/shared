@@ -1,0 +1,22 @@
+{
+ "after": {
+  "exemptions-name-their-reason": [],
+  "p5-adoption": [],
+  "p5-adoption/mitosys": []
+ },
+ "planned_at": "2026-08-24",
+ "schedule": {
+  "exemptions-name-their-reason": {
+   "end": 175.0,
+   "start": 0.0
+  },
+  "p5-adoption": {
+   "end": 175.0,
+   "start": 175.0
+  },
+  "p5-adoption/mitosys": {
+   "end": 175.0,
+   "start": 0.0
+  }
+ }
+}

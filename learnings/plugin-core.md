@@ -65,7 +65,7 @@ model rejects the stack in its own docs, verified 2026-08-23:
 
 realm ships a plugin, never hosts one:
 
-- `realm/.mi/prds/prd.md:28-34` plans realm *as* a mitosys plugin and forbids
+- `realm/prds/prd.md:28-34` plans realm *as* a mitosys plugin and forbids
   a hard dependency on mitosys; the `kind: realm` transport stays in the
   mitosys repo (option b, recorded there).
 - Authoring a plugin never needs the membrane crate — the WIT world is the

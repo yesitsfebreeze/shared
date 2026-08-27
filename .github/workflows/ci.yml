@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# shared CI — `just check`, automated. Nothing more.
+#
+# What a green tab here proves: the tree is formatted to rustfmt.toml, clippy
+# is clean at -D warnings, and `cargo test --workspace` passes. That suite is
+# not only unit tests — `conserved/tests/done_boxes_are_ticked.rs` reads the
+# board itself and fails when a `state: done` PRD carries an unticked
+# acceptance box. Until this file existed, that gate ran only when a human
+# typed `just check`; on 2026-08-25 it had been red on `main` for an unknown
+# number of days (`shared-classify`, three unticked boxes) with nothing
+# watching. That is what this workflow is for.
+#
+# The Rust version is NOT named here. `rust-toolchain.toml` is the single pin.
+#
+# Cost note: this repo is PRIVATE, so these minutes are metered against the
+# account, unlike a public repo where Actions is free. The suite is small
+# (~80 tests) but `load_throughput` alone runs 40-65s, so budget ~5 min/run.
+# ─────────────────────────────────────────────────────────────────────────────
+name: ci
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  check:
+    name: check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      # Installs the rust-toolchain.toml pin, components included.
+      - name: Install the pinned toolchain
+        run: rustup show
+
+      - uses: Swatinem/rust-cache@v2
+
+      # Formatting is host-independent, so once is enough.
+      - name: cargo fmt --check --all
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo fmt --check --all
+
+      # Byte-identical to the justfile's `check`, so the local command and the
+      # CI command are the same command.
+      - name: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: cargo test --workspace
+        run: cargo test --workspace

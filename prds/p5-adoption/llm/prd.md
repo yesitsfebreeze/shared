@@ -78,6 +78,32 @@ The user accepted this break explicitly on 2026-08-21, one version bump: `Record
 Wipe and re-derive, not a migration. It does not need re-escalating when this
 node runs.
 
+## Questions
+
+*One round, put to the user 2026-08-26 and answered the same day. Written back
+under this heading 2026-08-28: it sat at the foot of the file as
+`## Question for the user`, below its own answers, which left an `## Answers`
+section with no question above it. The fork is unchanged.*
+
+1. **`spec04` box 1 names four acquisitions for the scope. Should the two
+   swarm listener binds be registered on it, when Rust's `Drop` already frees
+   those ports exactly once and no test could tell the two mechanisms apart?**
+
+   - **(a) Close box 1 on the three filesystem acquisitions. (recommended)**
+     The scope carries what `Drop` does not — a directory and two files a
+     failed boot would otherwise leave behind — and the spec's line is read as
+     naming the acquisitions rather than mandating a second teardown mechanism
+     per acquisition. This node goes `done` as it stands.
+   - **(b) Fund the restructure as its own node.** `boot`'s event loop moves to
+     an async mutex (or the bind/hand-off is split so the swarm can be owned by
+     an undo), and all four acquisitions go on the scope. Real work with its
+     own contract, in `../model`, and a redesign of a boot path to satisfy a
+     property ownership already guarantees.
+   - **(c) Register them, accepting the redundancy, inside this node.** Widen
+     `spec04`'s footprint to the boot event loop now. Fastest path to a literal
+     `[x]`, and the one that most risks a check written from the answer — the
+     test for it would pass with the scope removed.
+
 ## Answers — 2026-08-26
 
 **Q1** — *`spec04` box 1 names four acquisitions for the scope. Should the two
@@ -120,24 +146,3 @@ between the bind and the hand-off, so the `Arc<Mutex<Option<_>>>` escape does
 not compile.
 
 The code is landed and the tree is green; `unblock` re-runs only this box.
-
-## Question for the user
-
-**`spec04` box 1 names four acquisitions for the scope. Should the two swarm
-listener binds be registered on it, when Rust's `Drop` already frees those
-ports exactly once and no test could tell the two mechanisms apart?**
-
-1. **Close box 1 on the three filesystem acquisitions.** The scope carries what
-   `Drop` does not — a directory and two files a failed boot would otherwise
-   leave behind — and the spec's line is read as naming the acquisitions
-   rather than mandating a second teardown mechanism per acquisition. This
-   node goes `done` as it stands. *(recommended)*
-2. **Fund the restructure as its own node.** `boot`'s event loop moves to an
-   async mutex (or the bind/hand-off is split so the swarm can be owned by an
-   undo), and all four acquisitions go on the scope. Real work with its own
-   contract, in `../model`, and a redesign of a boot path to satisfy a
-   property ownership already guarantees.
-3. **Register them, accepting the redundancy, inside this node.** Widen
-   `spec04`'s footprint to the boot event loop now. Fastest path to a literal
-   `[x]`, and the one that most risks a check written from the answer — the
-   test for it would pass with the scope removed.
