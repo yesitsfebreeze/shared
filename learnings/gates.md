@@ -2,7 +2,7 @@
 type: learning
 learning: gates
 subject: four gates every tree carries (source_layout, one_vocabulary, dependency_tree, board_is_tracked), two bind mitosys+model, one waits on a recorded flake, the rest are mitosys's alone
-binds: [mitosys, model, realm]
+binds: [mitosys, model, realm, shared]
 status: decided
 date: 2026-08-23
 code: mitosys src/mitosys/gates/lib.rs
@@ -15,7 +15,7 @@ code, its tests each refusing one class of violation with a named exemption
 list. model and realm run none — their gate commands compile and nothing reads
 the doctrine. This learning classifies mitosys's gates: which every family
 tree carries, which bind two trees, and which are mitosys's alone. The child
-PRDs (`model/prds/adopt-gates`, `realm/.mi/prds/15-gates`) cite this
+PRDs (`model/prds/adopt-gates`, `realm/prds/15-gates`) cite this
 classification instead of restating it.
 
 ## The count
@@ -27,7 +27,7 @@ sentence. The four tables below cover all seventeen files: 4 + 3 + 2 + 8.
 
 ## Carried by every tree — the family subset
 
-The subset `model/prds/adopt-gates` and `realm/.mi/prds/15-gates` land:
+The subset `model/prds/adopt-gates` and `realm/prds/15-gates` land:
 
 | gate | evidence |
 |---|---|
@@ -90,3 +90,38 @@ the PRD's constraints:
   are admitted through mitosys's gates (`shared/learnings/shared-crate.md`
   §admission). No child PRD lands on shared's board.
 - mitosys keeps all seventeen. Nothing changes there.
+
+## Addition 2026-08-27 — the family subset is five, not four
+
+`done_boxes_are_ticked` is the fifth gate every tree carries. It shipped from
+`prds/done-means-done` into `mitosys`, `realm` and `shared` after this document
+was written, which is why the tables above count four.
+
+| gate | evidence |
+|---|---|
+| `done_boxes_are_ticked` | a `state: done` PRD carrying an unticked box is the same defect in every tree, and three of the four already run the gate. `shared/learnings/done-means-done.md` is the rule; the gates are the enforcement |
+
+**The scoping sentence in this document is expired.** It reads *"the
+2026-08-23 scan named PRDs only in mitosys/realm/shared; model was never
+flagged"* — true on 2026-08-23, false by 2026-08-27, when
+`model/next-wave/sampler` was measured `state: done` with three open acceptance
+boxes. `model/prds/exemptions-name-their-reason` ports the gate.
+
+Two more corrections this addition carries, additively:
+
+- **`shared` is not "where nothing changes".** § Where nothing changes says no
+  child PRD lands on shared's board. One does:
+  `shared/prds/exemptions-name-their-reason`. shared runs
+  `conserved/tests/done_boxes_are_ticked.rs` today and owes the widening.
+- **`binds:` is four trees, not three.** This document's frontmatter names
+  `[mitosys, model, realm]`; `done_boxes_are_ticked` binds `shared` too.
+  Corrected 2026-08-27, on the round that closed
+  `prds/exemptions-name-their-reason`: the frontmatter now reads
+  `[mitosys, model, realm, shared]`.
+
+**Population and exemption contract are not restated here.**
+`shared/learnings/exemptions-name-their-reason.md` holds both: the gate counts
+every `- [ ]` in the whole `prd.md`, and every `EXEMPT` entry names the PRD,
+the commit and the condition that removes it. § The port rules above still
+governs everything else — shrink-only, a vacuity threshold, no code in the
+gates crate, reachable from the tree's own gate command.

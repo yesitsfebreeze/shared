@@ -80,3 +80,27 @@ gate so it cannot decay back into the unwritten form.
 will read the tick form this learning records against each tree's own tick
 form and fail if the verbs diverge. The shape above — quoted verify output
 or named gate, no tree-specific verb — is the form gate 4 will require.
+
+## Addition 2026-08-27 — which boxes the gate counts
+
+This learning says a `done` PRD carries no unticked box. It never said which
+boxes, and the three gates it shipped answered differently: `realm` whole-file,
+`mitosys` and `shared` under `## Acceptance` only. `resources/board/plan.py`
+answered from a fourth population — `specs/*.md` — and it is the one the board
+dispatches on.
+
+**`shared/learnings/exemptions-name-their-reason.md` settles it: the whole
+`prd.md`, every heading, `- [~]` read as a closure.** Decided by the user
+2026-08-27, recorded as `prds/memos/done-counts-which-boxes.md`.
+
+That document also carries what this one left unwritten:
+
+| clause | where it lands |
+|---|---|
+| the population a gate counts | whole `prd.md`; `specs/*.md` stay out |
+| what an `EXEMPT` entry owes | the PRD, the commit and the removal condition — all three, distinct per entry |
+| which trees carry the gate | all four. `model` is the one that does not, today |
+| the cost of widening | 25 `## Requirements` boxes over 7 `done` PRDs, 18 mitosys / 7 shared |
+| what covers the master board | nothing, and it names the violation that stands |
+
+The three forms above are unchanged by it. They are what closes each of the 25.

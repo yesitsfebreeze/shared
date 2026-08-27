@@ -164,6 +164,9 @@ it, this is a better-organised copy of the drift that is already there.
 - [[ratchet]] — one measurement discipline arrived at twice: model's floor
   and mitosys's ceiling are the same shape; each tree's missing half is
   filed on its own board
+- [[exemptions-name-their-reason]] — a `done_boxes_are_ticked` gate reads the
+  whole `prd.md`, and every `EXEMPT` entry names a PRD, a commit and a removal
+  condition. Decided 2026-08-27
 
 ## Reading order
 
