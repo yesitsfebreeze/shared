@@ -1,8 +1,9 @@
 ---
-state: open
+state: analyzing
 mode: afk
 priority: 40
 verify: "echo 'proof lives in the consumer trees: just check in ../mitosys, cargo test in ../model and ../realm, each against a conserved dependency'"
+claim: analyst-p5-adoption 2026-08-28 23:21
 ---
 
 # P5 — adoption: every consumer, one implementation
