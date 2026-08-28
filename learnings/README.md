@@ -171,6 +171,7 @@ it, this is a better-organised copy of the drift that is already there.
 - [[exemptions-name-their-reason]] — a `done_boxes_are_ticked` gate reads the
   whole `prd.md`, and every `EXEMPT` entry names a PRD, a commit and a removal
   condition. Decided 2026-08-27
+- [[a-shared-name-is-not-a-shared-function]] — a similarity score is a candidate finder, never a licence to merge: model's three `one_line`, mitosys's calendar pair at two widths, and model's scratch-name builders share a name or a body and not a function. Decided 2026-08-29
 
 ## Reading order
 
