@@ -1,9 +1,11 @@
 ---
-state: analyzing
+state: claimed
 mode: afk
 priority: 40
-verify: "echo 'proof lives in the consumer trees: just check in ../mitosys, cargo test in ../model and ../realm, each against a conserved dependency'"
-claim: analyst-p5-adoption 2026-08-28 23:21
+verify: "sh prds/p5-adoption/probe/ledger.sh"   # was an echo until 2026-08-28; the probe exits 1 on any red or missing proof
+complexity: 14
+blast-radius: low
+claim: impl-p5-adoption 2026-08-28 23:35
 ---
 
 # P5 — adoption: every consumer, one implementation
