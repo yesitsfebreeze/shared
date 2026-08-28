@@ -94,7 +94,7 @@ day of CI:
 A gate that only runs when remembered is a convention, not a ratchet. Three of
 four trees had quietly proved it.
 
-**2. There is a red gate right now.** `shared`'s own conserved test fails on
+**2. There is a red gate right now.** `shared`'s own crate test fails on
 this working tree:
 
 ```
@@ -134,7 +134,7 @@ on 2026-08-23, so history was rewritten recently enough to be worth one scan.
 - **`ruff`** — 34 Python files (`prds/`, `pearde/`) with no linter, no
   formatter, no `pyproject.toml`. `uv` is already installed and unused. The
   board tooling is the least-gated code in the workspace.
-- **`cargo-insta`** — snapshot testing. The conserved tests assert on
+- **`cargo-insta`** — snapshot testing. The `shared` crate's tests assert on
   document shape; insta is built for exactly that and makes the diffs readable.
 - **`watchexec`** — the `bacon` equivalent for the Python and shell side.
 - **`cargo-expand`** — for macro-generated code when a derive misbehaves.

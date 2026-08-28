@@ -3,7 +3,7 @@
 #
 # What a green tab here proves: the tree is formatted to rustfmt.toml, clippy
 # is clean at -D warnings, and `cargo test --workspace` passes. That suite is
-# not only unit tests — `conserved/tests/done_boxes_are_ticked.rs` reads the
+# not only unit tests — `shared/tests/done_boxes_are_ticked.rs` reads the
 # board itself and fails when a `state: done` PRD carries an unticked
 # acceptance box. Until this file existed, that gate ran only when a human
 # typed `just check`; on 2026-08-25 it had been red on `main` for an unknown

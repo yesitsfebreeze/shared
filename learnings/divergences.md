@@ -32,7 +32,7 @@ shape shared crates carry and (2) which law each gate port in
 **Kept: mitosys's law.** `<crate>/tests/` + `tests/unit/`, beside-the-module
 forbidden, at every crate boundary. It is the executable one — 3 checks with
 vacuity thresholds in `mitosys/src/mitosys/gates/tests/source_layout.rs`.
-Shared crates already carry it (`shared/conserved/tests/`, 10 files); realm
+Shared crates already carry it (`shared/shared/tests/`, 10 files); realm
 follows it (`shared/AGENTS.md` §divergence table).
 
 **model pays.** Its `AGENTS.md` §Testing rules law (`src/<module>/tests/`,
@@ -70,7 +70,7 @@ pass" a property of whichever stable was current on the machine, not of the
 tree.
 
 **Editions stay tree-local.** Cargo editions are per-crate: a 2021-edition
-`conserved` compiles as a dependency of 2024-edition model unchanged. Only
+`shared` compiles as a dependency of 2024-edition model unchanged. Only
 the pin propagates; the edition row was never a fork.
 
 ## Dependencies — mitosys's `[workspace.dependencies]`
@@ -101,7 +101,7 @@ No child elsewhere:
 
 - **realm** already conforms — pinned `1.94.0`, mitosys's test layout
   (`shared/AGENTS.md` §divergence table).
-- **shared** already adopted all three kept rules — the `conserved/tests/`
+- **shared** already adopted all three kept rules — the `shared/tests/`
   layout landed, `[workspace.dependencies]` in `shared/Cargo.toml`,
   `rust-version = "1.94.0"`.
 - **mitosys** keeps every kept rule — nothing changes there. The gate ports
@@ -158,7 +158,7 @@ is not done until something reads it.
   record, the `LearnOrigin` lesson ignored.
 - **model's test law family-wide.** mitosys and realm move 235+ files across
   51 crates, `source_layout.rs` is rewritten against its own recorded
-  history, `conserved/tests/` moves under `src/`, and mitosys's code-free
+  history, `shared/tests/` moves under `src/`, and mitosys's code-free
   gates crate has no legal home for its tests. The evidence is against it.
 - **Defer the dependency lift to the crate split.** Rejected: model's
   workspace already has 4 members sharing `interface`, the lift is one

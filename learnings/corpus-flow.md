@@ -171,7 +171,7 @@ reason each lost.
 
 - **A third daemon that tails both stores and mirrors records.**
   Rejected: a third process is a third gate runner, a third board, and
-  a third toolchain pin — exactly the cost `conserved`'s "where it
+  a third toolchain pin — exactly the cost `shared`'s "where it
   lives" decision already measured and refused ([[shared-crate]] §Where
   it lives). Two consumers and one daemon is three things to keep
   honest, and the mirror has to know both door shapes; the reader

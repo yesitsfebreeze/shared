@@ -47,13 +47,13 @@
 //!    count at the *panic site* and calls `abort` before any unwinding begins,
 //!    so the `catch_unwind` in `close()` is never reached and cannot change
 //!    it. Pinned out of process by
-//!    `conserved/tests/load_unwind_panic.rs::double_panic_aborts_the_process`,
+//!    `shared/tests/load_unwind_panic.rs::double_panic_aborts_the_process`,
 //!    which asserts on `signal() == Some(6)` and on the runtime's
 //!    `panic in a destructor during cleanup` line on the child's stderr.
 //! 2. **Nested scopes have a depth limit.** `Drop -> close -> undo -> Drop ->
 //!    …` recurses one stack frame chain per nesting level. Depth 1_000 is
 //!    proven safe by
-//!    `conserved/tests/load_scope.rs::deep_nesting_unwinds_at_a_safe_depth`;
+//!    `shared/tests/load_scope.rs::deep_nesting_unwinds_at_a_safe_depth`;
 //!    depth 10_000 overflows the stack and aborts. A stack overflow cannot be
 //!    caught, so nothing here helps.
 //! 3. **Under `panic = "abort"` there is no unwinding at all**, so the first
@@ -107,23 +107,23 @@
 //! Eight deviations, and no others:
 //!
 //! 1. **Module `effect` → `scope`.** `effect` is the name mitosys's plugin
-//!    contract gave it; `conserved` has no plugin contract. The ticket's
+//!    contract gave it; `shared` has no plugin contract. The ticket's
 //!    acceptance line and `learnings/shared-crate.md` §3 both say `scope`.
-//! 2. **`effect/effect.rs` → `conserved/src/scope.rs`.** mitosys's convention
+//! 2. **`effect/effect.rs` → `shared/src/scope.rs`.** mitosys's convention
 //!    is "a crate is its directory" (`[lib] path = "lib.rs"`, no `src/`);
-//!    `conserved` resolved that divergence dimension in favour of the cargo
+//!    `shared` resolved that divergence dimension in favour of the cargo
 //!    default (`AGENTS.md` §divergences, p0-foundation).
-//! 3. **Test import path.** `conserved/tests/scope.rs`'s import line reads
-//!    `use conserved::scope::*;` where the source read
+//! 3. **Test import path.** `shared/tests/scope.rs`'s import line reads
+//!    `use shared::scope::*;` where the source read
 //!    `use mitosys_util_effect::effect::*;`. Forced by 1 and 2. Nothing else
 //!    in the test file changed — not a name, not an assertion, not a blank
 //!    line. (It is the file's first line in the source and its second here,
 //!    because of deviation 7.)
 //! 4. **Doc-comment framing.** The source doc opened "the plugin contract's
 //!    foundation" and `lib.rs` carried the layer line and the `src/core/src/`
-//!    split history. `conserved` is domain-free, so that framing moved *into*
+//!    split history. `shared` is domain-free, so that framing moved *into*
 //!    this Provenance block rather than being deleted or left standing as if
-//!    `conserved` had plugins — deleted provenance reads as provenance that
+//!    `shared` had plugins — deleted provenance reads as provenance that
 //!    never existed. Kept above, because they are semantics and not domain:
 //!    the Cordis / Go `internal/effect` attribution and the two README
 //!    invariants.
@@ -133,17 +133,17 @@
 //!    rename. The source wins — the learning's wording is loose. This is not a
 //!    spec violation.
 //! 6. **No compatibility shim, no crate README copied.** `mitosys::effect` is
-//!    a `pub use` shim for call sites inside mitosys; `conserved` has no call
+//!    a `pub use` shim for call sites inside mitosys; `shared` has no call
 //!    sites to keep resolving, so there is nothing to shim. mitosys keeps its
 //!    own copy untouched; reconciling the two is `p5-adoption`. The source
 //!    crate's README is about a mitosys crate and does not move — its two
 //!    invariants survive above, per deviation 4.
-//! 7. **`conserved/tests/scope.rs` is wrapped in `mod scope { … }`.** Added
+//! 7. **`shared/tests/scope.rs` is wrapped in `mod scope { … }`.** Added
 //!    after the port, at the board's request, and a wrapper rather than a
 //!    rewrite: strip the first line, the last line and one leading tab from
 //!    every line and the file is again byte-for-byte the source's from its
 //!    line 2. The reason is that this ticket's gate is
-//!    `cargo test -p conserved scope`, and cargo's filter matches **test
+//!    `cargo test -p shared scope`, and cargo's filter matches **test
 //!    function names**, not file or target names. Unwrapped, four of the five
 //!    ported tests do not contain the substring `scope` and the gate reported
 //!    `1 passed; 4 filtered out` while exiting 0 — a gate that can pass having

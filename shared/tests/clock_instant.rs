@@ -3,21 +3,21 @@
 //!
 //! Every test function is wrapped in `mod clock` **and** named with a `clock_`
 //! prefix. That is not cosmetic: the ticket's own gate is
-//! `cargo test -p conserved clock`, which filters on test *names*, not file
+//! `cargo test -p shared clock`, which filters on test *names*, not file
 //! names, so a test called `unit_is_nanoseconds` in a file called
 //! `clock_instant.rs` is reported as "0 tests, 1 filtered out" — green, having
 //! run nothing.
 
 mod clock {
-	use conserved::Instant;
+	use shared::Instant;
 	use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-	/// `conserved/`, from the test binary's manifest directory.
+	/// `shared/`, from the test binary's manifest directory.
 	fn crate_root() -> std::path::PathBuf {
 		std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 	}
 
-	/// Every `*.rs` under `conserved/src/`.
+	/// Every `*.rs` under `shared/src/`.
 	fn rust_sources(dir: &std::path::Path, out: &mut Vec<std::path::PathBuf>) {
 		for entry in std::fs::read_dir(dir).expect("src/ is readable") {
 			let path = entry.expect("a readable directory entry").path();
@@ -236,7 +236,7 @@ mod clock {
 
 	/// The name collision, enforced rather than trusted.
 	///
-	/// `conserved::Instant` is the **wall** clock: comparable and storable
+	/// `shared::Instant` is the **wall** clock: comparable and storable
 	/// across processes and machines. std's `time::Instant` is **monotonic**:
 	/// opaque, process-local, unserializable. The ~47 monotonic sites across
 	/// the two trees — profilers, deadlines — are the other kind and must not

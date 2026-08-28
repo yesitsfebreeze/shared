@@ -33,7 +33,7 @@
 //! "unix epoch milliseconds" and line 72 computes `.as_secs()`. A unit stated
 //! only in prose has already drifted in one of the two trees, so the unit is
 //! pinned by `clock_instant_unit_is_unix_nanoseconds` in
-//! `conserved/tests/clock_instant.rs`. Changing the resolution is a
+//! `shared/tests/clock_instant.rs`. Changing the resolution is a
 //! wire-format change for both trees, not a refactor.
 //!
 //! # Why each item on the surface exists
@@ -75,7 +75,7 @@
 //!    in mitosys and the 20 in `../model` — profilers
 //!    (`util/profile.rs:32`), deadlines (`api/agentic/cli.rs:467`,
 //!    `grade/chat.rs:123`) — are the *other* kind and must not be converted.
-//!    `conserved/src/` never imports std's monotonic `Instant`;
+//!    `shared/src/` never imports std's monotonic `Instant`;
 //!    `clock_src_never_uses_std_time_instant` enforces that by reading the
 //!    source.
 //! 3. **No date formatting.** mitosys's `now_rfc3339()`

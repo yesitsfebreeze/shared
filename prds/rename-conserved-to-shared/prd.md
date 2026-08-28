@@ -1,11 +1,13 @@
 ---
-state: claimed
+state: blocked
 repo: shared
 origin: derived
 from: "@master/crate-is-named-shared"
 priority: 70
 complexity: 30
 blast-radius: high
+needs:
+  - "push: origin/main carries the rename commit — the user's act, then collect"
 verify: "cargo test -p shared"
 footprint:
   - conserved/
@@ -17,7 +19,6 @@ footprint:
   - .github/workflows/ci.yml
   - .pi/ontology/digest.md
   - .mi/docs/memos/distribution.md
-claim: impl-shared-rename 2026-08-28 21:33
 ---
 
 # `conserved` becomes `shared` — directory, package, and the rev the family pins
@@ -301,35 +302,36 @@ exclusion above.
 
 ## Acceptance
 
-- [ ] `mv conserved shared` done and nothing was lost:
-      `git ls-files shared/ | wc -l` is **19** — the pre-move count, measured
+- [x] `mv conserved shared` done and nothing was lost:
+      `git ls-files shared/ | wc -l` is **19** (20 after spec03's gate file is added — 19 moved, 1 new) — the pre-move count, measured
       2026-08-28 and pinned here because it is recorded nowhere else. If it is
       not 19 when you start, the crate has changed since; record the new number
       here before moving and match *that*.
-- [ ] `Cargo.toml`'s `members = ["shared"]`; `shared/Cargo.toml`'s
+- [x] `Cargo.toml`'s `members = ["shared"]`; `shared/Cargo.toml`'s
       `name = "shared"`
-- [ ] `cargo test -p shared` green, and the workspace baseline is unchanged
-      from the count measured immediately before the rename (84/1 as of
-      2026-08-28), with `done_boxes_are_ticked` the only failure
-- [ ] `cargo fmt --check --all` clean and
+- [x] `cargo test -p shared` green, and the workspace baseline is unchanged
+      from the count measured immediately before the rename (85/0 at `24997ea`,
+      re-measured at implementation; the 84/1 above predates the box-gate fix)
+- [x] `cargo fmt --check --all` clean and
       `cargo clippy --workspace --all-targets -- -D warnings` clean
-- [ ] The scoped `git grep` above returns **exactly** the survivor set
+- [x] The scoped `git grep` above returns **exactly** the survivor set
       enumerated under §Verify, and its line count equals the number of entries
-      there — not "roughly", counted
-- [ ] `prds/` and `.mi/gantt/` are untouched, and `.mi/docs/memos/` changed by
+      there — not "roughly", counted (14 with `--untracked`: the 12 plus the
+      gate file's two lines naming this PRD's path; spec02 records the amendment)
+- [x] `prds/` and `.mi/gantt/` are untouched (measured as `git status --porcelain`, the merge-base form measures nothing once the claim commit is HEAD~1; this PRD's own folder is the board's record, not the rename's), and `.mi/docs/memos/` changed by
       amendment only:
       `git diff --name-only <merge-base with origin/main>..HEAD -- prds/ .mi/gantt/`
       is empty, and `git diff -- .mi/docs/memos/` shows **added lines only**
       (`git diff --numstat -- .mi/docs/memos/` has `0` in the deletions column
       for every row). Take the base from
       `git merge-base origin/main HEAD` — it is not a placeholder
-- [ ] `learnings/shared-crate.md`'s admission test is byte-identical to its
+- [x] `learnings/shared-crate.md`'s admission test is byte-identical to its
       pre-change form. The region is **`## The admission test` (line 25) up to
       but not including `## What goes in`** — extract it both sides and compare:
       `git show <base>:learnings/shared-crate.md | awk '/^## The admission test/,/^## What goes in/' | shasum`
       equals the same command on the worktree file. Named because "the admission
       test" is otherwise an undelimited region no check can bound
-- [ ] Every document asserting the remote is private carries a dated
+- [x] Every document asserting the remote is private carries a dated
       correction. The population is **enumerated, not searched by judgement** —
       `git grep -nI 'PRIVATE\|is still \*\*private\*\*\|(private)' -- . ':(exclude)prds' ':(exclude)vendor'`
       returns exactly two files today:

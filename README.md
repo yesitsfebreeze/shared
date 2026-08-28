@@ -37,10 +37,10 @@ system, so one parser reads both.
 | `content-addressing.md` | blake3 over SHA-256, `[u8; 32]` over hex `String` | decided |
 | `storage.md` | redb over LMDB, sequenced behind mitosys's fold rewrite | decided |
 | `clock.md` | both trees read wall clock ~65×; the fix and the ratchet | decided |
-| `shared-crate.md` | proposal for `conserved` — what goes in, what stays out | decided |
+| `shared-crate.md` | proposal for `shared` — what goes in, what stays out | decided |
 
 The learnings are prose today and nothing gates them. The goal is to turn them
-into executable truth: a shared crate (`conserved`, proposed in
+into executable truth: a shared crate (`shared`, proposed in
 `learnings/shared-crate.md`) that holds `ContentId`, `Clock`, `Scope`/effect
 handles, order statistics, and hex — things all three projects need, with one
 implementation tested under load.
@@ -61,13 +61,13 @@ so a file that was never committed fails the check instead of passing quietly.
 1. **Audit** every crate in all three projects — document what patterns repeat.
 2. **Distill** the learnings: what is true of more than one project lands in
    `learnings/`. What is also dependency-light and domain-free graduates into
-   `conserved` (the shared crate).
+   `shared` (the shared crate).
 3. **Extract** the shared crate — starting with `Scope` (reversible effects,
    262 lines, zero dependencies), then `ContentId`, `Clock`, and order
    statistics. Each extraction proves the mechanism before the next one.
 4. **Test under load.** The shared crate must hold its contract at scale.
 5. **Adopt across projects.** Every project (`llm`, `mitosys`, `realm`)
-   depends on `conserved` for the patterns it provides, replacing hand-rolled
+   depends on `shared` for the patterns it provides, replacing hand-rolled
    duplicates.
 
 This is about utility functions and repeated patterns — `ContentId`, `Clock`,
@@ -78,7 +78,7 @@ surface.
 ## Where the shared code lives
 
 The mechanism is **a git dependency pinned by commit rev**: each consumer's
-`Cargo.toml` says `conserved = { git = "...", rev = "<commit>" }`, so drift
+`Cargo.toml` says `shared = { git = "...", rev = "<commit>" }`, so drift
 between the trees requires a visible rev bump. `.mi/docs/memos/distribution.md`
 carries the full argument.
 
@@ -98,7 +98,7 @@ deliberately records no recommendation:
 
 **Who carries the offline cost: mitosys, not this repo.** mitosys's dev
 container has no network, so its offline build story — `cargo vendor` output or
-a pre-populated registry cache covering the pinned `conserved` rev — is
+a pre-populated registry cache covering the pinned `shared` rev — is
 follow-up work scoped to mitosys, to be designed before its adoption step
 lands. It is not a blocker here.
 

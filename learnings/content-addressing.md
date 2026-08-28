@@ -5,7 +5,7 @@ subject: mitosys hashes content with SHA-256 into a hex String and llm with blak
 binds: [mitosys, llm]
 status: decided
 date: 2026-08-18
-code: mitosys src/mitosys/util/util.rs:9, llm src/utils/algebra/mod.rs:24, llm src/record/mod.rs:226, shared conserved/src/content_id.rs
+code: mitosys src/mitosys/util/util.rs:9, llm src/utils/algebra/mod.rs:24, llm src/record/mod.rs:226, shared shared/src/content_id.rs
 ---
 
 # One content hash: blake3, `[u8; 32]`
@@ -82,12 +82,12 @@ behind an optional feature"). Four things a consumer needs and cannot infer
 from the sentence itself:
 
 - Serde is an **optional feature** with `default = []`. A consumer writes
-  `conserved = { git = "…", rev = "…", features = ["serde"] }`. Without that,
+  `shared = { git = "…", rev = "…", features = ["serde"] }`. Without that,
   `ContentId` has no `Serialize`/`Deserialize` at all, and putting one inside
   a `#[derive(Serialize)]` struct is a compile error whose cause is the
   feature flag, not the code.
 - **The default dependency contract does not move.**
-  `cargo tree -p conserved --edges normal` still shows exactly one edge,
+  `cargo tree -p shared --edges normal` still shows exactly one edge,
   `blake3`, which is why this is not a second dependency in the sense
   [[shared-crate]] §"Size and shape" means.
 - **"Bytes on a binary wire" means the 32 raw bytes as a fixed-size tuple —

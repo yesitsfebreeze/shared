@@ -5,7 +5,7 @@ subject: a `done_boxes_are_ticked` gate reads the whole `prd.md`, every tree car
 binds: [mitosys, model, realm, shared]
 status: decided
 date: 2026-08-27
-code: mitosys src/mitosys/gates/tests/done_boxes_are_ticked.rs; realm src/gates/tests/done_boxes_are_ticked.rs; shared conserved/tests/done_boxes_are_ticked.rs
+code: mitosys src/mitosys/gates/tests/done_boxes_are_ticked.rs; realm src/gates/tests/done_boxes_are_ticked.rs; shared shared/tests/done_boxes_are_ticked.rs
 ---
 
 # exemptions-name-their-reason — one population, one contract, four trees
@@ -68,7 +68,7 @@ one reason, not many. `mitosys` holds 8 entries carrying the single string
 |---|---|---|
 | mitosys | `src/mitosys/gates/tests/done_boxes_are_ticked.rs` | red on `p6k10d-production-fold`, 5 boxes; `## Acceptance`-scoped |
 | realm | `src/gates/tests/done_boxes_are_ticked.rs` | green; already whole-file |
-| shared | `conserved/tests/done_boxes_are_ticked.rs` | green; `## Acceptance`-scoped, `EXEMPT` empty |
+| shared | `shared/tests/done_boxes_are_ticked.rs` | green; `## Acceptance`-scoped, `EXEMPT` empty |
 | model | **none** | `gates/tests/` holds 5 files and this is not one |
 
 `shared/learnings/gates.md`'s scoping sentence — *"the 2026-08-23 scan named
@@ -101,7 +101,7 @@ Both `## Acceptance`-scoped gates carry a doc comment reading *"the
 `## Requirements` section above it is intentionally read-write
 work-in-progress; the rule is about the acceptance gate, not the work log"*
 (`mitosys/src/mitosys/gates/tests/done_boxes_are_ticked.rs`,
-`shared/conserved/tests/done_boxes_are_ticked.rs`).
+`shared/shared/tests/done_boxes_are_ticked.rs`).
 
 **This decision overrides that sentence.** A `## Requirements` box in a
 `state: done` PRD is not a work log — it is an open claim in a file whose

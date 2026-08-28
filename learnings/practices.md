@@ -34,7 +34,7 @@ containers, ZFS and nftables — its CI already documents six suites that cannot
 run on a runner for want of a real pool or a reachable sshd, and two more that
 are known-red because GitHub blocks outbound ICMP. Those are precisely the
 tests DST replaces with something that runs anywhere, deterministically. And
-`shared/learnings/clock.md` plus `conserved/tests/clock_source.rs` mean the
+`shared/learnings/clock.md` plus `shared/tests/clock_source.rs` mean the
 clock is *already* an injectable seam — the single hardest precondition, and
 it is met.
 
@@ -68,7 +68,7 @@ an afternoon and a test suite only samples.
 # Already covered — do not re-recommend
 
 **Property-based testing.** `proptest` is in the lockfiles and
-`conserved/tests/content_id_props.rs` uses it correctly, at default case
+`shared/tests/content_id_props.rs` uses it correctly, at default case
 counts, with an explicit note that there is no `proptest_config` shrinking
 coverage to look fast. That is the discipline most proptest adopters skip.
 `hypothesis` (8.9k★) and `fast-check` (5.1k★) lead their languages, but this

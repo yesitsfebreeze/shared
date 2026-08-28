@@ -89,17 +89,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "conserved"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "postcard",
- "proptest",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "constant_time_eq"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -462,6 +451,17 @@ dependencies = [
  "serde",
  "serde_core",
  "zmij",
+]
+
+[[package]]
+name = "shared"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "postcard",
+ "proptest",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

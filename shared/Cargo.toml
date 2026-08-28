@@ -1,5 +1,5 @@
 [package]
-name = "conserved"
+name = "shared"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,7 +11,7 @@ serde = { workspace = true, optional = true }
 
 [features]
 # The crate's default dependency contract does not move: with `default = []`,
-# `cargo tree -p conserved --edges normal` shows exactly one edge, blake3.
+# `cargo tree -p shared --edges normal` shows exactly one edge, blake3.
 default = []
 serde = ["dep:serde"]
 

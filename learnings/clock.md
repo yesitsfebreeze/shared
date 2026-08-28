@@ -6,7 +6,7 @@ binds: [mitosys, llm]
 status: decided
 date: 2026-08-18
 decided: 2026-08-21
-code: mitosys src/mitosys/util/util.rs:107, llm src/record/mod.rs:239, llm src/node/transactional.rs:72, shared conserved/src/clock.rs
+code: mitosys src/mitosys/util/util.rs:107, llm src/record/mod.rs:239, llm src/node/transactional.rs:72, shared shared/src/clock.rs
 ---
 
 # Time is a parameter, and neither tree treats it as one
@@ -130,7 +130,7 @@ rather than candidates.
 ## Landed
 
 Step 2 of §"The fix" — *give time a type and one source* — is in
-`conserved/src/clock.rs`:
+`shared/src/clock.rs`:
 
 | commit | what it landed |
 |---|---|
@@ -156,7 +156,7 @@ gone. On the day it flipped:
   emptied from the leaves inward. Both are consumer-tree work by design: p3's
   own third requirement keeps the ratchet out of this repo, and
   `p5-adoption`'s `ratchets` child carries it in the trees themselves.
-- **No consumer tree reads `conserved::Clock`.** mitosys still ships
+- **No consumer tree reads `shared::Clock`.** mitosys still ships
   `now_nanos`/`now_ms`/`now_secs`; llm still ships `rec_now()`.
 - **Both content-hash sites are still live bugs** in llm: `rec_now()` feeding
   `created` into the record preimage, and `Commit::new` at

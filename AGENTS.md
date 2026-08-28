@@ -62,7 +62,7 @@ code that targets a specific project:
 | **toolchain** | edition 2024, **no pin** | edition 2021, pinned `1.94.0` | edition 2021, **no pin** |
 | **dependencies** | per-package versions | pinned once in `[workspace.dependencies]`, gated | per-package versions |
 
-A shared crate must choose one convention per dimension. `conserved` (proposed
+A shared crate must choose one convention per dimension. `shared` (proposed
 in `learnings/shared-crate.md`) resolves each one explicitly in its own crate
 manifest and test layout.
 
@@ -110,7 +110,7 @@ decision — corrections are new documents that supersede the old one.
 
 ## The shared crate
 
-`learnings/shared-crate.md` proposes **`conserved`** — a crate all three
+`learnings/shared-crate.md` proposes **`shared`** — a crate all three
 projects depend on, holding domain-free utilities:
 
 | thing | dependency | why it qualifies |
@@ -143,7 +143,7 @@ places):
    Does it qualify? If no, it stays as prose in learnings — still valuable.
 3. **If it qualifies**, open a learning with status `partial`, naming both
    implementations and the extraction path.
-4. **Extract** — move one implementation into `conserved`, replace the other
+4. **Extract** — move one implementation into `shared`, replace the other
    with a dependency. Never extract blind — the cargo build and `just check`
    in all affected projects must pass.
 5. **Close** — update the learning status to `decided`, link to the commit.
@@ -155,11 +155,11 @@ contract, deciding the names and the API surface. Do it before writing code.
 
 | document | where | what it is |
 |---|---|---|
-| **The board** | `.mi/prds/` | claimable work for extracting `conserved` — p0 first, everything blocks on it |
+| **The board** | `.mi/prds/` | claimable work for extracting `shared` — p0 first, everything blocks on it |
 | Scaffold reset memo | `.mi/docs/memos/scaffold-reset.md` | why the pre-split conserved-* crates are condemned |
 | Distribution memo | `.mi/docs/memos/distribution.md` | how the crate reaches consumers — **decided**: a git dependency pinned by commit rev; mitosys carries the offline cost |
 | Learnings admission rule | `learnings/README.md` | what belongs in learnings, what does not |
-| Shared crate proposal | `learnings/shared-crate.md` | the full `conserved` plan |
+| Shared crate proposal | `learnings/shared-crate.md` | the full `shared` plan |
 | Capability matrix | `learnings/inventory.md` | what each project has built |
 | Two halves | `learnings/two-halves.md` | how mitosys and llm fit together |
 | Divergences | `learnings/divergences.md` | four contradictions blocking shared code |

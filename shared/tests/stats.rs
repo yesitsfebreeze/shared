@@ -1,7 +1,7 @@
 //! Order statistics — the pin on the median decision.
 //!
 //! Everything lives inside `mod stats { … }` on purpose. The ticket's gate is
-//! `cargo test -p conserved stats`, and that argument is a **test name**
+//! `cargo test -p shared stats`, and that argument is a **test name**
 //! filter, not a target filter: cargo hands it to every test binary, which
 //! matches it against each test's full path. A test called
 //! `even_length_median_is_the_upper_median` does not contain the string
@@ -10,7 +10,7 @@
 //! selects it.
 
 mod stats {
-	use conserved::stats::{median, min_median_max, percentile};
+	use shared::stats::{median, min_median_max, percentile};
 
 	/// `None` means empty input and only empty input.
 	#[test]

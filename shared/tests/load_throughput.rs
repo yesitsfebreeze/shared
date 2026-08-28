@@ -51,7 +51,7 @@ mod load_throughput {
 	//! clone with no baseline reports green — the same shape of non-proof this
 	//! whole ticket exists to replace.
 
-	use conserved::ContentId;
+	use shared::ContentId;
 	use std::hint::black_box;
 	use std::time::{Duration, Instant};
 

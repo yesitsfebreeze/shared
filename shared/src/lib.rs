@@ -1,4 +1,4 @@
-//! `conserved` — the domain-free primitives shared by the Rust trees.
+//! `shared` — the domain-free primitives shared by the Rust trees.
 //!
 //! This crate was **deliberately empty at p0**. The foundation ticket's job was
 //! a repository that can hold the crate, not the crate's contents: nothing is
@@ -16,7 +16,7 @@
 //! trees disagree. The shared crate cannot inherit a contradiction, so it
 //! resolves each one explicitly:
 //!
-//! - **Test law** — integration tests live at `conserved/tests/` (the mitosys
+//! - **Test law** — integration tests live at `shared/tests/` (the mitosys
 //!   shape). No tests beside the module they cover.
 //! - **Toolchain** — edition 2021, `rust-version = "1.94.0"`: the crate
 //!   compiles for its strictest consumer.

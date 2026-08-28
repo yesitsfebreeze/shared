@@ -5,7 +5,7 @@ subject: the concrete proposal — one small crate both trees depend on, holding
 binds: [mitosys, llm]
 status: decided
 date: 2026-08-18
-code: mitosys src/mitosys/util/, llm src/utils/, shared conserved/src/scope.rs, shared conserved/src/content_id.rs
+code: mitosys src/mitosys/util/, llm src/utils/, shared shared/src/scope.rs, shared shared/src/content_id.rs
 ---
 
 # `shared` — the crate both trees depend on
@@ -16,7 +16,7 @@ record of what the admission test below is *for*: a conserved region is the part
 of a genome that is identical across species because it cannot afford to drift.
 That is exactly the admission test. What it was not is the name of the
 repository the crate ships from, which is `shared`, and one thing with two names
-cost every consumer a `conserved` in its manifest resolving from an address that
+cost every consumer a `shared` in its manifest resolving from an address that
 said `shared`. The name now matches the address. The etymology is history, not a
 claim about the word `shared` — there is no such thing as a "shared region" in
 genomics, and nothing below rests on the word. See [[crate-name]] for the
@@ -88,14 +88,14 @@ a correct, dependency-free implementation and the other has a comment.
 **No dependencies.**
 
 **Landed as `Scope` / `Disposer`.** `Handle` above is the proposal's word; the
-type that exists in `conserved::scope` is `Disposer`, and that is the name to
+type that exists in `shared::scope` is `Disposer`, and that is the name to
 reach for at a call site.
 
 **Corrected 2026-08-21 — "as-is" did not survive contact.** p5's load proof
 measured that a panicking inverse abandoned every inverse still to come and
 that `held()` then reported `[]`
 (`.mi/prds/p5-adoption/load-proof/finding.md`). p6-scope-unwind fixed it in
-`conserved` — every inverse runs, `held()` is true during the unwind, and a
+`shared` — every inverse runs, `held()` is true during the unwind, and a
 new `failed()` names the inverses that panicked; it is recorded at its site as
 deviation 8, the first *semantic* divergence from the port. The port was still
 the right move; "one side has a *correct* implementation" was the loose word,
@@ -131,8 +131,8 @@ with `default = []` rather than as a second dependency ([[content-addressing]]
 carries that argument).
 
 **If mitosys's dependency gate objects** to a core crate pulling `blake3`
-transitively for `Scope`, split at the obvious line: `conserved` (Clock,
-Scope, stats, hex — no dependencies) and `conserved-id` (ContentId —
+transitively for `Scope`, split at the obvious line: `shared` (Clock,
+Scope, stats, hex — no dependencies) and `shared-id` (ContentId —
 blake3). Do not pre-split; let the gate decide, which is what the gate is
 for.
 
@@ -150,7 +150,7 @@ for.
 ## Where it lives — the one constraint, now resolved
 
 The learnings folder is prose, and a plain sibling directory costs it
-nothing but a gate. **Code is different.** A `path = "../conserved"`
+nothing but a gate. **Code is different.** A `path = "../shared"`
 dependency from either tree:
 
 - does not exist inside mitosys's dev container, which bind-mounts the repo
@@ -167,7 +167,7 @@ made for prose. Three options, in the order they cost:
 1. **Vendored into each tree** (subtree or a copied directory with a
    recorded source hash). Everything builds everywhere; the sync is manual
    and must be gated.
-2. **A git dependency** to a small `conserved` repository, pinned by commit
+2. **A git dependency** to a small `shared` repository, pinned by commit
    in each tree's `Cargo.toml`. Builds in the container (cargo fetches over
    the network at build time — which mitosys's container does not have,
    so this needs vendoring or a pre-populated registry cache to work
@@ -186,7 +186,7 @@ close it: do not re-escalate this.
 
 It was **proven once before anything was extracted**, which is exactly what
 §"First move" asked for. In `9fff8ea`, mitosys resolved, locked, compiled and
-ran a test against `conserved` through a rev-pinned git dependency; the rev is
+ran a test against `shared` through a rev-pinned git dependency; the rev is
 recorded in `.mi/prds/p1-scope/proof.md`. The provisional half of that proof
 is the URL — it pinned `file:///Users/feb/dev/infra/shared`, and the board's
 answer of 2026-08-21 names `https://github.com/inner-zirkle/shared` as the
@@ -238,7 +238,7 @@ All three consumers pay it the same way, and it is cheap:
   `.cargo/config.toml`. Already landed; `cargo metadata --offline --locked`
   exits 0 on a cold `CARGO_HOME` with no `HOME` and no credential helper.
 - **model** and **realm** — the same mechanism, landed 2026-08-28 at
-  **192K** each: `vendor/conserved-0.1.0` and a `.cargo/config.toml` that
+  **192K** each: `vendor/shared-0.1.0` and a `.cargo/config.toml` that
   replaces **only** the `git+…?rev=…` source. `[source.crates-io]` is
   deliberately left on the network, because crates.io is public and reachable
   from every runner; vendoring the whole graph would cost each repo hundreds
@@ -246,7 +246,7 @@ All three consumers pay it the same way, and it is cheap:
   both — it still names the git URL and the rev, so the pin is still the pin
   and drift still requires a visible rev bump. Only where the bytes come from
   moves. Each tree gates the copy with
-  `scripts/conserved-vendor-check.sh`, wired in front of `just verify`
+  `scripts/shared-vendor-check.sh`, wired in front of `just verify`
   (`model`) and `just check` (`realm`).
 
 The trap worth writing down, because it is silent: `cargo vendor` resolves a
@@ -271,7 +271,7 @@ Where the decision above turned into a crate. Every sha is on `main`.
 | `ab154f7` | `git init`; the reset workspace; the board; `.mi/docs/memos/distribution.md` |
 | `0d4bc10` | the fresh-clone gate (`scripts/fresh-clone-check.sh`) — p0's acceptance |
 | `eb55b49` | p0's acceptance ticks |
-| `5313ca4` | `Scope`/`Disposer` ported into `conserved::scope`, zero dependencies |
+| `5313ca4` | `Scope`/`Disposer` ported into `shared::scope`, zero dependencies |
 | `0b2f964`, `85dad04` | the `mod scope` test wrapper and its deviation record |
 | `9fff8ea` | **the distribution mechanism proven once**, from mitosys |
 | `f7b454a` | the proof re-pinned at the final port rev |
@@ -282,13 +282,13 @@ real) and `5313ca4` (§"First move", done). The rest are the record.
 
 Against §"What goes in", item by item:
 
-1. **`ContentId`** — in the crate, `conserved/src/content_id.rs`.
-2. **`Clock`** — in the crate, `conserved/src/clock.rs`, landed after this
+1. **`ContentId`** — in the crate, `shared/src/content_id.rs`.
+2. **`Clock`** — in the crate, `shared/src/clock.rs`, landed after this
    section was first drafted. [[clock]] carries its own record of what the
    implementation decided.
-3. **`Scope` / `Disposer`** — in the crate, `conserved/src/scope.rs`.
-4. **Order statistics** — in the crate as `conserved::stats`, one definition
-   of median (the upper one), `conserved/src/stats.rs`.
+3. **`Scope` / `Disposer`** — in the crate, `shared/src/scope.rs`.
+4. **Order statistics** — in the crate as `shared::stats`, one definition
+   of median (the upper one), `shared/src/stats.rs`.
 5. **`hex`** — in, folded into `ContentId`'s `Display`/`FromStr` exactly as
    §5 said it would be, rather than as a public utility.
 
@@ -298,12 +298,12 @@ Against §"What goes in", item by item:
 code lives, how it reaches a consumer. The extraction is complete; adoption
 is not. The admission audit of 2026-08-23, every admitted item:
 
-| admitted item | in `conserved` | mitosys still carries | model still carries |
+| admitted item | in `shared` | mitosys still carries | model still carries |
 |---|---|---|---|
-| `ContentId` | `conserved/src/content_id.rs` | `util/util.rs` `content_hash` + `digest` (SHA-256) | `utils/algebra` `content_id`, `utils/fs` `blake3_hash`/`compute_version_hash`, `record` `rec_id` — blake3 already, local copies |
-| `Clock` | `conserved/src/clock.rs` | `util/util.rs` `now_nanos`/`now_ms`/`now_secs` + direct wall reads | `record` `rec_now()`, `src/node/transactional.rs:72` |
-| `Scope`/`Disposer` | `conserved/src/scope.rs` | `util/effect` (semantics diverged — deviation 8) | prose site `src/main.rs:126` |
-| order statistics | `conserved/src/stats.rs` | `util/util.rs` `percentile_sorted`, zero callers | `src/grade/measure.rs:203` `aggregate` |
+| `ContentId` | `shared/src/content_id.rs` | `util/util.rs` `content_hash` + `digest` (SHA-256) | `utils/algebra` `content_id`, `utils/fs` `blake3_hash`/`compute_version_hash`, `record` `rec_id` — blake3 already, local copies |
+| `Clock` | `shared/src/clock.rs` | `util/util.rs` `now_nanos`/`now_ms`/`now_secs` + direct wall reads | `record` `rec_now()`, `src/node/transactional.rs:72` |
+| `Scope`/`Disposer` | `shared/src/scope.rs` | `util/effect` (semantics diverged — deviation 8) | prose site `src/main.rs:126` |
+| order statistics | `shared/src/stats.rs` | `util/util.rs` `percentile_sorted`, zero callers | `src/grade/measure.rs:203` `aggregate` |
 | `hex` | behind `ContentId`'s `Display`/`FromStr` | `util/util.rs` `pub mod hex` | — |
 
 One exemption — the only admitted item a tree keeps a copy of:
@@ -338,7 +338,7 @@ Where adoption lives now:
   cross-tree ledger and dispatches nothing into the trees — the user's
   answer 2 of 2026-08-21 stands.
 - Both trees pin the same rev:
-  `conserved = { git = "https://github.com/yesitsfebreeze/shared.git", rev = <sha> }`.
+  `shared = { git = "https://github.com/yesitsfebreeze/shared.git", rev = <sha> }`.
   The rev is pushed and on `origin/main`; the repository is still private, so
   the pin is unreachable to anything without the user's credential —
   publishing is the user's call (answer 1 of 2026-08-21); the children name
@@ -352,7 +352,7 @@ Where adoption lives now:
   replacement in `.cargo/config.toml`; model and realm did not, and their CI
   has been red on `main` since adoption — `failed to authenticate when
   downloading repository`, all four realm jobs, run 33122525527, 2026-08-27.
-  The fix is the same mechanism at a fraction of the size: `conserved` alone
+  The fix is the same mechanism at a fraction of the size: `shared` alone
   is **192K** vendored, and replacing only the *git* source leaves
   `[source.crates-io]` on the network, where it is public and reachable.
 - realm adoption is `p5-adoption`'s `realm` child, outside the

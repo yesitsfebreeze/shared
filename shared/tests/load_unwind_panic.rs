@@ -24,10 +24,10 @@ mod load_unwind_panic {
 	//! `.mi/prds/p5-adoption/load-proof/finding.md`, which stays as the record
 	//! of the defect and must not be edited.
 	//!
-	//! Measured on Apple M5, `rustc 1.94.0`, against `conserved/src/scope.rs`
+	//! Measured on Apple M5, `rustc 1.94.0`, against `shared/src/scope.rs`
 	//! at `main`.
 
-	use conserved::scope::{Disposer, Scope, Undo};
+	use shared::scope::{Disposer, Scope, Undo};
 	use std::panic::{catch_unwind, AssertUnwindSafe};
 	use std::sync::{Arc, Mutex, Weak};
 
@@ -69,7 +69,7 @@ mod load_unwind_panic {
 	}
 
 	// This test used to assert CURRENT behaviour, deliberately, and that
-	// behaviour was not what the crate advertised: `conserved/src/scope.rs`'s
+	// behaviour was not what the crate advertised: `shared/src/scope.rs`'s
 	// module doc says in its second sentence that "Leaving something behind is
 	// not expressible", and three of five inverses were left behind with the
 	// scope reporting nothing outstanding. The old comment here said that

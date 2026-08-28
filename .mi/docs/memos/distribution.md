@@ -63,3 +63,17 @@ or a pre-populated registry cache covering the pinned `conserved` rev) is
 follow-up work scoped to mitosys, not designed here and not a blocker for
 `p0`/`p1` in this repo. It must be designed before mitosys's adoption step
 lands, and should be tracked as an explicit task rather than assumed away.
+
+## Amendment
+
+**Amended 2026-08-28 — the crate was renamed; this memo is not rewritten.**
+The crate this memo calls `conserved` is now named `shared`, and the directory
+holding it moved from `shared/conserved/` to `shared/shared/`
+(`learnings/crate-name.md`, `binds: [mitosys, model, realm, shared]`). Every
+`conserved` above — including the `subject:` line, the `Cargo.toml` snippet in
+§"What is open", and both mentions in §"Decision (2026-08-21)" — is **the name
+as it stood when the decision was made** and is left standing as the record;
+read it as `shared` wherever it names the live crate. The decision itself is
+unchanged: a git dependency pinned by commit rev, with mitosys carrying the
+offline cost. Nothing else in this file moves, because a memo is a record and
+the tree does not rewrite what was decided under the name it was decided under.

@@ -4,15 +4,15 @@
 //! The whole file is behind the optional `serde` feature.
 //!
 //! Wrapped in `mod content_id` for the same reason as the other two test
-//! files: the ticket gate `cargo test -p conserved content_id` filters on test
+//! files: the ticket gate `cargo test -p shared content_id` filters on test
 //! *names*, not file names, so without the wrapper it would run none of these
 //! and still exit 0.
 
 #![cfg(feature = "serde")]
 
 mod content_id {
-	use conserved::ContentId;
 	use serde::{Deserialize, Serialize};
+	use shared::ContentId;
 
 	const ABC_HEX: &str = "6437b3ac38465133ffb63b75273a8db548c558465d79db03fd359c6cd5bd9d85";
 

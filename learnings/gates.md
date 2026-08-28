@@ -85,7 +85,7 @@ the PRD's constraints:
 
 ## Where nothing changes
 
-- shared's workspace already conforms — `conserved/tests/`,
+- shared's workspace already conforms — `shared/tests/`,
   `[workspace.dependencies]`, `rust-version = "1.94.0"` — and shared crates
   are admitted through mitosys's gates (`shared/learnings/shared-crate.md`
   §admission). No child PRD lands on shared's board.
@@ -112,7 +112,7 @@ Two more corrections this addition carries, additively:
 - **`shared` is not "where nothing changes".** § Where nothing changes says no
   child PRD lands on shared's board. One does:
   `shared/prds/exemptions-name-their-reason`. shared runs
-  `conserved/tests/done_boxes_are_ticked.rs` today and owes the widening.
+  `shared/tests/done_boxes_are_ticked.rs` today and owes the widening.
 - **`binds:` is four trees, not three.** This document's frontmatter names
   `[mitosys, model, realm]`; `done_boxes_are_ticked` binds `shared` too.
   Corrected 2026-08-27, on the round that closed

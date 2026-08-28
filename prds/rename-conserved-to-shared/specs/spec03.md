@@ -81,12 +81,12 @@ Two consequences the implementer must plan for:
 
 - [ ] `shared/tests/landed_rev_is_published.rs` is tracked, and
       `cargo test -p shared --test landed_rev_is_published` reports **5 passed**
-- [ ] The gate is proved to **fail**, not merely to pass. Re-run all three
+- [x] The gate is proved to **fail**, not merely to pass. Re-run all three
       negative fixtures from the table above against your own tree, quote each
       panic message, and restore `prd.md` byte-identically each time —
       `shasum prds/rename-conserved-to-shared/prd.md` before and after must
       match. A gate only ever seen green is not evidence
-- [ ] With the gate in place the suite population is the spec01 population
+- [x] With the gate in place the suite population is the spec01 population
       **plus exactly 5** — measured 85 → 90 on 2026-08-28, by moving the gate
       file aside and re-counting — and no test that passed without it fails with
       it. `cargo fmt --check --all` and
@@ -102,7 +102,7 @@ Two consequences the implementer must plan for:
       `cargo test -p shared --test landed_rev_is_published` green while
       `git show $(sed -n 's/^- rev: `\(.*\)`$/\1/p' prds/rename-conserved-to-shared/prd.md):shared/Cargo.toml | grep 'name'`
       prints `name = "shared"`
-- [ ] The three consumer PRDs are **not touched** by this work:
+- [x] The three consumer PRDs are **not touched** by this work:
       `git -C .. status --porcelain mitosys/prds model/prds realm/prds` lists
       nothing from this session. Their rev bump is their own node's; this one
       only publishes the sha they read

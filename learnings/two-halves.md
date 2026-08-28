@@ -36,8 +36,8 @@ Which types cross, which tree owns each, how each crosses. Decided
 
 | type | owner | crosses as |
 |---|---|---|
-| `LearnOrigin` | model | one declaration, one home (`model/prds/one-learn-origin`); moves into `conserved` only when mitosys ships signal — [[shared-crate]] criterion 1 admits today's need, never a speculative one |
-| `ContentId`, `Clock`, `Scope`/`Disposer`, order stats | shared | `conserved`, landed — a rev-pinned git dependency in each tree ([[shared-crate]] §Where it lives) |
+| `LearnOrigin` | model | one declaration, one home (`model/prds/one-learn-origin`); moves into `shared` only when mitosys ships signal — [[shared-crate]] criterion 1 admits today's need, never a speculative one |
+| `ContentId`, `Clock`, `Scope`/`Disposer`, order stats | shared | `shared`, landed — a rev-pinned git dependency in each tree ([[shared-crate]] §Where it lives) |
 | record shape — preimage, bitemporal supersede, lazy decay, replay-as-fold | model | ported shape, not file: mitosys's `engine/record` adopts it, direction per [[record-shape]] (`mitosys/prds/record-shape-port`) |
 | grade envelope — `Baseline`/`Grade`/`normalized_ms`/`pass_window` | model | ported shape per [[ratchet]]; the carrier is mitosys `prds/p9-perf-floor` |
 | reload seam — `interface` + loader | model | its own crate when mitosys's swap work starts, not before ([[shared-crate]] §What stays out) |
@@ -174,7 +174,7 @@ the answer.
   recorded in [[shared-crate]] §"Landed" as the `git init` of the `shared/`
   repository. The third repository existed from that commit onward: own
   git tree, own board of seven nodes at `shared/prds/`, own
-  `rust-version` pin, own `Cargo.toml`, own `conserved/` crate, own remote
+  `rust-version` pin, own `Cargo.toml`, own `shared/` crate, own remote
   at `https://github.com/inner-zirkle/shared`.
 - **What changed the answer.** Three consumers now exist, not two: the
   decision binds `realm` as well as `mitosys` and `llm` —
@@ -220,7 +220,7 @@ The merge as it stands on 2026-08-23, one carrier per step:
    `adopt-test-law`, `pin-toolchain`, `workspace-deps` are open on
    `model/prds`.
 2. **Gates port** — carried by master `prds/propagate-gates` (analyzing).
-3. **First shared crate** — done. `conserved` landed ([[shared-crate]]
+3. **First shared crate** — done. `shared` landed ([[shared-crate]]
    §Landed); consumer adoption is held under shared `p5-adoption`.
 4. **Origin vocabulary** — carried by model child
    `model/prds/one-learn-origin`. No prerequisite; lands now.

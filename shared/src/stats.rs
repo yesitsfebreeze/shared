@@ -83,7 +83,7 @@
 fn debug_assert_sorted(sorted: &[f64]) {
 	debug_assert!(
 		sorted.windows(2).all(|w| w[0] <= w[1]),
-		"conserved::stats: the slice must be sorted ascending and NaN-free; sortedness is the caller's contract, never a hidden sort"
+		"shared::stats: the slice must be sorted ascending and NaN-free; sortedness is the caller's contract, never a hidden sort"
 	);
 }
 
@@ -99,7 +99,7 @@ fn debug_assert_sorted(sorted: &[f64]) {
 /// `debug_assert!`ed and neither is repaired: this function does not sort.
 ///
 /// ```
-/// use conserved::stats::percentile;
+/// use shared::stats::percentile;
 ///
 /// let xs = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
 /// assert_eq!(percentile(&xs, 0.0), Some(1.0));
@@ -112,7 +112,7 @@ fn debug_assert_sorted(sorted: &[f64]) {
 pub fn percentile(sorted: &[f64], p: f64) -> Option<f64> {
 	debug_assert!(
 		!p.is_nan(),
-		"conserved::stats::percentile: `p` must not be NaN; a NaN `p` is a bug at the call site"
+		"shared::stats::percentile: `p` must not be NaN; a NaN `p` is a bug at the call site"
 	);
 	debug_assert_sorted(sorted);
 	if sorted.is_empty() {
@@ -145,7 +145,7 @@ pub fn percentile(sorted: &[f64], p: f64) -> Option<f64> {
 /// a hidden sort.
 ///
 /// ```
-/// use conserved::stats::median;
+/// use shared::stats::median;
 ///
 /// // The discriminating input: the three definitions disagree here.
 /// assert_eq!(median(&[1.0, 2.0, 3.0, 4.0]), Some(3.0)); // upper median: chosen
@@ -169,7 +169,7 @@ pub fn median(sorted: &[f64]) -> Option<f64> {
 /// The median is [`median`]'s, never re-derived here.
 ///
 /// ```
-/// use conserved::stats::min_median_max;
+/// use shared::stats::min_median_max;
 ///
 /// assert_eq!(min_median_max(&[100.0, 200.0, 300.0, 400.0]), Some((100.0, 300.0, 400.0)));
 /// assert_eq!(min_median_max(&[42.0]), Some((42.0, 42.0, 42.0)));

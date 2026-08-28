@@ -1,7 +1,7 @@
 mod load_scope {
 	//! `Scope` unwind-under-panic at scale.
 	//!
-	//! p1's ported `drop_unwinds` (in `conserved/tests/scope.rs`) drops a scope
+	//! p1's ported `drop_unwinds` (in `shared/tests/scope.rs`) drops a scope
 	//! holding **one** effect on the happy path. That leaves the load half of
 	//! the crate's second invariant — *"a scope unwinds on drop, including on
 	//! panic"* — untested: N effects, panicked out of, all N inverses run in
@@ -9,7 +9,7 @@ mod load_scope {
 	//!
 	//! # What was measured before this file was written
 	//!
-	//! Apple M5, `rustc 1.94.0`, against `conserved/src/scope.rs` at `main`.
+	//! Apple M5, `rustc 1.94.0`, against `shared/src/scope.rs` at `main`.
 	//! `close()` sets `closed = true` and `mem::take`s both `order` and `live`
 	//! *before* running a single inverse, so the unwind is a flat reverse
 	//! iteration over a `Vec<u64>` with `HashMap` removals — a loop, not
@@ -28,9 +28,9 @@ mod load_scope {
 	//! constant with one value that does not change with the profile.
 	//!
 	//! The panic-*during*-unwind cases are deliberately not mixed in here; they
-	//! are worse than they look and live in `conserved/tests/load_unwind_panic.rs`.
+	//! are worse than they look and live in `shared/tests/load_unwind_panic.rs`.
 
-	use conserved::scope::{Scope, Undo};
+	use shared::scope::{Scope, Undo};
 	use std::panic::catch_unwind;
 	use std::sync::atomic::{AtomicUsize, Ordering};
 	use std::sync::{Arc, Mutex};
@@ -72,7 +72,7 @@ mod load_scope {
 	/// The untested half of the second invariant: the unwind here comes from
 	/// `Drop` while a panic is in flight. This test never calls `Scope::close`
 	/// — the scope is simply dropped as the stack unwinds past it. It
-	/// complements `drop_unwinds` in `conserved/tests/scope.rs`, which covers
+	/// complements `drop_unwinds` in `shared/tests/scope.rs`, which covers
 	/// the same mechanism on the happy path with a single effect.
 	#[test]
 	fn panic_unwinds_all_n_in_reverse() {
@@ -203,7 +203,7 @@ mod load_scope {
 		);
 	}
 
-	/// `held_reports_live_effects` in `conserved/tests/scope.rs` covers this at
+	/// `held_reports_live_effects` in `shared/tests/scope.rs` covers this at
 	/// the 2-effect scale. This proves `order` still tracks registration order
 	/// at 100_000 — and does so on a scope that is about to be panicked out of,
 	/// which is when the report matters.

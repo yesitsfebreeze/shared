@@ -15,7 +15,7 @@ mitosys is extracting its plugin core as **membrane**
 `mitosys/prds/p8-membrane/`). Measured 2026-08-23, four of its crates carry
 7,428 impl lines with zero domain dependencies — the most domain-free code in
 the family. Decided 2026-08-23 (`prds/membrane-home`): it is **not**
-`conserved`'s next admission.
+`shared`'s next admission.
 
 ## The decision
 
@@ -146,4 +146,4 @@ shared crate exists to carry it.
   explicitly, and `p8a` names, addresses and gates the crate in-tree — own
   manifest, zero domain edges, gated — exactly the shape that later moves to
   `shared/` as a rev-pinned git dependency with zero call-site rework, the
-  mechanism `conserved` proved once (`9fff8ea`, [[shared-crate]] §Landed).
+  mechanism `shared` proved once (`9fff8ea`, [[shared-crate]] §Landed).

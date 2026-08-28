@@ -67,9 +67,9 @@ the constants in one place. Both trees implement five properties:
 
 ## One definition, enforced by reuse
 
-Statistics come from `conserved::stats` — `min_median_max`, one definition of
-median (`shared/prds/p4-stats`, `shared/conserved/src/stats.rs`). `Budget`
-is a `conserved` candidate under [[shared-crate]]'s admission test —
+Statistics come from `shared::stats` — `min_median_max`, one definition of
+median (`shared/prds/p4-stats`, `shared/shared/src/stats.rs`). `Budget`
+is a `shared` candidate under [[shared-crate]]'s admission test —
 criterion 1 turns true the day model adopts the gate. Noted here; the shared
 board decides it, not this document.
 

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["conserved"]
+members = ["shared"]
 
 [workspace.package]
 version = "0.1.0"
@@ -23,7 +23,7 @@ blake3 = "1"
 # untouched.
 proptest = "1.11"
 
-# Optional in `conserved` (feature `serde`, off by default). Both consumers
+# Optional in `shared` (feature `serde`, off by default). Both consumers
 # already pin serde 1 — `../mitosys/Cargo.toml:191` and
 # `../model/Cargo.toml:65` — so enabling the feature adds no crate that was
 # not already in either closure. `default-features = false`: the impls are

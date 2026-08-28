@@ -5,14 +5,14 @@
 //! The whole file is behind the optional `serde` feature p2 admitted.
 //!
 //! Wrapped in `mod clock` and every test named with a `clock_` prefix: the
-//! gate `cargo test -p conserved --features serde clock` filters on test
+//! gate `cargo test -p shared --features serde clock` filters on test
 //! *names*, not file names.
 
 #![cfg(feature = "serde")]
 
 mod clock {
-	use conserved::Instant;
 	use serde::{Deserialize, Serialize};
+	use shared::Instant;
 
 	/// The five values every encoding test runs: the epoch, a 2026 instant, a
 	/// pre-epoch instant, and both ends of the range.

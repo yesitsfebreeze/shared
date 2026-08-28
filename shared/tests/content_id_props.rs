@@ -1,7 +1,7 @@
 //! `ContentId` — the round-trip properties the ticket's acceptance names.
 //!
 //! Wrapped in `mod content_id` for the same reason as `tests/content_id.rs`:
-//! the ticket gate `cargo test -p conserved content_id` filters on test
+//! the ticket gate `cargo test -p shared content_id` filters on test
 //! *names*, so without the wrapper these report as `display_parse_round_trip`
 //! and friends and the gate runs none of them while exiting 0.
 //!
@@ -9,8 +9,8 @@
 //! `proptest_config` here shrinking the coverage to look fast.
 
 mod content_id {
-	use conserved::ContentId;
 	use proptest::prelude::*;
+	use shared::ContentId;
 
 	fn is_lowercase_hex(s: &str) -> bool {
 		s.bytes()

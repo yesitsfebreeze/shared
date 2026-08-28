@@ -3,12 +3,12 @@
 //! exists.
 //!
 //! Wrapped in `mod clock` and every test named with a `clock_` prefix: the
-//! ticket's gate `cargo test -p conserved clock` filters on test *names*, not
+//! ticket's gate `cargo test -p shared clock` filters on test *names*, not
 //! file names, so an unprefixed test here would be silently filtered out and
 //! the gate would pass having run nothing.
 
 mod clock {
-	use conserved::{Clock, FixedClock, Instant, SystemClock};
+	use shared::{Clock, FixedClock, Instant, SystemClock};
 	use std::sync::Arc;
 	use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -83,7 +83,7 @@ mod clock {
 	/// **This is not p5's ratchet.** The count-of-clock-reads gate described in
 	/// `learnings/clock.md` §"The fix" is a *consumer* gate over `../mitosys`
 	/// and `../model`, it enumerates the ~65 reads in each tree, and it belongs
-	/// to the adoption node. This test reads `conserved/src/` and nothing else:
+	/// to the adoption node. This test reads `shared/src/` and nothing else:
 	/// it keeps *this crate* honest about having one reader. Do not delete the
 	/// consumer ratchet believing this one already covers it, and do not grow
 	/// this one into it.

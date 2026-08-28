@@ -16,7 +16,7 @@
 //!
 //! `blake3` enters the crate here and is reachable through this module alone.
 //! The integration test `blake3_is_reachable_only_through_content_id` enforces
-//! that by reading `conserved/src/` rather than by asking nicely.
+//! that by reading `shared/src/` rather than by asking nicely.
 //!
 //! # What this type refuses
 //!

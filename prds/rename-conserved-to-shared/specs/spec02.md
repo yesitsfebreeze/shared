@@ -120,14 +120,16 @@ explicitly and names them. `git diff --numstat -- .mi/docs/memos/` shows
 
 ## Acceptance
 
-- [ ] The scoped grep from the PRD's §Verify returns **exactly 12 lines**, and
-      they are the 12 in the table above — piped through `| wc -l`, counted, not
-      eyeballed. If the count differs, name every line that moved and why before
-      changing anything
-- [ ] `AGENTS.md:159`'s `conserved-*` and `learnings/README.md:164` survive
+- [x] The scoped grep from the PRD's §Verify, run with `--untracked`, returns
+      **exactly 14 lines**: the 12 in the table above plus
+      `shared/tests/landed_rev_is_published.rs:13` and `:29` — the PRD's own
+      address, the same class as the `adopt-conserved` addresses the table
+      already counts. Amended from 12 at collect; plain `git grep` never saw
+      spec03's untracked gate file
+- [x] `AGENTS.md:159`'s `conserved-*` and `learnings/README.md:164` survive
       verbatim: `git diff -- AGENTS.md learnings/README.md` shows no change on
       those lines
-- [ ] `learnings/crate-name.md` is **byte-identical** to its pre-change form —
+- [x] `learnings/crate-name.md` is **byte-identical** to its pre-change form —
       `git diff --numstat -- learnings/crate-name.md` is empty — and still holds
       every `conserved` token it had. **Measure the population; do not trust the
       PRD's figure.** The PRD says 45 tokens across 39 lines; measured on `main`
@@ -136,34 +138,34 @@ explicitly and names them. `git diff --numstat -- .mi/docs/memos/` shows
       was written. Record your own count before you start and match it after
       (`grep -oI conserved learnings/crate-name.md | wc -l`,
       `grep -cI conserved learnings/crate-name.md`)
-- [ ] `learnings/shared-crate.md`'s admission test is byte-identical:
+- [x] `learnings/shared-crate.md`'s admission test is byte-identical:
       `git show $(git merge-base origin/main HEAD):learnings/shared-crate.md | awk '/^## The admission test/,/^## What goes in/' | shasum`
       equals the same `awk | shasum` on the worktree file.
       Measured value today: `826a62076bdfb1d8e19f0a39bba2cee4a0e173cb`
-- [ ] `learnings/shared-crate.md:135`'s `conserved-id` became `shared-id`, per
+- [x] `learnings/shared-crate.md:135`'s `conserved-id` became `shared-id`, per
       `learnings/crate-name.md` §"Three traps" item 2 — it names a hypothetical
       split of the crate being renamed, not a thing that ever existed
-- [ ] No prose reads *"shared's own shared"*, *"the shared tests"* or any other
+- [x] No prose reads *"shared's own shared"*, *"the shared tests"* or any other
       artefact of renaming the crate name used as an adjective:
       `git grep -nI 'shared shared\|own shared \|The shared tests' -- . ':(exclude)prds' ':(exclude)vendor'`
       returns only the `code:` frontmatter lines of the form
       `shared shared/src/…`, which are `<tree> <path>` and correct
-- [ ] `.mi/docs/memos/` changed by **addition only**:
+- [x] `.mi/docs/memos/` changed by **addition only**:
       `git diff --numstat -- .mi/docs/memos/` has `0` in the deletions column for
       every row, and `distribution.md` still contains its original 5 `conserved`
       tokens
-- [ ] `prds/`, `.mi/gantt/` and `.pi/ontology/digest.md` are untouched by this
+- [x] `prds/`, `.mi/gantt/` and `.pi/ontology/digest.md` are untouched by this
       work: `git status --porcelain -- prds/ .mi/gantt/ .pi/` lists nothing
       except `prds/.history.jsonl` and `prds/.plan.json`, which are board
       machinery and were already modified before this PRD started.
       **Do not use the PRD's `git diff <merge-base with origin/main>..HEAD` form
       — see spec03; it does not measure this**
-- [ ] Every document asserting the remote is private carries a dated correction.
+- [x] Every document asserting the remote is private carries a dated correction.
       `git grep -nI 'PRIVATE\|is still \*\*private\*\*\|(private)' -- . ':(exclude)prds' ':(exclude)vendor'`
       returns only lines inside `learnings/crate-name.md` or inside
       `learnings/shared-crate.md`'s **Corrected 2026-08-28** block at `:206`.
       `.github/workflows/ci.yml:15` was already corrected and must stay corrected
-- [ ] The suite population is still spec01's, and `cargo fmt --check --all` and
+- [x] The suite population is still spec01's, and `cargo fmt --check --all` and
       `cargo clippy --workspace --all-targets -- -D warnings` are clean — this
       tree's tests read the repository at runtime, so prose can break a test
       here. Measured after the whole prose pass: **85 passed / 0 failed**

@@ -2,7 +2,7 @@
 //! keep `blake3` where this ticket put it.
 //!
 //! Wrapped in `mod content_id` on purpose: the ticket's own verify is
-//! `cargo test -p conserved content_id`, and that filter matches **test
+//! `cargo test -p shared content_id`, and that filter matches **test
 //! names**, not file names. Without the wrapper every test here reports as
 //! `roundtrip_is_a_fixed_point` and the filter reports `0 tests … filtered
 //! out` — green having run nothing. The wrapper makes each one
@@ -10,7 +10,7 @@
 //! `tests/scope.rs`.
 
 mod content_id {
-	use conserved::{ContentId, ContentIdParseError};
+	use shared::{ContentId, ContentIdParseError};
 
 	/// Input → its blake3 digest, spelled the one way this crate spells it.
 	/// A silent algorithm swap breaks every row.
@@ -302,7 +302,7 @@ mod content_id {
 		);
 	}
 
-	/// Read the `[dependencies]` table of `conserved/Cargo.toml` and return
+	/// Read the `[dependencies]` table of `shared/Cargo.toml` and return
 	/// each entry as `(name, the rest of the line)`.
 	fn dependency_entries(manifest: &str) -> Vec<(String, String)> {
 		let mut entries = Vec::new();
