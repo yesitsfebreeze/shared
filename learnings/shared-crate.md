@@ -185,11 +185,55 @@ is the URL — it pinned `file:///Users/feb/dev/infra/shared`, and the board's
 answer of 2026-08-21 names `https://github.com/inner-zirkle/shared` as the
 real one, added as `origin` and not yet pushed.
 
+**Superseded 2026-08-23 — the address moved.** Every repository in the family
+left the `inner-zirkle` organisation for the personal account, so the URL every
+consumer pins today is `https://github.com/yesitsfebreeze/shared.git`. What did
+*not* move is the visibility: it is still **private** (`gh repo view
+yesitsfebreeze/shared` → `"visibility":"PRIVATE"`, checked 2026-08-28), so the
+cost this section priced against option 2 is still owed. Read the
+`inner-zirkle` URL in the paragraph directly above — and every other
+occurrence of that organisation anywhere in this document — as a historical
+record of what was decided on 2026-08-21, never as an address to copy. The
+copyable pin is in §"Landed".
+
 The cost option 2 carries is the one this section named against it: mitosys's
 dev container has no network at build time, so it needs vendoring or a
-pre-populated registry cache. That is scoped as mitosys-side follow-up in the
+pre-populated registry cache. That was scoped as mitosys-side follow-up in the
 `mitosys` child of `p5-adoption` — a cost of the chosen option, not a
 reopening of the choice.
+
+**Superseded 2026-08-28 — that scope was too narrow, and it cost two trees a
+build.** Pricing this against mitosys's container alone asked the wrong
+question. The container was never the sharp edge; the **CI runner** is, and
+this section never considered one. `model` and `realm` have no Dockerfile at
+all — what they have is `.github/workflows/ci.yml`, and `actions/checkout`
+hands a job a token scoped to its *own* repository and nothing in `shared`.
+So a private remote costs **every** consumer a resolution failure on every
+machine that lacks the user's credential, not mitosys alone, and the cost is
+owed by whoever builds — not by whoever publishes.
+
+All three consumers pay it the same way, and it is cheap:
+
+- **mitosys** — a committed `vendor/` plus a source replacement in
+  `.cargo/config.toml`. Already landed; `cargo metadata --offline --locked`
+  exits 0 on a cold `CARGO_HOME` with no `HOME` and no credential helper.
+- **model** and **realm** — the same mechanism, landed 2026-08-28 at
+  **192K** each: `vendor/conserved-0.1.0` and a `.cargo/config.toml` that
+  replaces **only** the `git+…?rev=…` source. `[source.crates-io]` is
+  deliberately left on the network, because crates.io is public and reachable
+  from every runner; vendoring the whole graph would cost each repo hundreds
+  of megabytes to solve a problem 192K wide. `Cargo.lock` is untouched in
+  both — it still names the git URL and the rev, so the pin is still the pin
+  and drift still requires a visible rev bump. Only where the bytes come from
+  moves. Each tree gates the copy with
+  `scripts/conserved-vendor-check.sh`, wired in front of `just verify`
+  (`model`) and `just check` (`realm`).
+
+The trap worth writing down, because it is silent: `cargo vendor` resolves a
+rev out of the **local** git db, so a commit that never left the vendoring
+machine copies in looking healthy while naming something no clone can fetch.
+Push before vendoring; the gate above asserts
+`git -C ../shared branch -r --contains <rev>` prints something.
 
 ## First move
 
@@ -274,10 +318,23 @@ Where adoption lives now:
   cross-tree ledger and dispatches nothing into the trees — the user's
   answer 2 of 2026-08-21 stands.
 - Both trees pin the same rev:
-  `conserved = { git = "https://github.com/inner-zirkle/shared", rev = <sha> }`.
-  The pin is unreachable until the user pushes `origin` — publishing is
-  the user's call (answer 1 of 2026-08-21); the children name that event
-  and do not push.
+  `conserved = { git = "https://github.com/yesitsfebreeze/shared.git", rev = <sha> }`.
+  The rev is pushed and on `origin/main`; the repository is still private, so
+  the pin is unreachable to anything without the user's credential —
+  publishing is the user's call (answer 1 of 2026-08-21); the children name
+  that event and do not push.
+
+  **Reachability, not existence, is what actually bites.** A private remote
+  costs each consumer a resolution failure on every machine that lacks the
+  credential, and the CI runner is the one that matters, because
+  `actions/checkout` hands a job a token scoped to its *own* repository and
+  nothing in `shared`. mitosys pays this with `vendor/` and a source
+  replacement in `.cargo/config.toml`; model and realm did not, and their CI
+  has been red on `main` since adoption — `failed to authenticate when
+  downloading repository`, all four realm jobs, run 33122525527, 2026-08-27.
+  The fix is the same mechanism at a fraction of the size: `conserved` alone
+  is **192K** vendored, and replacing only the *git* source leaves
+  `[source.crates-io]` on the network, where it is public and reachable.
 - realm adoption is `p5-adoption`'s `realm` child, outside the
   master-board `conserved-crate` PRD — its done condition names mitosys
   and model only.
