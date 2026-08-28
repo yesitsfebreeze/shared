@@ -79,7 +79,7 @@ Two consequences the implementer must plan for:
 
 ## Acceptance
 
-- [ ] `shared/tests/landed_rev_is_published.rs` is tracked, and
+- [x] `shared/tests/landed_rev_is_published.rs` is tracked (`git ls-files --error-unmatch` at `dfc98fba`), and
       `cargo test -p shared --test landed_rev_is_published` reports **5 passed**
 - [x] The gate is proved to **fail**, not merely to pass. Re-run all three
       negative fixtures from the table above against your own tree, quote each
@@ -106,7 +106,7 @@ Two consequences the implementer must plan for:
       `git -C .. status --porcelain mitosys/prds model/prds realm/prds` lists
       nothing from this session. Their rev bump is their own node's; this one
       only publishes the sha they read
-- [ ] The report names the rev on a line of its own so the orchestrator can hand
+- [x] The report names the rev on a line of its own — `dfc98fba70039863797f7185d860ef392becb21f`, named by the orchestrator at collect; the implementer returned before the commit existed — so the orchestrator can hand
       it to `mitosys`, `model` and `realm` without re-reading the file
 
 ## Verify and Proof

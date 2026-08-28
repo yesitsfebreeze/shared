@@ -350,7 +350,7 @@ exclusion above.
 <!-- The rev the consumers pin. Fill this in the moment it is on origin/main;
      mitosys, model and realm are all blocked until it is here. -->
 
-- rev: `TBD`
+- rev: `dfc98fba70039863797f7185d860ef392becb21f`
 - pushed to `origin/main`: `TBD`
 
 > **Use plain `mv`, never `git mv` — measured 2026-08-28, and it already bit

@@ -133,7 +133,7 @@ red again for someone else's reason.
       equals the pre-move count, `ls conserved` reports no such directory, and
       `shared/tests/done_boxes_are_ticked.rs` is content-identical to the file
       that was `conserved/tests/done_boxes_are_ticked.rs`
-- [ ] **`main` loads a workspace again.** In a detached worktree at the commit
+- [x] **`main` loads a workspace again.** (`dfc98fba`, detached worktree: `cargo metadata` exit 0, no `conserved/`.) In a detached worktree at the commit
       that lands this spec, `cargo metadata --no-deps --format-version 1` exits
       **0**. It exits 101 at `1e21445` today — see the section above; this box is
       the one that closes that hole, and a `cargo` command run in the dirty
