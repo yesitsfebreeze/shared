@@ -1,6 +1,5 @@
 ---
-state: claimed
-claim: impl-p5-mitosys-spec01 2026-08-28T04:20
+state: specced
 mode: afk
 priority: 44
 est: 20h
@@ -145,3 +144,100 @@ flight — after `plugins-view` (four paths to nine) and `p8d-floor-split` itsel
 (three to sixteen). The standing lesson is now paid for three times over: a spec
 citing `src/mitosys/**` survives these moves; one citing the moving half goes
 stale in an afternoon.
+
+
+## `spec01` done 2026-08-28 — the offline container stands; `spec02`–`spec04` remain
+
+Committed in mitosys as `ef29a6e`. This node stays `specced`: one of four specs
+is closed, and the other three are the adoption itself.
+
+Container gate green on the trimmed tree — `cargo test --workspace --offline`
+2126/0/21 and `just check` 2127/0/21, **exactly the `276a400` host baseline**,
+reproduced inside the container against a 356MB vendor directory. Cold
+`cargo build --workspace --offline` finished in 57.37s. `just vendor` proven
+idempotent *and* refilling: deleting `vendor/serde-1.0.229` makes
+`cargo metadata --offline` exit 101, and the recipe restores it.
+
+### The trim, on the user's decision
+
+**886MB → 356MB**; tar+gzip proxy 115.4MB → 55.7MiB. `.git` went 223MB → 370MB
+rather than the ~700MB the untrimmed tree would have cost.
+
+`cargo vendor` **cannot** filter — moving `vendor/windows-0.61.3` aside makes
+`cargo metadata --offline` exit 101 (`required by package tao v0.36.0`), because
+cargo resolves across every platform before deciding what to compile.
+`cargo-vendor-filterer` answers it with **stubs**: real `Cargo.toml`, empty
+`src/lib.rs`, matching `.cargo-checksum.json`. Resolution stays truthful, no
+source ships, and a build for an excluded platform fails loudly on an empty
+crate rather than mysteriously. 123 of the 585 entries are stubs. Putting a
+platform back is one `--platform=<triple>` line, documented in `DOCKER.md`.
+
+`aws-lc-sys` (68MB) **stays and is not a platform artefact**: `reqwest →
+hyper-rustls → rustls → aws-lc-rs → aws-lc-sys`, and the container's cold build
+compiles it. It leaves when the model client stops needing TLS.
+
+### `.gitattributes`, added by the board before staging, and load-bearing
+
+`core.autocrlf` is `input` and **221 vendored files contain CRLF**. Without
+`vendor/** -text`, git strips the CR on commit, a fresh clone checks out
+different bytes, and **every one of those `.cargo-checksum.json` entries
+fails** — so the offline build would have worked only on the machine that
+vendored it. Measured on `vendor/indoc-2.0.7/tests/test_formatdoc.rs`:
+
+```
+on disk, and in .cargo-checksum.json  538586016cf601451b582604908f7ab594ce642bbbd7a458ba2dff1d300f297d
+CRLF stripped, as git would store it  5be5d5d8b400adef91a7fc49f21c0219062c161728ea66210f47940c12326a26
+```
+
+The staged blob now hashes to the former. A vendor tree that verifies only
+where it was made is worse than none: it fails at **checksum** time, long after
+the fetch it was supposed to replace.
+
+### What this changes for `shared-remote-is-private`
+
+Measured, not assumed, in a throwaway crate pinning `conserved` by rev:
+`cargo vendor` **does** vendor git dependencies — `conserved` landed at 204K —
+and emits a `[source."git+<url>?rev=<rev>"] … replace-with =
+"vendored-sources"` stanza for `.cargo/config.toml`. `cargo build --offline`
+against it finished in 3.83s **with no git access at all**.
+
+So `spec02`'s adoption collapses the credential requirement to **one machine,
+once per rev bump**: whoever runs `just vendor`. Container and CI need neither
+the credential nor `~/.cargo/git/db/shared-*`.
+
+**The hazard, which must not be lost:** `cargo vendor` resolves a rev from the
+**local** git db. A rev that exists only on this machine vendors happily and
+freezes into the tree, and the pin looks healthy everywhere while naming a
+commit no remote has. Vendoring **hides** the never-pushed-commit problem rather
+than fixing it. Whoever bumps `conserved` must confirm the rev is on the remote
+first; nothing in the mechanism will tell them.
+
+Also arriving with `conserved`: `blake3`, `arrayvec` and `constant_time_eq` are
+not in mitosys's `Cargo.lock` today, so `dependency_tree.rs`'s OWNERS/CLOSURE
+and `deny.toml` both gain entries.
+
+### Two defects found and filed, neither this spec's
+
+- **`typos-gate-cannot-run`** — `_typos.toml` is invalid TOML (duplicate
+  `extend-words` under `[default]`), `typos-cli` exits 78, and the gate has
+  never run while `quality.yml` claims it green. The `vendor/*` exclude added
+  here is at line 12 inside `[files]`, a different table, and is **clean and
+  independent** of the duplicate — it starts working the moment the file
+  parses.
+- **`harness-last-words-race`** — `a_harness_that_dies_mid_turn`'s stderr
+  reader loses to its exit path: 4/20 with `init: true`, 6/20 without, **0/30
+  in isolation**. Intra-binary contention, costing roughly one `just check` in
+  four.
+
+And one corrected in place: the `acp_mockagent.rs` doc comment blaming "the
+platform's shell and on timing, 2 runs in 3 in the Linux dev container". It was
+neither. **PID 1 was `sleep infinity`, which never `wait()`s**, so a SIGKILLed
+orphan stayed a zombie and the test's `kill -0` liveness probe reported it alive
+forever; macOS passed because launchd reaps. `init: true` puts `docker-init` at
+PID 1 and both tests pass in 0.08s. A reproduction called flaky for two months
+was deterministic all along, on a cause nobody had looked for.
+
+Also noted: `cargo machete` is already red on `src/` alone at `276a400` — 11
+crates, 14 unused deps, which looks like `p8d-floor-split` fallout — and once
+`vendor/` is committed, `quality.yml`'s bare `cargo machete` will walk it and
+needs a path argument.
