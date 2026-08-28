@@ -12,9 +12,10 @@
 #
 # The Rust version is NOT named here. `rust-toolchain.toml` is the single pin.
 #
-# Cost note: this repo is PRIVATE, so these minutes are metered against the
-# account, unlike a public repo where Actions is free. The suite is small
-# (~80 tests) but `load_throughput` alone runs 40-65s, so budget ~5 min/run.
+# Cost note: this repo went PUBLIC on 2026-08-28, so Actions minutes are free
+# rather than metered against the account. The suite is small (~80 tests) but
+# `load_throughput` alone runs 40-65s, so budget ~5 min/run anyway — the cost
+# that remains is wall clock, not billing.
 # ─────────────────────────────────────────────────────────────────────────────
 name: ci
 

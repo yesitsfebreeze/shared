@@ -102,6 +102,13 @@ change and should not get one.
 - **`conserved-rev-drift`** — the filename of mitosys's open memo. It appears
   in prose here and must survive as written.
 
+And one look-alike that is **not** an exclusion, ruled here so it is not read as
+one: **`conserved-id` (`learnings/shared-crate.md:135`) becomes `shared-id`.**
+It names a hypothetical future split of the crate being renamed — the `blake3`
+split the dependency gate might force — not a thing that has ever existed. It
+gets the same ruling as mitosys's `conserved-scope`; see
+`learnings/crate-name.md` §"Three traps", item 2.
+
 ### 5. `cargo fmt --all` afterwards
 
 rustfmt re-sorts the import block: `shared` sorts **after** `proptest`/`serde`
@@ -113,18 +120,31 @@ probe.
 
 ### 6. Live prose only
 
-In: `README.md` (6 hits), `AGENTS.md` (6), `.github/workflows/ci.yml` (1, line 6
-— a path citation `conserved/tests/done_boxes_are_ticked.rs` that changes because
-the **directory** moves), `learnings/*.md`, `.mi/docs/memos/distribution.md` (5),
-`.pi/ontology/digest.md` (3).
+In: `README.md` (6 hits), `AGENTS.md` (6, minus the one survivor below),
+`.github/workflows/ci.yml` (line 6 — a path citation
+`conserved/tests/done_boxes_are_ticked.rs` that changes because the **directory**
+moves; and line 15, see the visibility section), `learnings/*.md` (path
+citations and `code:` fields only — decisions are amended, not substituted).
 
-Two live-looking files that are **not** renamed:
+`.pi/ontology/digest.md` (3 hits) is **held**, not renamed — see its own section
+below.
+
+Three live-looking files that are **not** renamed:
 
 - `.mi/gantt/plan.{md,json}` — a historical planning artifact describing a
   `.mi/prd/` layout that no longer exists.
 - `.mi/docs/memos/scaffold-reset.md` — it is *about* `conserved-core`,
   `conserved-alloc`, `conserved-net` and the rest of the condemned scaffold.
   Every token in it is a proper noun.
+- **`.mi/docs/memos/distribution.md` (5 hits) — amended, not renamed.** An
+  earlier draft of this PRD had it in the "renamed" column, contradicting
+  `learnings/crate-name.md`. The decision ruled, and this is the ruling: **no
+  memo body is substituted in any tree**, because a memo is a record and the
+  family does not rewrite what was decided under the name it was decided under
+  (`mitosys/.mi/docs/memos/membrane-is-the-core.md:270-272`, and
+  `learnings/README.md` rule 1). It gets **one dated amendment line** saying the
+  crate is now `shared` and that every `conserved` below is the name as it stood.
+  The file stays in the footprint because it is edited — just not substituted.
 
 `Cargo.lock` changes, but not by hand — it regenerates on the first `cargo
 build`. Check that it did and that the package entry reads `name = "shared"`.
@@ -177,6 +197,30 @@ vendored copies in mitosys, model and realm stay.** Public fixes
 *authentication*. It does not fix *reachability* — a public remote is still a
 network round trip, and mitosys's dev container has no network at build time.
 
+## The trap in this tree specifically: the decision document is written in the old name
+
+`learnings/crate-name.md` is the `binds:` document this PRD implements. Its
+subject **is** the old name, so **45 of its tokens are `conserved` and every one
+must survive** (`grep -oI conserved learnings/crate-name.md | wc -l` = 45 across
+39 lines, measured 2026-08-28). A rename run over `learnings/` without excluding
+it destroys the record of why the rename happened.
+
+That is the sharp edge of a fourth exclusion class, on top of item 4's three.
+**These survive, and the verify grep is written around them:**
+
+| survivor | why |
+|---|---|
+| `learnings/crate-name.md`, all 45 tokens | the decision document; its subject is the old name |
+| `learnings/README.md:164` | its index entry, which quotes the old name |
+| `learnings/shared-crate.md:13`, `:15` | the renamed-from sentence and the genomics etymology |
+| `learnings/shared-crate.md:198-199`, `:215` | the superseded private-remote text, kept under rule 1 |
+| `learnings/shared-crate.md:335-336` | `mitosys/prds/adopt-conserved`, `model/prds/adopt-conserved` — PRD addresses |
+| `learnings/shared-crate.md:359` | the `conserved-crate` PRD — a real directory, `/Users/feb/dev/infra/prds/conserved-crate/` |
+| `AGENTS.md:159` | `conserved-*`, the condemned pre-split scaffold family |
+| all of `.mi/docs/memos/` | amended, never substituted — see item 6 |
+| all of `.mi/gantt/` | historical planning artifact |
+| all of `prds/` | records; a done PRD's directory name is an address |
+
 ## Verify
 
 **Scoped to the crate, deliberately.**
@@ -185,13 +229,30 @@ network round trip, and mitosys's dev container has no network at build time.
 cargo test -p shared
 cargo fmt --check --all
 cargo clippy --workspace --all-targets -- -D warnings
-git grep -nI conserved -- . ':(exclude)prds' ':(exclude).mi/gantt' \
-  ':(exclude).mi/docs/memos/scaffold-reset.md' ':(exclude)vendor'
+git grep -nI conserved -- . \
+  ':(exclude)prds' \
+  ':(exclude).mi/gantt' \
+  ':(exclude).mi/docs/memos' \
+  ':(exclude)learnings/crate-name.md' \
+  ':(exclude).pi/ontology/digest.md' \
+  ':(exclude)vendor'
 ```
 
-The last command must return **only** the three exclusions from item 4: the
-three `b"conserved"` sites, the two `conserved-core` sites, and any
-`conserved-rev-drift` mention.
+The last command must return **exactly** these and nothing else — count them,
+do not eyeball them:
+
+- the three `b"conserved"` sites (`shared/tests/content_id.rs:31`, `:108`,
+  `shared/tests/content_id_serde.rs:30`)
+- the two `conserved-core` sites (`shared/src/clock.rs:86`,
+  `shared/tests/clock_source.rs:48`)
+- `learnings/README.md:164`
+- `learnings/shared-crate.md`'s six survivor lines from the table above
+- `AGENTS.md:159`
+- any `conserved-rev-drift` mention
+
+`.pi/ontology/digest.md` is excluded from the grep because it is held; if the
+user's ruling releases it, drop that exclusion and the file renames with the
+rest.
 
 **Not `just check`, and not `cargo test --workspace`.** This tree's workspace
 suite is red on `main` today for a reason this PRD does not own:
@@ -210,10 +271,40 @@ and after, on the tree as it then stood. **Parity is the acceptance criterion,
 not an absolute count**: re-measure the baseline immediately before the rename
 and require the same numbers after.
 
+## `.pi/ontology/digest.md` is held pending a ruling — do not rename it
+
+`.pi/ontology/digest.md:23` binds the crate as an **entity name to an external
+store id**:
+
+```
+conserved kern:629fc82759c9 — proposed shared crate: ContentId, Clock, Scope/Handle,
+  order stats, hex; partial | see: learnings/shared-crate.md
+```
+
+The file's own header says *"Pointers, not data: kern IDs … The substance lives
+in the memory store and in files — this file only says where."* Renaming the
+pointer without renaming the entity in the store desyncs the index; renaming it
+in the store is work no PRD owns.
+
+**Measured 2026-08-28, and it changes the question — see this PRD's parent
+report.** The binding is already dangling: `kern get 629fc82759c9` returns *"no
+thought with id"*, as do four other ids sampled from the same file, and
+`kern health` on this directory reports `thoughts: 0  reasons: 0`. `kern` v2.0.0
+reads `shared/.kern/data`, not the `.pi/kern/data` the file was written against;
+both are untracked and `.pi/kern/data/` is gitignored (`.gitignore:8`).
+
+So renaming the token here cannot desync anything — but the right move is
+plausibly to fix or delete the whole orphaned index, which is not this PRD's.
+**Leave all three hits alone until the ruling lands**, and keep the grep
+exclusion above.
+
 ## Acceptance
 
-- [ ] `git mv conserved shared` done; `git ls-files shared/ | wc -l` matches the
-      pre-move `git ls-files conserved/ | wc -l`
+- [ ] `git mv conserved shared` done and nothing was lost:
+      `git ls-files shared/ | wc -l` is **19** — the pre-move count, measured
+      2026-08-28 and pinned here because it is recorded nowhere else. If it is
+      not 19 when you start, the crate has changed since; record the new number
+      here before moving and match *that*.
 - [ ] `Cargo.toml`'s `members = ["shared"]`; `shared/Cargo.toml`'s
       `name = "shared"`
 - [ ] `cargo test -p shared` green, and the workspace baseline is unchanged
@@ -221,13 +312,33 @@ and require the same numbers after.
       2026-08-28), with `done_boxes_are_ticked` the only failure
 - [ ] `cargo fmt --check --all` clean and
       `cargo clippy --workspace --all-targets -- -D warnings` clean
-- [ ] The scoped `git grep` above returns only the three `b"conserved"` sites,
-      the two `conserved-core` sites, and `conserved-rev-drift` mentions
-- [ ] `prds/` is untouched: `git diff --name-only <base>..HEAD -- prds/` is empty
+- [ ] The scoped `git grep` above returns **exactly** the survivor set
+      enumerated under §Verify, and its line count equals the number of entries
+      there — not "roughly", counted
+- [ ] `prds/` and `.mi/gantt/` are untouched, and `.mi/docs/memos/` changed by
+      amendment only:
+      `git diff --name-only <merge-base with origin/main>..HEAD -- prds/ .mi/gantt/`
+      is empty, and `git diff -- .mi/docs/memos/` shows **added lines only**
+      (`git diff --numstat -- .mi/docs/memos/` has `0` in the deletions column
+      for every row). Take the base from
+      `git merge-base origin/main HEAD` — it is not a placeholder
 - [ ] `learnings/shared-crate.md`'s admission test is byte-identical to its
-      pre-change form
-- [ ] Every document asserting the remote is private carries a dated correction
-      saying it is public and that the vendored copies stay anyway
+      pre-change form. The region is **`## The admission test` (line 25) up to
+      but not including `## What goes in`** — extract it both sides and compare:
+      `git show <base>:learnings/shared-crate.md | awk '/^## The admission test/,/^## What goes in/' | shasum`
+      equals the same command on the worktree file. Named because "the admission
+      test" is otherwise an undelimited region no check can bound
+- [ ] Every document asserting the remote is private carries a dated
+      correction. The population is **enumerated, not searched by judgement** —
+      `git grep -nI 'PRIVATE\|is still \*\*private\*\*\|(private)' -- . ':(exclude)prds' ':(exclude)vendor'`
+      returns exactly two files today:
+      - `.github/workflows/ci.yml:15` — *"this repo is PRIVATE, so these minutes
+        are metered against the …"*. **A live cost claim that is now false**:
+        Actions minutes on a public repository are not metered. Correct it.
+      - `learnings/shared-crate.md:198-199`, `:215` — already carries a dated
+        correction block; the old text stays under rule 1.
+      The box passes when the grep returns only lines inside a dated correction
+      block or inside `learnings/crate-name.md`
 - [ ] **Pushed.** `git branch -r --contains HEAD` names `origin/main`, and the
       sha is written into §Landed below where the three consumer PRDs read it
 

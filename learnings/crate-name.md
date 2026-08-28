@@ -5,7 +5,7 @@ subject: the crate is named `shared`, not `conserved` — directory and package 
 binds: [mitosys, model, realm, shared]
 status: decided
 date: 2026-08-28
-code: shared conserved/Cargo.toml, mitosys Cargo.toml:376, model Cargo.toml:38, realm Cargo.toml:66
+code: shared shared/Cargo.toml, mitosys Cargo.toml:376, model Cargo.toml:38, realm Cargo.toml:66
 ---
 
 # The crate is named `shared`
@@ -152,6 +152,43 @@ artifacts in `shared` — `.mi/gantt/plan.{md,json}` (a planning record naming a
 `.mi/prd/` layout that no longer exists) and `.mi/docs/memos/scaffold-reset.md`
 (about `conserved-core`).
 
+### The three-part rule, because "live prose" was too blunt
+
+An earlier draft of this section put `.mi/docs/memos/` out of scope while
+`shared`'s child PRD put `.mi/docs/memos/distribution.md` in. **This is the
+ruling; the child follows it.** Each folder's own written convention decides,
+and the three cases are different:
+
+1. **A path or an identifier is corrected in place, everywhere.**
+   `conserved/src/clock.rs` resolves to nothing after the move and
+   `conserved::Clock` names no crate. Correcting a citation so it still
+   resolves is not rewriting history. This is `learnings/README.md`
+   §"How a document is corrected" rule 1 — *an addition or a factual
+   correction is an edit in place* — applied to citations.
+2. **A decision, a claim, or a name-as-recorded is amended, never
+   substituted.** `learnings/README.md` rule 1 again — *an edit adds: it never
+   deletes the sentence it corrects* — and mitosys's memo convention says the
+   same thing in its own words at
+   `mitosys/.mi/docs/memos/membrane-is-the-core.md:270-272`: *"that memo is a
+   record and the tree does not rewrite what was decided under the name it was
+   decided under."* So **no memo body is substituted in any tree.** A memo
+   carrying a claim that is still *live* and now names a dead crate gets one
+   dated amendment line, and nothing else. Three memos qualify, all of them:
+   - `shared/.mi/docs/memos/distribution.md` — 5 tokens, `status: decided`,
+     the distribution mechanism. **This is the one `shared`'s child had in the
+     wrong column.**
+   - `mitosys/.mi/docs/memos/membrane-is-the-core.md:273` — whether `membrane`
+     ships as a `conserved`-shaped crate in `shared/`, explicitly undecided.
+   - `mitosys/.mi/docs/memos/memory.md:241` — `conserved::ContentId`, a live
+     crate path inside a dated amendment block of its own.
+   `mitosys/.mi/docs/memos/README.md:248-249` is the memo index and moves only
+   if a filename does, which is why no filename does.
+3. **A filename and a directory name never change, because they are
+   addresses.** `conserved-rev-drift.md` keeps its name — renaming it reddens
+   mitosys's memo-index gate until the README link above is rewritten too. Only
+   its `status:` changes. Every `prds/` directory keeps its name for the reason
+   in the paragraph above.
+
 ## Three traps a blanket `sed` walks into
 
 All three were found by running the rename, not by reading it.
@@ -163,10 +200,21 @@ All three were found by running the rename, not by reading it.
    `8d369871266d2453da564f5748e5a3070f25068aa5be7db442dd2c2b1b31f08e`.
    Renaming the bytes changes the digest and fails
    `fixed_vectors_render_as_expected`.
-2. **`conserved-core` and `conserved-rev-drift` are proper nouns.**
+2. **`conserved-core` and `conserved-rev-drift` are proper nouns; two
+   look-alikes are not.**
    `conserved-core` (`conserved/src/clock.rs:86`,
    `conserved/tests/clock_source.rs:48`) is the name of a condemned scaffold, a
-   historical fact. `conserved-rev-drift` is a memo's filename.
+   historical fact. `conserved-rev-drift` is a memo's filename. Both survive.
+
+   **`conserved-id` and `conserved-scope` do not.** Both name a *hypothetical
+   future split of the crate being renamed* — `conserved-id` at
+   `learnings/shared-crate.md:135` (the `blake3` split the dependency gate
+   might force), `conserved-scope` at
+   `mitosys/src/mitosys/util/effect/Cargo.toml:24` and
+   `mitosys/src/mitosys/util/effect/README.md:42` (the split a size objection
+   might force). Nothing has ever been called either. They become `shared-id`
+   and `shared-scope`, and they are called out here only because they wear the
+   same shape as the two that survive.
 3. **The etymology cannot be substituted.**
    [[shared-crate]] named the crate from biology — *a conserved region is the
    part of a genome that is identical across species because it cannot afford to
@@ -190,6 +238,14 @@ Four child PRDs, one per tree, `state: open`:
 package rename in `shared` is a new commit and every consumer's rev bumps in the
 same change — or the family forks onto two package names at once. The consumers
 land on the rev `shared` publishes to `origin/main`.
+
+**The three consumers are mutually independent, and may run concurrently.**
+This is a serial hop followed by three parallel ones, not a chain of four. No
+consumer touches another consumer's files — the footprints are disjoint by
+construction, each being one repository — and each reads `../shared` read-only
+through `git -C`, never writing it. So once `shared` has pushed, any two or all
+three may be dispatched at the same time. An orchestrator seeing three PRDs that
+all name the same `needs:` should not read that as an order between them.
 
 ### A vendored consumer build does not force the rev bump — `reproduced`
 
@@ -235,6 +291,29 @@ is exercised. Public fixes *authentication*; vendoring fixes *reachability*, and
 those were always two problems. Every `.cargo/config.toml` in the family
 currently states in prose that the remote is PRIVATE. That prose is stale as of
 today and each child PRD corrects it in the same edit that renames it.
+
+## The master board's own prose is left as it is — deliberately
+
+`prds/` is not renamed, and on the master board that rule swallows almost
+everything: **48 files under `/Users/feb/dev/infra/prds/` name the crate**
+(`git grep -lI conserved -- prds`, 2026-08-28), and all but a handful are PRD
+bodies and specs recording work already done.
+
+Two of them are not records, and leaving them is a choice rather than an
+oversight:
+
+- `prds/plan.md:158` — *"`conserved` is pinned from github.com/yesitsfebreeze/shared
+  (**private**)"*. About to be wrong twice over: wrong name, wrong visibility.
+- `prds/vision.md:81` and `:92` — both use `conserved` as the **live** crate
+  name while describing the destination.
+
+They are left because `plan.md` is regenerated by `plan.py` on every scan and
+`vision.md`'s two lines sit beside the `@…/adopt-conserved` edges that must not
+move — correcting the prose beside an address that is deliberately stale reads
+as an inconsistency either way. **This node does not own the master board's own
+text.** If it is worth fixing it is a one-line follow-up on this board, filed
+separately, and it is named here so the next reader knows it was seen rather
+than missed.
 
 ## Out of scope, stated so nobody widens it
 
