@@ -1,12 +1,24 @@
 {
  "after": {
-  "p5-adoption": []
+  "p5-adoption": [],
+  "rename-conserved-to-shared": [],
+  "the-ontology-digest-indexes-a-dead-store": [
+   "rename-conserved-to-shared"
+  ]
  },
  "planned_at": "2026-08-24",
  "schedule": {
   "p5-adoption": {
-   "end": 50.0,
+   "end": 30.0,
    "start": 0.0
+  },
+  "rename-conserved-to-shared": {
+   "end": 30.0,
+   "start": 0.0
+  },
+  "the-ontology-digest-indexes-a-dead-store": {
+   "end": 60.0,
+   "start": 30.0
   }
  }
 }

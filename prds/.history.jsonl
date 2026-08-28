@@ -3,4 +3,4 @@
 {"d": "2026-08-25", "done": 9, "hdone": 31.5, "hleft": 215.0, "left": 5, "states": {"done": 9, "failed": 1, "open": 1, "specced": 3}}
 {"d": "2026-08-26", "done": 9, "hdone": 31.5, "hleft": 215.0, "left": 5, "states": {"done": 9, "open": 1, "specced": 4}}
 {"d": "2026-08-27", "done": 12, "hdone": 158.5, "hleft": 88.0, "left": 3, "states": {"done": 12, "open": 2, "specced": 1}}
-{"d": "2026-08-28", "done": 12, "hdone": 158.5, "hleft": 88.0, "left": 3, "states": {"done": 12, "open": 2, "specced": 1}}
+{"d": "2026-08-28", "done": 14, "hdone": 246.5, "hleft": 30.0, "left": 3, "states": {"done": 14, "open": 2, "specced": 1}}
