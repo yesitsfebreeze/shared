@@ -1,5 +1,5 @@
 ---
-state: open
+state: analyzing
 repo: shared
 origin: derived
 from: "@master/crate-is-named-shared"
@@ -17,6 +17,7 @@ footprint:
   - .github/workflows/ci.yml
   - .pi/ontology/digest.md
   - .mi/docs/memos/distribution.md
+claim: analyst-shared-rename 2026-08-28 13:38
 ---
 
 # `conserved` becomes `shared` — directory, package, and the rev the family pins
