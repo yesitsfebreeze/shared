@@ -17,6 +17,15 @@
 //! above the acceptance section; a gate reporting green on a condition that
 //! does not hold is worse than no gate.
 //!
+//! # What an open box is spelled like
+//!
+//! Any Markdown list marker — `-`, `*`, `+`, or an ordered `1.`/`1)` — then a
+//! bracket pair holding nothing but whitespace. The ordered arm arrived on
+//! 2026-08-28 from `@infra/gates-adopt-the-best-matcher`, which adopted this
+//! file's matcher on the other three trees and measured the one spelling it
+//! did not close. All four gates carry the identical function and the
+//! identical fixture table now.
+//!
 //! `- [x]` is a closure. `- [~]` is a closure too: it is a box struck with a
 //! reason, per `shared/learnings/done-means-done.md` § The three forms an
 //! unclosable box may take. A strike records a bar the code did not clear, not
@@ -128,25 +137,65 @@ fn frontmatter_state(text: &str) -> Option<String> {
 	None
 }
 
-/// True when `line` opens an unticked checkbox: a list bullet, then a bracket
+/// Strips one Markdown list marker from the front of `rest`, returning what
+/// follows it, or `None` when `rest` does not open a list item.
+///
+/// The three bullets (`-`, `*`, `+`) are this file's own, unchanged. The
+/// ordered arm (`1.`, `2)`) came back from mitosys, model and realm on
+/// 2026-08-28 (`@infra/gates-adopt-the-best-matcher`, spec03 and spec05): this
+/// matcher was the widest of the four and was adopted by the other three, and
+/// the port measured a spelling it does not close. It strips a bullet or gives
+/// up, so an ordered task list reaches neither branch and `1. [ ]` walks past
+/// it exactly as it walks past the single literal `- [ ]`. GitHub renders an
+/// ordered task list as checkboxes exactly like an unordered one, so the same
+/// rendered open box was invisible to all four gates.
+///
+/// Zero ordered-marker boxes exist on any of the four boards, measured
+/// 2026-08-28 over every tracked board file on mitosys (122), model (75),
+/// realm (19) and this tree (16): no hits, on any tree, in any state. The arm
+/// changes no verdict today.
+///
+/// `digits > 9` is GFM's own bound on an ordered marker, and it is what keeps
+/// a year or a version number from being read as a list marker. `)` is
+/// admitted beside `.` because GFM admits both.
+///
+/// Kept as its own arm so it can be removed on its own if the ordered form is
+/// ruled out of scope.
+fn strip_list_marker(rest: &str) -> Option<&str> {
+	if let Some(after) = rest
+		.strip_prefix('-')
+		.or_else(|| rest.strip_prefix('*'))
+		.or_else(|| rest.strip_prefix('+'))
+	{
+		return Some(after);
+	}
+	let digits = rest.len() - rest.trim_start_matches(|c: char| c.is_ascii_digit()).len();
+	if digits == 0 || digits > 9 {
+		return None;
+	}
+	let rest = &rest[digits..];
+	rest.strip_prefix('.').or_else(|| rest.strip_prefix(')'))
+}
+
+/// True when `line` opens an unticked checkbox: a list marker, then a bracket
 /// pair holding nothing but whitespace.
 ///
-/// The bullet is any of Markdown's three (`-`, `*`, `+`) and the gap between
-/// bullet and bracket is any run of spaces, because all of those render as the
-/// same open box in every viewer the board is read in. A gate matching one
-/// spelling only is a gate a stray `*`-bulleted box walks past, and a board
-/// file is prose, written by hand, in four repositories.
+/// The marker is any of Markdown's three bullets or an ordered marker (see
+/// [`strip_list_marker`]) and the gap between marker and bracket is any run of
+/// spaces, because all of those render as the same open box in every viewer
+/// the board is read in. A gate matching one spelling only is a gate a stray
+/// `*`-bulleted box walks past, and a board file is prose, written by hand, in
+/// four repositories.
 ///
 /// A ticked box and a struck box are closures and do not match: their brackets
 /// are not empty. The struck form is a box whose bar the code did not clear,
 /// closed with a reason beside it -- never work that is merely still owed.
+///
+/// This body is byte-identical to mitosys's, model's and realm's, which is the
+/// point: the four gates disagreeing about what a box is was the defect
+/// `@infra/gates-adopt-the-best-matcher` existed to remove.
 fn opens_an_unticked_box(line: &str) -> bool {
-	let rest = line.trim_start();
-	let Some(rest) = rest
-		.strip_prefix('-')
-		.or_else(|| rest.strip_prefix('*'))
-		.or_else(|| rest.strip_prefix('+'))
-	else {
+	let Some(rest) = strip_list_marker(line.trim_start()) else {
 		return false;
 	};
 	let rest = rest.trim_start_matches(' ');
@@ -235,6 +284,57 @@ fn every_done_prd_has_no_unticked_box() {
 			bad.len()
 		);
 	}
+}
+
+/// The matcher, pinned to a fixture rather than to the board.
+///
+/// The board carries zero of these spellings today, on all four trees, so
+/// nothing about the widening is held by the walk above: it reads the same
+/// green it read yesterday. Only this fixture fails if the matcher narrows
+/// back to the single literal `- [ ]`, or if the ordered arm is dropped.
+///
+/// The rows are identical to mitosys's, model's and realm's, so "proven by the
+/// same fixture run" is literal rather than inherited.
+#[test]
+fn the_matcher_reads_every_spelling_of_one_rendered_box() {
+	// (line, is an open box)
+	let cases: &[(&str, bool)] = &[
+		// The five that walked past the literal `- [ ]` matcher.
+		("* [ ] a star bullet", true),
+		("+ [ ] a plus bullet", true),
+		("- [] no space inside the brackets", true),
+		("-  [ ] two spaces after the bullet", true),
+		("1. [ ] an ordered task list", true),
+		("1) [ ] an ordered task list, paren marker", true),
+		// Already red before the widening, and still red.
+		("- [ ] the literal spelling", true),
+		("  - [ ] indented, under no heading", true),
+		("\t- [ ] tab-indented", true),
+		// Closures. `- [~]` is struck-with-a-reason, not work still owed.
+		("- [x] ticked, on evidence", false),
+		("- [X] ticked, capital", false),
+		("- [~] ~~struck~~ — with the reason beside it", false),
+		("* [x] ticked under a star bullet", false),
+		// Not boxes at all.
+		("prose quoting an inline `- [ ]` mid-sentence", false),
+		("- [a link](https://example.invalid) is not a box", false),
+		("- not a box at all", false),
+		("1234567890. [ ] ten digits, past GFM's bound", false),
+		("state: done", false),
+	];
+	let wrong: Vec<&str> = cases
+		.iter()
+		.filter(|(line, open)| opens_an_unticked_box(line) != *open)
+		.map(|(line, _)| *line)
+		.collect();
+	assert!(
+		wrong.is_empty(),
+		"{} line(s) read the wrong way — every row here renders as the same \
+		 open box, or as no box at all, in every viewer this board is read \
+		 in:\n  {}",
+		wrong.len(),
+		wrong.join("\n  ")
+	);
 }
 
 /// The exemption list is shrink-only. An entry added today that names a
