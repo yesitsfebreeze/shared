@@ -1,5 +1,5 @@
 ---
-state: analyzing
+state: specced
 repo: shared
 origin: derived
 from: "@master/crate-is-named-shared"
@@ -17,7 +17,6 @@ footprint:
   - .github/workflows/ci.yml
   - .pi/ontology/digest.md
   - .mi/docs/memos/distribution.md
-claim: analyst-shared-rename 2026-08-28 13:38
 ---
 
 # `conserved` becomes `shared` — directory, package, and the rev the family pins
@@ -64,7 +63,7 @@ own child PRD.
 Measured on 2026-08-28 by a probe that was run and then deliberately reverted;
 every number below is reproduced against `main` as it stands today.
 
-### 1. `git mv conserved shared`
+### 1. `mv conserved shared`
 
 **19 tracked files** (`git ls-files conserved | wc -l` = 19).
 `conserved/tests/done_boxes_are_ticked.rs` moves **unmodified** — its content
@@ -301,7 +300,7 @@ exclusion above.
 
 ## Acceptance
 
-- [ ] `git mv conserved shared` done and nothing was lost:
+- [ ] `mv conserved shared` done and nothing was lost:
       `git ls-files shared/ | wc -l` is **19** — the pre-move count, measured
       2026-08-28 and pinned here because it is recorded nowhere else. If it is
       not 19 when you start, the crate has changed since; record the new number
@@ -350,3 +349,17 @@ exclusion above.
 
 - rev: `TBD`
 - pushed to `origin/main`: `TBD`
+
+> **Use plain `mv`, never `git mv` — measured 2026-08-28, and it already bit
+> once.** `git mv` stages the rename into the shared index, and a concurrent
+> orchestrator commit then sweeps it in. That is exactly what happened in
+> `shared`: a commit whose only intended file was a PRD body carried all 19
+> renames with it as `R100`, without the root `Cargo.toml` edit that goes with
+> them, and `cargo metadata --no-deps` exited 101 on a clean checkout of `main`
+> — *"failed to load manifest for workspace member"*. The working tree looked
+> green the whole time, because the one-line fix sat in it uncommitted.
+>
+> **`git mv` buys nothing here.** Git computes rename detection from content
+> similarity at diff time, not from the index, so a plain `mv` produces exactly
+> the same `R100` rows in the eventual commit. The only thing `git mv` adds is
+> the window in which someone else's commit can take your half-finished rename.
