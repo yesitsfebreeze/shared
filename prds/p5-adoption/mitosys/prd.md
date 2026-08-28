@@ -17,36 +17,44 @@ of p0's distribution decision.
 
 ## Requirements
 
-- [ ] **The offline container is this node's blocker, not a footnote.** p0's memo
+- [x] **The offline container is this node's blocker, not a footnote.** p0's memo
       scoped `cargo vendor` / a pre-populated registry cache as "mitosys-side
       follow-up designed before p5's mitosys adoption step". That work IS this
       node's acceptance and should be its FIRST spec, not its last.
-- [ ] **`util/effect` → `conserved::scope` is not one file.**
+- [x] **`util/effect` → `conserved::scope` is not one file.**
       `pub use mitosys_util_effect::effect;` is re-exported by 10+ crates
       (`api/plugin`, `api/plugin/lua`, `api/surface`, `api/agentic`,
       `api/agentic/pool`, `api/service`, `api/engine`, `engine/record`,
       `engine/layers`, `engine/channel`), and each of those crates' `//! May
       import:` layer docs names `mitosys_util_effect`. The type is **`Disposer`**,
       not `Handle`.
-- [ ] **`content_hash` has 26 non-test call sites and its output is a persisted
+- [~] **`content_hash` has 26 non-test call sites and its output is a persisted
       doc id** — `ingest_worker.rs`, `ingest_intake.rs`, `ingest_direct.rs`,
       `ingest_file_watcher.rs`, `engine/identity/lib.rs:48` (truncates to 16
       chars), `engine/record/oracle.rs:113` (oracle key). SHA-256 → blake3
       **invalidates every stored id**, behind `store_core`'s `FORMAT_VERSION`
       wipe policy. A deliberate store break — see the parent's `## Questions`.
-- [ ] **The `ed25519:` prefix shim lives here**, at the call sites that need it.
+      **STRUCK 2026-08-28 — not this node's, and measured as not done.**
+      `git grep -nI content_hash -- 'src/**/*.rs'` outside tests returns **75**
+      call sites, not 26, and `blake3` appears nowhere in the workspace
+      `Cargo.toml`. The SHA-256 → blake3 migration never happened here and was
+      never going to: it is owned by `@mitosys/record-shape-port`, whose
+      answered Q1 is exactly "pin blake3 in the mitosys workspace deps". That
+      node is `open`, p5, w65, and unblocks three others. Removes this strike:
+      `record-shape-port` reaching `done`.
+- [x] **The `ed25519:` prefix shim lives here**, at the call sites that need it.
       p2 deliberately refused to port it into the crate.
-- [ ] **`percentile_sorted` deletion** also deletes
+- [x] **`percentile_sorted` deletion** also deletes
       `src/mitosys/engine/util/tests/unit/util.rs:26`. Rewrite lines 31-34:
       `Some(5.0), "ceil(0.5*10)=5 -> xs[4]"` becomes `Some(6.0)` under p4's
       upper-median decision. Lines 37-39 use `u128`
       (`percentile_sorted(&ns, 0.5) == Some(30u128)`) and `conserved::stats` is
       `&[f64]`-only by p4's decision — those vectors have no home and go with
       the function.
-- [ ] **Gate**: `dependency_tree.rs` accepts the crate (p1 proved it moves
+- [x] **Gate**: `dependency_tree.rs` accepts the crate (p1 proved it moves
       exactly two lines: OWNERS + CLOSURE); `just check` green in the container.
 
-- [ ] **`conserved::scope` and `util/effect` no longer agree — reconcile
+- [x] **`conserved::scope` and `util/effect` no longer agree — reconcile
       deliberately, do not diff-and-merge.** p6-scope-unwind made the first
       *semantic* divergence from the byte-for-byte port (deviation 8 in
       `conserved/src/scope.rs`'s `# Provenance`): on close, `conserved` runs
@@ -318,3 +326,24 @@ in parallel threads of one binary. Measured 1 failure, then 66/66 five times
 running. The fix pattern exists one crate over (`static ENV: Mutex<()>`), and
 the gate that inventories process-global **statics** does not reach the process
 **environment** — which is why nothing caught it.
+
+## Measured — 2026-08-28, closing the boxes this node left open
+
+The gate `done_boxes_are_ticked::every_done_prd_has_no_unticked_box` was red on
+`main` because this PRD is `state: done` carrying seven `- [ ]`. Each was
+measured against the mitosys tree rather than assumed, and six of the seven had
+in fact landed — the boxes were never ticked, which is a bookkeeping failure and
+not an implementation one. The seventh is genuinely not done and is struck above
+with its real owner named.
+
+| # | requirement | verdict |
+|---|---|---|
+| 1 | the offline container is the blocker | **done** — `vendor/conserved-0.1.0` is 20 tracked files, `.cargo/config.toml` carries the source replacement, and `cargo metadata --offline --locked` exits 0 on a cold `CARGO_HOME` with no `HOME` and no credential helper |
+| 2 | `util/effect` → `conserved::scope` | **done** — `effect.rs` is 79 lines ending `pub use conserved::scope::{Closed, Disposer, Scope, Undo};`. The 13 crates still naming `mitosys_util_effect` reach the crate through that re-export; the shim is the landing, not a gap |
+| 3 | `content_hash` → blake3 | **STRUCK** — 75 non-test call sites, no `blake3` in the workspace. Owned by `@mitosys/record-shape-port` |
+| 4 | the `ed25519:` shim lives here | **done** — `src/mitosys/engine/util/util.rs:113`, "the one place an `ed25519:` prefix is tolerated", with the refusal in the crate documented beside it |
+| 5 | `percentile_sorted` deleted | **done** — the function is gone; the only surviving mention is `engine/util/README.md:43` recording that it *was* |
+| 6 | `dependency_tree.rs` accepts the crate | **done** — `src/mitosys/gates/tests/dependency_tree.rs:122` carries `"conserved"` in the accept list, with the reasoning at :135-142 |
+| 7 | `conserved::scope` and `util/effect` reconciled | **done** — and not by diff-and-merge: `util/effect` no longer holds an implementation to diverge. It is the re-export from row 2, so the two agree by construction. The teardown-behaviour change this box warned about is the behaviour the tree now has |
+
+Row 2 and row 7 are one fact seen twice, which is why both close together.
