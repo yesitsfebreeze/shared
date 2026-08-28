@@ -1,5 +1,5 @@
 ---
-state: specced
+state: done
 mode: afk
 priority: 44
 est: 20h
@@ -241,3 +241,80 @@ Also noted: `cargo machete` is already red on `src/` alone at `276a400` — 11
 crates, 14 unused deps, which looks like `p8d-floor-split` fallout — and once
 `vendor/` is committed, `quality.yml`'s bare `cargo machete` will walk it and
 needs a path argument.
+
+
+## Done 2026-08-28 — `spec02`–`spec04`, and the address does not move
+
+Container `just check` — this node's own `verify:` — **EXIT=0, 2139/0/21**,
+with `conserved` compiled from `vendor/` under `CARGO_NET_OFFLINE=true` and an
+**empty `/usr/local/cargo/git/`**: no credential, no git access. Host
+`just check` 2140/0/21. Board re-ran vectors 10/0, `dependency_tree` 8/0,
+`fmt --check` exit 0. Landed in mitosys as `2d04000d`.
+
+### `vectors::address` is pinned to SHA-256, on the user's decision
+
+It is now byte-for-byte what `content_hash` computed before it became blake3,
+so **no address in any existing store moved**. `content_hash` stays blake3 and
+its call-site count drops **21 → 20** — and the one that left is exactly the one
+that was never an identity.
+
+**The rule, in one line, written at both hash sites and in the `vectors` module
+doc: an id may move behind a format bump, because the fold re-mints it from the
+event's text; an address may not move at all, because nothing re-mints a file
+name.**
+
+An `assert_ne!` now sits beside the equality in `vectors/tests/vectors.rs`.
+Rewriting the old assertion to the new spelling would have left **nothing**
+guarding the split, and the next person to "unify the two hashes" would
+re-couple the address and strand every journal. Now that fails a test.
+
+### Re-verified by replaying the original fixture — a user's first run
+
+The pre-adoption journal and its SHA-256 blobs, restored from git into the
+working tree only (`git show >`, never `git checkout --`, so the index stayed
+clean), replayed through the new code:
+
+1. **The fold succeeds.** No `Corrupt`, no refusal. Confirmed independently
+   outside the tree: SHA-256 over the hex of every `to_bits` in Python
+   reproduces `c2b2950f…768d0`, the name the file already had.
+2. **Ids are re-minted consistently** — and this **refutes a claim the worker
+   had itself written into the docs earlier**, that an id is "carried in the
+   event, never re-derived on replay". Measured: the fold recomputes it from the
+   event's *text*, `blake3(text)` where the recording held `sha256(text)`, both
+   checked against oracles outside the tree. Corrected everywhere it appeared,
+   and the real argument is stronger than the one it replaced.
+3. **One thing still breaks, and it is silent.** Filed, not worked around.
+
+### The remaining gap, filed as `@mitosys/recall-references-dangle-silently`
+
+An id stored as a **literal cross-entity reference** is matched, not re-minted,
+so after a hash change it matches nothing. Two entities came back
+`heat 1.0 / access 1` where the recording had `1.96 / 2`, and the delivered
+ranking moved — **no error, no log, no refusal**.
+
+A user's first run now: the pack wipes on `FORMAT_VERSION` 16, **the fold
+succeeds**, the graph rebuilds whole under blake3 ids, and accumulated recall
+heat and access counts are silently dropped. **Materially smaller than "comes up
+empty", and worse in kind** — a workspace that refuses to boot tells you
+something is wrong; this one ranks results differently and says nothing.
+`Ingest::replaces` is the same shape and the fixture does not exercise it, so
+two is a lower bound rather than a census.
+
+### The fixture's blob names did change, and that is not the rule moving
+
+`embed_text`, the fake embedder, derives its vector **from** `content_hash(text)`
+— so blake3 gave it different floats, and different floats have a different
+SHA-256 address, correctly. A real embedder returns model output. The caveat is
+written into the fixture's module doc so nobody reads the diff as a
+counter-example.
+
+### One more defect, filed as `@mitosys/config-tests-race-on-the-environment`
+
+The first container `just check` after the pin went red on
+`load_of_a_foreign_root_pins_data_dir_to_that_root` — and the mechanism was
+found rather than shrugged at. `Config::load` reads `MITOSYS_MEMORY_DIR`; a
+**sibling test** `set_var`s and `remove_var`s that same variable with no guard,
+in parallel threads of one binary. Measured 1 failure, then 66/66 five times
+running. The fix pattern exists one crate over (`static ENV: Mutex<()>`), and
+the gate that inventories process-global **statics** does not reach the process
+**environment** — which is why nothing caught it.

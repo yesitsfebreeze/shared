@@ -35,18 +35,35 @@ reading more code.
 
 ## Acceptance
 
-- [ ] `grep -rn percentile_sorted ../mitosys/src --include='*.rs'` returns no
-      results.
-- [ ] `util/util.rs` no longer defines `percentile_sorted`.
-- [ ] `util/tests/unit/util.rs` no longer defines
+- [x] `grep -rn percentile_sorted ../mitosys/src --include='*.rs'` returns no
+      results. Ran 2026-08-28 in `../mitosys`: no output, exit 1. The
+      deleted-provenance note lives in `engine/util/README.md`
+      (“What left, and why it did not move”) rather than in a `.rs` doc
+      comment, so the record survives without the grep matching it.
+- [x] `util/util.rs` no longer defines `percentile_sorted`. The whole
+      definition and its doc comment are gone; the module doc no longer
+      advertises “percentiles”.
+- [x] `util/tests/unit/util.rs` no longer defines
       `percentile_sorted_is_nearest_rank_with_edges_and_generic_types` (all
       of it, including the `u128` vectors) — not a partially-edited
-      survivor.
-- [ ] The crate's other tests in that file (`hex_encode_...`,
+      survivor. The whole `#[test]` block, lines 25–40 inclusive, was
+      removed as one unit; the same grep above is the proof.
+- [x] The crate's other tests in that file (`hex_encode_...`,
       `hex_decode_...`, `content_hash_...`, `cmp_rank_...`, etc.) are
-      untouched and still pass.
-- [ ] `cargo test -p mitosys-engine-util` passes inside the offline container
-      (spec01's mechanism).
+      untouched and still pass. `cargo test -p mitosys-engine-util`:
+      `68 passed; 0 failed` in the unit target plus `8 passed; 0 failed`
+      in `tests/watcher.rs`. (`content_hash_...` is rewritten later by
+      **spec03**, which is that spec's change, not this one's.)
+- [x] `cargo test -p mitosys-engine-util` passes inside the offline container
+      (spec01's mechanism). Covered by the container's whole-workspace run,
+      `docker compose exec dev cargo test --workspace --offline`, with
+      `CARGO_NET_OFFLINE=true`: **2138 passed; 0 failed; 21 ignored**, exit 0.
+      On the host, `cargo test -p mitosys-engine-util` on its own gives
+      `68 passed; 0 failed` (unit) + `8 passed; 0 failed` (`tests/watcher.rs`)
+      + `0` doc-tests. (The board's correction was load-bearing here: the
+      spec's original `-p mitosys-util` names a package `cargo metadata` does
+      not list, and cargo answers that with "no packages matched" and exit 0 —
+      a verify that cannot fail.)
 
 ## Verify and Proof
 

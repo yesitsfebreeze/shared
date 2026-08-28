@@ -60,26 +60,162 @@ rendering; `engine/record/oracle.rs:113` keys the oracle and both id shape
 
 ## Acceptance
 
-- [ ] `util::content_hash` calls `conserved::ContentId` internally; `sha2`
-      is no longer reachable from that function's body (it may still be a
-      dependency of other crates for unrelated hashing — this spec does not
-      assert `sha2` leaves the workspace, only that `content_hash`'s own
-      algorithm is blake3).
-- [ ] `store_core`'s `FORMAT_VERSION` (currently `15`,
-      `engine/store_core/lib.rs:101`) is bumped by exactly one, with a
-      comment naming the SHA-256→blake3 id break as the reason — matching
-      the existing convention at that constant's other bump comments.
-- [ ] Every one of the 20 measured call sites (re-verified by grep, not
-      copied from this file) compiles and produces a `ContentId`-shaped
-      identity; none is left calling a stale SHA-256 helper.
-- [ ] `ContentId::from_str`'s `ed25519:`-prefix refusal (p2's decision) is
+- [x] `util::content_hash` calls `conserved::ContentId` internally; `sha2`
+      is no longer reachable from that function's body. The whole body is now
+      `conserved::ContentId::of(s.as_bytes()).to_string()` — one line, no
+      `Sha256`, no `hex::encode`. Signature unchanged (`&str -> String`), and
+      `ContentId`'s `Display` is 64 lowercase hex, so every call site's type
+      and shape carry over.
+      `sha2` stays declared by `mitosys-engine-util`, for `digest()` — the
+      raw-32-byte SHA-256 whose only callers are `store_core`'s
+      `canonical_digest`/`map_digest` (`lib.rs:562,569`), a changed-or-not
+      marker for the pack and **not an identity**. Its doc comment used to
+      claim it was "deliberately the *same* function underneath" as
+      `content_hash`; that sentence is now false and has been rewritten rather
+      than left standing.
+- [x] `store_core`'s `FORMAT_VERSION` is bumped by exactly one, 15 -> 16, at
+      `engine/store_core/lib.rs:106` (the board's corrected line), with a
+      trailing `// v16: content_hash moved SHA-256 -> blake3
+      (conserved::ContentId), so every persisted doc/entity id, dedup key and
+      oracle key rehashes — a wipe-and-re-derive break the user accepted
+      2026-08-21, not a migration (…spec03)` in the same one-line-per-version
+      shape as v15, v14, v13 and v11 beneath it.
+- [x] Every one of the measured call sites (re-verified by grep, not copied
+      from this file) compiles and produces a `ContentId`-shaped identity;
+      none is left calling a stale SHA-256 helper. The board's corrected count
+      of **21 was reproduced exactly** before the pin — including
+      `ingest_place.rs` at `:381` and `:429` and `ingest_worker.rs` at
+      `206, 254, 599` — and **20 of them moved to blake3**. None needed
+      editing: the function's name, signature and rendered shape are
+      unchanged, so the algorithm moved underneath them.
+      **The twenty-first is `engine/vectors/lib.rs`, and it deliberately did
+      not move** (see "The address stays SHA-256" below). It is the one site
+      of the 21 that was never an identity, and after the pin the grep returns
+      20 call sites plus the definition. Every remaining one is a doc id,
+      entity id, dedup key, cache key or oracle key — exactly the population
+      the parent PRD scoped.
+      `engine/identity/lib.rs:48`'s 16-char truncation still holds — blake3
+      renders 64 lowercase hex the same as SHA-256 did — and it is a
+      process-lifetime build id, never persisted.
+- [x] `ContentId::from_str`'s `ed25519:`-prefix refusal (p2's decision) is
       not worked around anywhere in the id path; the prefix-tolerant
-      `util::hex::decode` keeps serving only its existing non-id (key
-      string) callers, unchanged.
-- [ ] `cargo test --workspace` passes inside the offline container
-      (spec01's mechanism), including any test asserting
-      `id == content_hash(text)` (`engine/graph/merge.rs:96`'s invariant) —
-      a break here is this spec's, not a pre-existing failure to shrug off.
+      `util::hex::decode` keeps serving only its existing non-id (key string)
+      callers, unchanged — **and that set is measured as empty.**
+      `grep -rn 'hex::decode\|hex::encode' src --include='*.rs' | grep -v
+      '/tests/'` returned exactly one line before this change,
+      `util/util.rs:15` inside `content_hash` itself, and returns none after
+      it. So `hex::decode` has never had a non-test caller in this tree and
+      `hex::encode` has just lost its only one; the box holds trivially,
+      because there is nothing left to work around with. Nothing calls
+      `ContentId::from_str` at all — mitosys holds ids as rendered `String`s
+      everywhere, so no id in this tree is parsed back.
+      `util::hex` is left byte-identical rather than deleted (this node's
+      deletion spec named one function and this is not it), with a doc block
+      added above it saying it is not the id path and must not become one.
+      **Reported, not chased:** a `pub mod` with zero callers is dead weight
+      the next reader will have to re-derive.
+- [x] `cargo test --workspace` passes inside the offline container
+      (spec01's mechanism). Measured twice, because the store break was
+      re-scoped mid-node:
+      **before the pin** — `docker compose exec dev cargo test --workspace
+      --offline` under `CARGO_NET_OFFLINE=true`: 2138 passed; 0 failed;
+      21 ignored, exit 0.
+      **after the pin** — host `just check` 2140 passed; 0 failed; 21 ignored,
+      exit 0, and container `just check` (the PRD's own `verify:`, under
+      `CARGO_NET_OFFLINE=true`) **2139 passed; 0 failed; 21 ignored, exit 0**.
+      `merge.rs:96`'s `id == content_hash(text)` invariant holds untouched —
+      both sides call the same function, so moving the algorithm moved both.
+
+      **Three things did break, all this spec's, all owned rather than
+      shrugged off.** The first `cargo test --workspace --no-fail-fast` after
+      the swap was 2133/6/21, in three targets:
+
+      1. `engine/base`'s two frozen-digest tests
+         (`source_id_is_byte_identical_for_every_scheme_that_carries_no_position`,
+         `a_declared_position_is_a_fourth_hashed_component`) — seven hardcoded
+         SHA-256 `source_id()`s. **Re-based, not recomputed from the failure
+         output**: each of the seven was re-derived by hand-typing the key
+         string `source_id()` documents (`scheme \0 object_id \0 section`,
+         plus `\0 position` when non-zero) and hashing it with blake3 outside
+         this tree; two of the seven matched the assertion's `left` value,
+         which is what makes the other five trustworthy. The test's comment
+         now says the baseline moved once, on 2026-08-28, for the algorithm
+         and not for the layout — which is still what it guards.
+      2. `engine/commands`'s **determinism conformance**, all four tests, and
+         this one is the finding rather than the chore. It did not fail a
+         byte-compare: `fold::replay` **refused the fixture** —
+         *"vector c2b2950f… named at seq 3 is corrupt"*. `vectors::address`
+         is `content_hash` over the f32 bit patterns, so the five committed
+         blobs were named by a rule that no longer exists, and
+         `Vectors::get`'s re-derive-on-read answered `Corrupt`. Fixed by the
+         sanctioned deliberate act: `record_the_determinism_fixture`
+         (`#[ignore]`d recorder) re-recorded all four JSON files and all five
+         blobs off the same texts, instants and producers. Recorded in that
+         file's module doc, not only in the commit.
+      3. Two gates, one real and one a homonym —
+         `membrane_boundary::every_membrane_dependency_is_allowed` (a membrane
+         crate declaring a non-membrane dep: a real gate doing its job, closed
+         with a scoped `EXEMPT` row) and
+         `tests_do_not_share_a_counter::no_test_measures_shared_state_against_its_verdict`
+         (its inventory scans every test file for the literal `failed(` and
+         attributed spec02's new `Scope::failed()` to `commands_exit.rs`'s
+         process-global `FAILED` latch).
+
+## The address stays SHA-256 — user decision, 2026-08-28
+
+`vectors::address` was the twenty-first `content_hash` call site and it is
+**pinned to SHA-256** rather than following the id to blake3. The decision is
+the user's, taken on this spec's own measurement, and it is recorded here
+because the code now holds two hash functions and that reads as an oversight
+unless the reason travels with it.
+
+**What the measurement was.** Replaying the pre-adoption determinism recording
+through the post-adoption code — the exact shape of a user's first run — was
+not a byte-compare failure. `fold::replay` **refused the fixture**: *"vector
+c2b2950f… named at seq 3 is corrupt"*. `store_core`'s `FORMAT_VERSION` wipes
+the packed graph and reaches neither the journal nor `.mi/vectors`, so the
+fold replayed an old journal whose `document`/`chunks` fields name SHA-256
+addresses, `Vectors::get` re-derived them under blake3, and the store refused
+byte-perfect blobs as `Corrupt`. The workspace came up **empty**. That is a
+total loss of reachability, not the bounded doc-id break the parent PRD
+scoped.
+
+**Why an id may move and an address may not.** The fold recomputes an entity id
+from the *text* the event carries — measured, not assumed: the same replay
+produced `b79d408a…` = `blake3(text)` where the recording held
+`101c80aa…` = `sha256(text)`, both verified against an oracle outside the tree.
+So the graph is re-minted whole and nothing inside it dangles. A vector address
+is different in kind: it is the name of a file the journal does not contain, and
+nothing can rename bytes the fold never sees. An append-only log cannot be
+rewritten to say a new name.
+
+**Implemented as `hex::encode(digest(..))`**, which is byte-for-byte what
+`content_hash` computed before it became blake3 — so no address in any existing
+store moved. Confirmed against a pre-adoption blob with an oracle outside this
+tree: unpacking `vectors/c2/b295…vec` out of git and taking SHA-256 over the hex
+of every `to_bits` reproduces `c2b2950f…`, the name the file already had.
+`vectors/tests/vectors.rs` now asserts the equality **and** an `assert_ne!`
+against `content_hash`, so the next attempt to "unify the two hashes" fails a
+test instead of stranding every journal.
+
+### Still broken, reported and deliberately not worked around
+
+Pinning the address makes the fold succeed; it does not close everything.
+**An id that one event stores as a literal reference to another entity still
+dangles, and it dangles silently.** A `memory.recall` event names the ids it
+recalled as text; `retrieval::score::apply_recall` skips ids the graph does not
+hold. On the same replay, two entities came back `heat 1.0 / access 1` where
+the recording had `1.96 / 2`, and the delivered ranking moved with them — with
+no error, no log and no refusal. `Ingest::replaces` is the same shape and that
+fixture does not exercise it.
+
+So a user's first run after this lands: the pack wipes on `FORMAT_VERSION`, the
+fold **succeeds**, the graph rebuilds whole under blake3 ids — and whatever
+recall heat and access counts the store had accumulated are silently dropped,
+changing retrieval ranking with nothing saying why. That is smaller than
+"comes up empty" and worse in kind, because it is silent. It is a finding for
+the board, not something this spec worked around.
+
 
 ## Verify and Proof
 
