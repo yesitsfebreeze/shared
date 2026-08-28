@@ -8,12 +8,19 @@ date: 2026-08-18
 code: mitosys src/mitosys/util/, llm src/utils/, shared conserved/src/scope.rs, shared conserved/src/content_id.rs
 ---
 
-# `conserved` — the crate both trees depend on
+# `shared` — the crate both trees depend on
 
-Named for the biology the family already runs on: a conserved region is the
-part of a genome that is identical across species because it cannot afford
-to drift. That is exactly the admission test below. (If the name reads as
-too cute, `shared-floor` says the same thing and nothing else changes.)
+**Renamed 2026-08-28. It was `conserved`; it is now `shared`.** The original
+name came from biology, and the sentence that carried it is worth keeping as a
+record of what the admission test below is *for*: a conserved region is the part
+of a genome that is identical across species because it cannot afford to drift.
+That is exactly the admission test. What it was not is the name of the
+repository the crate ships from, which is `shared`, and one thing with two names
+cost every consumer a `conserved` in its manifest resolving from an address that
+said `shared`. The name now matches the address. The etymology is history, not a
+claim about the word `shared` — there is no such thing as a "shared region" in
+genomics, and nothing below rests on the word. See [[crate-name]] for the
+decision, what the rename cost, and what it deliberately did not rename.
 
 ## The admission test
 
@@ -195,6 +202,19 @@ cost this section priced against option 2 is still owed. Read the
 occurrence of that organisation anywhere in this document — as a historical
 record of what was decided on 2026-08-21, never as an address to copy. The
 copyable pin is in §"Landed".
+
+**Corrected 2026-08-28 — the visibility moved too, later the same day.** The
+sentence above is accurate as of the morning it was written and is left standing
+as the record; it is no longer true. `yesitsfebreeze/shared` is **public**, at
+the user's decision, verified anonymously —
+`https://api.github.com/repos/yesitsfebreeze/shared` returns HTTP 200 with
+`"private": false, "visibility": "public"`. What that changes is
+*authentication* and nothing else: the vendored copies in all three consumers
+stay, because a public remote is still a network round trip and an offline build
+— mitosys's dev container has no network at build time — still cannot make it.
+Read every "PRIVATE" below, and in each consumer's `.cargo/config.toml`, as the
+reason vendoring was built rather than a reason it is still needed. See
+[[crate-name]].
 
 The cost option 2 carries is the one this section named against it: mitosys's
 dev container has no network at build time, so it needs vendoring or a

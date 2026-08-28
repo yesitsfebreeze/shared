@@ -157,10 +157,14 @@ it, this is a better-organised copy of the drift that is already there.
 - [[clock]] — both trees read the wall clock ~65 times each against a shared
   law that forbids it; the fix, and the ratchet that makes it affordable.
   Decided 2026-08-21; the type landed, the reads have not moved
-- [[shared-crate]] — the concrete proposal for `conserved`: what goes in,
+- [[shared-crate]] — the concrete proposal for the crate: what goes in,
   what stays out, and where the code lives — the one constraint that had to
   be decided before the first line moved, and was. Decided 2026-08-21; no
   consumer has adopted the crate yet
+- [[crate-name]] — the crate is named `shared`, not `conserved`: directory and
+  package move together for three lines, live prose is renamed and `prds/` is
+  not, and a vendored consumer build is a false green until the new rev is
+  published. Decided 2026-08-28
 - [[ratchet]] — one measurement discipline arrived at twice: model's floor
   and mitosys's ceiling are the same shape; each tree's missing half is
   filed on its own board
