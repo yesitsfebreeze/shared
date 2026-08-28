@@ -48,13 +48,20 @@ closable and the spec is blocked, not done.
 
 ## Acceptance
 
-- [ ] the realm box is `[x]` and the text under it quotes `just check` exit 0 with the vendor-check `content match` line, the four `Scope::new()` sites, and the two greps that exit 1
-- [ ] the ratchets box is `[x]` and the text under it quotes `wall_clock_reads_may_only_decrease ... ok` from each of the three trees with their `N passed; 0 failed` summaries and the three `RATCHET_CEILING` values
-- [ ] the load-proof box is `[x]` and the text under it quotes the three `load_*` binaries' `passed; 0 failed` lines
-- [ ] the mitosys box is `[~]`, its original text inside `~~…~~`, the reason naming `engine/util/util.rs:206-222` and `mitosys/prds/adopt-conserved`
-- [ ] the llm box is `[~]`, its original text inside `~~…~~`, the reason naming the llm child's box 3 (monotonic `Instant::now`), the 15 → 10 wall-clock count, and `model/prds/adopt-conserved`
-- [ ] `prd.md` holds no open box in any spelling the gate counts (`-`, `*`, `+`, `1.`, `1)` followed by an empty bracket pair) — under `## Requirements`, `## Acceptance`, or any other heading
-- [ ] `cargo test -p shared --test done_boxes_are_ticked` passes — 3 passed; 0 failed
+- [x] the realm box is `[x]` and the text under it quotes `just check` exit 0 with the vendor-check `content match` line, the four `Scope::new()` sites, and the two greps that exit 1
+      — quoted from the implementer's probe run 2026-08-28: `Scope adopted at 4 sites: ...`, `... both exit 1`, `cd ../realm && just check — exit 0 (vendor-check rev agreement + content match, ...)`
+- [x] the ratchets box is `[x]` and the text under it quotes `wall_clock_reads_may_only_decrease ... ok` from each of the three trees with their `N passed; 0 failed` summaries and the three `RATCHET_CEILING` values
+      — mitosys `ok. 7 passed; 0 failed`, model `ok. 3 passed; 0 failed`, realm `ok. 3 passed; 0 failed`; `RATCHET_CEILING` 48 / 10 / 0 at `:228` / `:82` / `:55`
+- [x] the load-proof box is `[x]` and the text under it quotes the three `load_*` binaries' `passed; 0 failed` lines
+      — `load_scope` 5 passed; 0 failed, `load_throughput` 1 passed; 0 failed, `load_unwind_panic` 7 passed; 0 failed
+- [x] the mitosys box is `[~]`, its original text inside `~~…~~`, the reason naming `engine/util/util.rs:206-222` and `mitosys/prds/adopt-conserved`
+      — `grep -n 'engine/util/util.rs:206-222' prd.md` → line 43 (the box) and the ledger row; `grep -q 'mitosys/prds/adopt-conserved'` exit 0
+- [x] the llm box is `[~]`, its original text inside `~~…~~`, the reason naming the llm child's box 3 (monotonic `Instant::now`), the 15 → 10 wall-clock count, and `model/prds/adopt-conserved`
+      — the box reads "monotonic `Instant::now` (74 in non-test source today), which the llm child's box 3 ... forbids converting"; "15 → ceiling 10"; `grep -q 'model/prds/adopt-conserved'` exit 0
+- [x] `prd.md` holds no open box in any spelling the gate counts (`-`, `*`, `+`, `1.`, `1)` followed by an empty bracket pair) — under `## Requirements`, `## Acceptance`, or any other heading
+      — `! grep -qE '^[[:space:]]*([-*+]|[0-9]+[.)]) \[[[:space:]]*\]' prd.md` exit 0; ticked 3, struck 2
+- [x] `cargo test -p shared --test done_boxes_are_ticked` passes — 3 passed; 0 failed
+      — `test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out` (`every_done_prd_has_no_unticked_box`, `the_matcher_reads_every_spelling_of_one_rendered_box`, `exemption_list_only_names_done_prds` all `ok`); second probe run after the edits: `EXIT=0`, 0 `FAIL`, 6 `GAP`, identical to the first
 
 ## Verify and Proof
 

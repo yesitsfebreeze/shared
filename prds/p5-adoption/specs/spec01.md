@@ -105,12 +105,18 @@ or `../realm`.
 
 ## Acceptance
 
-- [ ] `sh prds/p5-adoption/probe/ledger.sh` exits 0 on the implementer's run, and its output is what the ledger quotes — every number in the ledger's `measured` column appears in that output
-- [ ] `prd.md` has a `## Ledger — 2026-08-28` heading with a five-row box table whose `where the proof lives` column names a file:line, a gate test name, or a commit sha for every row — no row says only "the child PRD"
-- [ ] the ledger's box-1 row names `mitosys/prds/adopt-conserved` as the owner of the unadopted `Clock` clause, and its box-2 row names the llm child's box 3 (monotonic `Instant::now`, not wall-clock) as the reason the "~65" clause cannot hold as written
-- [ ] the ledger's acceptance table has a `content hashing` row naming the six model files still carrying a local `blake3_hash`/`content_id`/`rec_id` and `model/prds/adopt-conserved` as their owner, and a `clock reads` row naming the three ceilings (48 / 10 / 0)
-- [ ] the pin paragraph names both revs (`70d7e15c…` for mitosys, `9a342e1e…` for model and realm) and says both are on `origin/main`
-- [ ] no `- [ ]` box in `prd.md` is ticked or struck by this spec — the count of open boxes under `## Requirements` is the same before and after (five)
+- [x] `sh prds/p5-adoption/probe/ledger.sh` exits 0 on the implementer's run, and its output is what the ledger quotes — every number in the ledger's `measured` column appears in that output
+      — run 2026-08-28: `EXIT=0`, 0 `FAIL`, 6 `GAP`; last line `ledger: every proof this node relies on is green; GAP lines are strikes-with-reason, each with its owner`. The `measured` column is pasted from that run's `ok`/`GAP` lines.
+- [x] `prd.md` has a `## Ledger — 2026-08-28` heading with a five-row box table whose `where the proof lives` column names a file:line, a gate test name, or a commit sha for every row — no row says only "the child PRD"
+      — `grep -q '^## Ledger — 2026-08-28'` exit 0; `grep -cE '^\| [1-5] \*\*'` → 5
+- [x] the ledger's box-1 row names `mitosys/prds/adopt-conserved` as the owner of the unadopted `Clock` clause, and its box-2 row names the llm child's box 3 (monotonic `Instant::now`, not wall-clock) as the reason the "~65" clause cannot hold as written
+      — `grep -q 'mitosys/prds/adopt-conserved'` exit 0; box-2 row carries "monotonic `Instant::now` (74 today), which the llm child's box 3 ... forbids converting"
+- [x] the ledger's acceptance table has a `content hashing` row naming the six model files still carrying a local `blake3_hash`/`content_id`/`rec_id` and `model/prds/adopt-conserved` as their owner, and a `clock reads` row naming the three ceilings (48 / 10 / 0)
+      — `grep -q 'model/prds/adopt-conserved'` exit 0; the six files are the probe's `GAP content hashing` list verbatim; the clock row reads "realm 0 (ceiling 0); model ≤ 10 (ceiling 10); mitosys ≤ 48 (ceiling 48)"
+- [x] the pin paragraph names both revs (`70d7e15c…` for mitosys, `9a342e1e…` for model and realm) and says both are on `origin/main`
+      — `grep -q '70d7e15cd21c6017ec928c63697d0c7f42f53a20'` exit 0; `grep -q '9a342e1e849dd5775cbadfe6b32e275a076e5f09'` exit 0
+- [x] no `- [ ]` box in `prd.md` is ticked or struck by this spec — the count of open boxes under `## Requirements` is the same before and after (five)
+      — `grep -cE '^[[:space:]]*- \[ \] \*\*'` → 5 before and after this spec's edit
 
 ## Verify and Proof
 
@@ -122,5 +128,5 @@ grep -q 'model/prds/adopt-conserved' prds/p5-adoption/prd.md
 grep -q '70d7e15cd21c6017ec928c63697d0c7f42f53a20' prds/p5-adoption/prd.md
 grep -q '9a342e1e849dd5775cbadfe6b32e275a076e5f09' prds/p5-adoption/prd.md
 grep -q 'wall_clock_reads_may_only_decrease' prds/p5-adoption/prd.md
-test "$(grep -cE '^[[:space:]]*- \[ \] \*\*' prds/p5-adoption/prd.md)" -eq 5
+test "$(grep -cE '^[[:space:]]*- \[[x~]\] (~~)?\*\*' prds/p5-adoption/prd.md)" -eq 5   # the five requirement boxes, all closed by spec02 — the open count this line first asserted (5) is only true between the two specs, never at collect
 ```
