@@ -1,8 +1,8 @@
 ---
 complexity: 10
 footprint:
-  - ../mitosys/src/mitosys/util/util.rs
-  - ../mitosys/src/mitosys/util/tests/unit/util.rs
+  - ../mitosys/src/mitosys/engine/util/util.rs
+  - ../mitosys/src/mitosys/engine/util/tests/unit/util.rs
 ---
 
 # spec04 — delete `percentile_sorted`, a zero-caller function `conserved::stats` has no generic home for
@@ -45,7 +45,7 @@ reading more code.
 - [ ] The crate's other tests in that file (`hex_encode_...`,
       `hex_decode_...`, `content_hash_...`, `cmp_rank_...`, etc.) are
       untouched and still pass.
-- [ ] `cargo test -p mitosys-util` passes inside the offline container
+- [ ] `cargo test -p mitosys-engine-util` passes inside the offline container
       (spec01's mechanism).
 
 ## Verify and Proof
@@ -53,6 +53,25 @@ reading more code.
 ```sh
 cd ../mitosys
 grep -rn percentile_sorted src --include='*.rs'
-cargo test -p mitosys-util
+cargo test -p mitosys-engine-util
 just check
 ```
+
+
+## Addresses corrected 2026-08-28 by the board, measured at `276a400`
+
+Both footprint entries were stale after `p8d-floor-split` and are rewritten to
+`src/mitosys/engine/util/util.rs` and
+`src/mitosys/engine/util/tests/unit/util.rs`.
+
+**The verify command named a package that no longer exists.**
+`cargo metadata --no-deps` lists `mitosys-engine-util`,
+`mitosys-engine-util-math` and `mitosys-util-effect` — there is no
+`mitosys-util`. The verify command and the last acceptance box are rewritten to
+`-p mitosys-engine-util`. A verify naming a package cargo cannot resolve does
+not fail loudly, it fails as "no packages matched" — which is why this needed
+finding rather than waiting to be hit.
+
+Line numbers survived the move: `percentile_sorted` is still at `util.rs:104`
+and its test at `unit/util.rs:26`, with assertions at 28, 29, 31, 35, 36, 38,
+39 — all `reproduced` at the new paths.

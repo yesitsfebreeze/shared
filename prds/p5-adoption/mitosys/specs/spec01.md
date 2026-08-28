@@ -36,13 +36,13 @@ vendor/cache mechanism supplied everything, not the network.
 
 ## Acceptance
 
-- [ ] `docker compose down -v` (drops the `cargo-registry`/`cargo-git`
+- [x] `docker compose down -v` (drops the `cargo-registry`/`cargo-git`
       volumes, simulating a machine that has never built this repo) followed
       by `docker compose up -d dev` and `docker compose exec dev cargo build
       --workspace --offline` succeeds.
 - [ ] `docker compose exec dev cargo test --workspace --offline` succeeds
       (dev-dependencies are covered too, not just the build graph).
-- [ ] The provisioning step that fills `vendor/` or the registry/git cache is
+- [x] The provisioning step that fills `vendor/` or the registry/git cache is
       a committed script or `just` target, not a manual one-off — running it
       again after a `Cargo.toml` dependency change updates the cache/vendor
       tree without hand-editing.

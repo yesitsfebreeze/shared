@@ -2,7 +2,7 @@
 complexity: 70
 footprint:
   - ../mitosys/Cargo.toml
-  - ../mitosys/src/mitosys/util/util.rs
+  - ../mitosys/src/mitosys/engine/util/util.rs
   - ../mitosys/src/mitosys/engine/base/base_types.rs
   - ../mitosys/src/mitosys/engine/identity/lib.rs
   - ../mitosys/src/mitosys/engine/record/oracle.rs
@@ -90,3 +90,28 @@ cargo build --workspace
 cargo test --workspace
 just check
 ```
+
+
+## Addresses corrected 2026-08-28 by the board, measured at `276a400`
+
+`p8d-floor-split` moved the floor into the engine. **`src/mitosys/util/util.rs`
+no longer exists** — it is `src/mitosys/engine/util/util.rs`, package
+`mitosys-engine-util`. The footprint is rewritten. Line numbers largely
+survived the move; these did not:
+
+| this spec says | measured |
+|---|---|
+| `util/util.rs:44` (the `ed25519:` prefix) | `src/mitosys/engine/util/util.rs:44` — content `reproduced` |
+| `FORMAT_VERSION` at `engine/store_core/lib.rs:101` | value `15` correct, line is **106** |
+| **20** `content_hash` call sites | **21** |
+| `ingest_place.rs:411` | does not exist — there are **two** sites in that file, `:381` and `:429` |
+| `ingest_worker.rs:207,255,597` | **206, 254, 599** |
+
+Every other listed site still holds: `oracle:113`, `identity:48`,
+`intake:268`, `direct:64`, `file_watcher:189`, `hnsw:529`, `vectors:59`,
+`tick_tasks:173`, `commands_ingest_cmd:82`, `tag:120`, `server:554` and
+`:1444`, `base_types:430`, `:754`, `:759`, `:770`. The
+`grep -v 'base_types.rs:368'` filter is still correct.
+
+Callers now spell it `mitosys_engine_util::content_hash`, or `util::content_hash`
+through the alias.

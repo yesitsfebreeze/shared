@@ -1,5 +1,6 @@
 ---
-state: specced
+state: claimed
+claim: impl-p5-mitosys-spec01 2026-08-28T04:20
 mode: afk
 priority: 44
 est: 20h
@@ -37,7 +38,7 @@ of p0's distribution decision.
 - [ ] **The `ed25519:` prefix shim lives here**, at the call sites that need it.
       p2 deliberately refused to port it into the crate.
 - [ ] **`percentile_sorted` deletion** also deletes
-      `src/mitosys/util/tests/unit/util.rs:26`. Rewrite lines 31-34:
+      `src/mitosys/engine/util/tests/unit/util.rs:26`. Rewrite lines 31-34:
       `Some(5.0), "ceil(0.5*10)=5 -> xs[4]"` becomes `Some(6.0)` under p4's
       upper-median decision. Lines 37-39 use `u128`
       (`percentile_sorted(&ns, 0.5) == Some(30u128)`) and `conserved::stats` is
@@ -92,3 +93,55 @@ be fetched from a container or another machine.
 The user accepted this break explicitly on 2026-08-21, one version bump: SHA-256 hex doc ids -> blake3, behind `store_core`'s `FORMAT_VERSION` wipe.
 Wipe and re-derive, not a migration. It does not need re-escalating when this
 node runs.
+
+
+## Dispatched scoped to `spec01` — 2026-08-28, and why
+
+The implementer is told to build `spec01` and **stop**. Three reasons, and the
+first is this PRD's own text.
+
+1. **The PRD says so.** Its first requirement reads: "The offline container is
+   this node's blocker, not a footnote … That work IS this node's acceptance and
+   should be its FIRST spec, not its last."
+2. **`spec01`'s footprint is clean; `spec03` and `spec04`'s addresses are
+   rotted.** `@mitosys/p8-membrane/p8d-floor-split` landed at `276a400` and
+   moved the floor: `mitosys-util` → **`mitosys-engine-util` at
+   `src/mitosys/engine/util`**, `mitosys-util-math` →
+   **`mitosys-engine-util-math` at `src/mitosys/engine/util/math`**, and
+   `src/mitosys/util/` now holds **only `effect/`**. So:
+   - `spec02` cites `src/mitosys/util/effect/` — **still correct**, that crate
+     did not move.
+   - `spec03` and `spec04` cite `src/mitosys/util/util.rs` — **gone**. Both need
+     their addresses refreshed before anyone implements them, and that is the
+     board's edit, not a worker's.
+   This is the third time this session a spec has been rotted by a rename in
+   flight, after `plugins-view` (four paths → nine) and `p8d` itself (three →
+   sixteen). The standing lesson: a spec citing `src/mitosys/**` is stable under
+   these moves; one citing the moving half goes stale in an afternoon.
+3. **Another worker is live in the mitosys tree** on
+   `plugins-visible/census-counts-composed`, probing `api/plugin/` and the
+   `inspect` builtin — which `spec02`'s footprint overlaps.
+
+The implementer is asked, instead of running ahead, to report every stale
+address it notices in `spec02`–`spec04` measured against the current tree. That
+list is what the board needs to refresh them.
+
+
+## The stale-address sweep, done 2026-08-28
+
+`spec01`'s implementer was asked to report every address in `spec02`–`spec04`
+that the day's renames had rotted, rather than run ahead into them. It did, and
+the board has applied the corrections in each spec, each with its measurement.
+
+The scale is worth recording: **one of the four specs was clean** (`spec02`,
+apart from a `src/plugins/` → `src/builtins/` path), one had a moved file with
+five drifted line numbers and a miscount (`spec03`: 21 `content_hash` sites, not
+20), and one named **a cargo package that no longer exists** (`spec04`:
+`-p mitosys-util`). None of that would have failed loudly; a verify naming an
+unresolvable package reports "no packages matched" and moves on.
+
+That is the third time this session a spec has been rotted by a rename in
+flight — after `plugins-view` (four paths to nine) and `p8d-floor-split` itself
+(three to sixteen). The standing lesson is now paid for three times over: a spec
+citing `src/mitosys/**` survives these moves; one citing the moving half goes
+stale in an afternoon.

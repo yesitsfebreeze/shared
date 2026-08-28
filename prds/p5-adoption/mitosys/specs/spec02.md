@@ -13,7 +13,7 @@ footprint:
   - ../mitosys/src/mitosys/engine/layers/
   - ../mitosys/src/mitosys/engine/channel/
   - ../mitosys/src/mitosys/engine/genome/
-  - ../mitosys/src/plugins/memory/
+  - ../mitosys/src/builtins/memory/
   - ../mitosys/src/mitosys/gates/tests/dependency_tree.rs
 ---
 
@@ -40,7 +40,7 @@ mitosys_util_effect src --include='*.rs'` (excluding
 `util/effect/{lib.rs,tests/effect.rs}` themselves) currently returns **11**
 sites: `api/plugin`, `api/plugin/lua`, `api/surface`, `api/agentic`,
 `api/agentic/pool`, `api/service`, `engine/record`, `engine/layers`,
-`engine/channel`, `engine/genome`, and `src/plugins/memory/plugin.rs`. The
+`engine/channel`, `engine/genome`, and `src/builtins/memory/plugin.rs`. The
 PRD's named list of 10 includes `api/engine`, which no longer exists — it was
 folded into `src/plugins/memory` on 2026-08-21 per this repo's own
 `CLAUDE.md` — and omits `engine/genome` and `plugins/memory`, both of which
@@ -87,3 +87,19 @@ cargo build --workspace
 cargo test --workspace
 just check
 ```
+
+
+## Addresses corrected 2026-08-28 by the board, measured at `276a400`
+
+`src/plugins/` **does not exist.** A tree-wide rename moved every plugin
+directory to `src/builtins/` earlier that day; `src/` now holds `builtins/`,
+`mitosys/` and `surfaces/`. The footprint entry and the body reference are
+rewritten to `src/builtins/memory/plugin.rs` (package `mitosys-memory`).
+
+Everything else in this spec was **`reproduced`** against the current tree and
+needs no change: `src/mitosys/util/effect/` is still correct — that crate did
+**not** move under `p8d-floor-split`, because it is membrane's temporal half.
+The 11 re-export sites reproduce exactly (`grep -rl mitosys_util_effect src
+--include='*.rs'` gives 13 files, minus `util/effect/{lib.rs,tests/effect.rs}`),
+as do the four `catch_unwind` files and `api/plugin/plugin.rs`'s `.held(` at
+lines 330 and 616.
