@@ -332,8 +332,8 @@ One migration — named, not an exemption:
 
 Where adoption lives now:
 
-- One child PRD per consumer tree: `mitosys/prds/adopt-conserved` and
-  `model/prds/adopt-conserved`. They carry the requirements written in
+- One child PRD per consumer tree: `mitosys/.pearde/prds/adopt-conserved` and
+  `model/.pearde/prds/adopt-conserved`. They carry the requirements written in
   `.mi/prds/p5-adoption/{mitosys,llm}/prd.md`; this board stays the
   cross-tree ledger and dispatches nothing into the trees — the user's
   answer 2 of 2026-08-21 stands.

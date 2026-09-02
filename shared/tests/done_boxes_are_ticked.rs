@@ -6,7 +6,7 @@
 //! reason rather than ticked. The population the rule counts is settled by
 //! `shared/learnings/exemptions-name-their-reason.md` § The scope rule and by
 //! the user's decision of 2026-08-27, recorded as
-//! `../prds/memos/done-counts-which-boxes.md` on the master board.
+//! `../.pearde/memos/done-counts-which-boxes.md` on the master board.
 //!
 //! # What this file counts
 //!
@@ -65,10 +65,10 @@ fn root() -> PathBuf {
 	}
 }
 
-/// Every `prd.md` under `<root>/prds/`, as paths relative to the root.
+/// Every `prd.md` under `<root>/.pearde/prds/`, as paths relative to the root.
 fn board_files(root: &Path) -> Vec<String> {
 	let mut out = Vec::new();
-	walk(&root.join("prds"), &mut out);
+	walk(&root.join(".pearde").join("prds"), &mut out);
 	out.sort();
 	out
 		.iter()
@@ -240,7 +240,7 @@ fn every_done_prd_has_no_unticked_box() {
 	let files = board_files(&root);
 	assert!(
 		!files.is_empty(),
-		"found no prd.md under {}/prds — a gate that reads nothing must fail, \
+		"found no prd.md under {}/.pearde/prds — a gate that reads nothing must fail, \
 		 because a moved board would otherwise turn this check silently off",
 		root.display()
 	);

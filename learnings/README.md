@@ -162,7 +162,7 @@ it, this is a better-organised copy of the drift that is already there.
   be decided before the first line moved, and was. Decided 2026-08-21; no
   consumer has adopted the crate yet
 - [[crate-name]] — the crate is named `shared`, not `conserved`: directory and
-  package move together for three lines, live prose is renamed and `prds/` is
+  package move together for three lines, live prose is renamed and `.pearde/` is
   not, and a vendored consumer build is a false green until the new rev is
   published. Decided 2026-08-28
 - [[ratchet]] — one measurement discipline arrived at twice: model's floor

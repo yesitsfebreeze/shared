@@ -32,16 +32,16 @@ today.
 ## The seam
 
 Which types cross, which tree owns each, how each crosses. Decided
-2026-08-23 (`prds/two-halves-merge`).
+2026-08-23 (`.pearde/prds/two-halves-merge`).
 
 | type | owner | crosses as |
 |---|---|---|
-| `LearnOrigin` | model | one declaration, one home (`model/prds/one-learn-origin`); moves into `shared` only when mitosys ships signal — [[shared-crate]] criterion 1 admits today's need, never a speculative one |
+| `LearnOrigin` | model | one declaration, one home (`model/.pearde/prds/one-learn-origin`); moves into `shared` only when mitosys ships signal — [[shared-crate]] criterion 1 admits today's need, never a speculative one |
 | `ContentId`, `Clock`, `Scope`/`Disposer`, order stats | shared | `shared`, landed — a rev-pinned git dependency in each tree ([[shared-crate]] §Where it lives) |
-| record shape — preimage, bitemporal supersede, lazy decay, replay-as-fold | model | ported shape, not file: mitosys's `engine/record` adopts it, direction per [[record-shape]] (`mitosys/prds/record-shape-port`) |
-| grade envelope — `Baseline`/`Grade`/`normalized_ms`/`pass_window` | model | ported shape per [[ratchet]]; the carrier is mitosys `prds/p9-perf-floor` |
+| record shape — preimage, bitemporal supersede, lazy decay, replay-as-fold | model | ported shape, not file: mitosys's `engine/record` adopts it, direction per [[record-shape]] (`mitosys/.pearde/prds/record-shape-port`) |
+| grade envelope — `Baseline`/`Grade`/`normalized_ms`/`pass_window` | model | ported shape per [[ratchet]]; the carrier is mitosys `.pearde/prds/p9-perf-floor` |
 | reload seam — `interface` + loader | model | its own crate when mitosys's swap work starts, not before ([[shared-crate]] §What stays out) |
-| `LlmFunc`/`EmbedFunc` (`mitosys/src/mitosys/engine/model/lib.rs:48`) | mitosys | model satisfies the two closure types; zero wiring change on the mitosys side (`model/prds/back-llmfunc`) |
+| `LlmFunc`/`EmbedFunc` (`mitosys/src/mitosys/engine/model/lib.rs:48`) | mitosys | model satisfies the two closure types; zero wiring change on the mitosys side (`model/.pearde/prds/back-llmfunc`) |
 | corpus signal — mitosys record → model door | mitosys produces, model admits | a future master-board PRD, admitted after the origin vocabulary and the record shape converge (steps 4 and 6) |
 
 ### One `LearnOrigin`
@@ -81,7 +81,7 @@ The mapping, every variant of both current spellings:
 The `u8` discriminants are data on disk. A retired discriminant decodes by
 the table above and is never reassigned. The code and format consequences —
 the decode mapping in `try_from_u8`, or a format-version bump — are
-`model/prds/one-learn-origin`'s work.
+`model/.pearde/prds/one-learn-origin`'s work.
 
 ## The three couplings, in order of value
 
@@ -173,7 +173,7 @@ the answer.
 - **When it became measurable.** Commit `ab154f7` on `shared/` (2026-08-21),
   recorded in [[shared-crate]] §"Landed" as the `git init` of the `shared/`
   repository. The third repository existed from that commit onward: own
-  git tree, own board of seven nodes at `shared/prds/`, own
+  git tree, own board of seven nodes at `shared/.pearde/`, own
   `rust-version` pin, own `Cargo.toml`, own `shared/` crate, own remote
   at `https://github.com/inner-zirkle/shared`.
 - **What changed the answer.** Three consumers now exist, not two: the
@@ -218,19 +218,19 @@ The merge as it stands on 2026-08-23, one carrier per step:
 
 1. **Divergences** — done. [[divergences]] is decided; the model children
    `adopt-test-law`, `pin-toolchain`, `workspace-deps` are open on
-   `model/prds`.
-2. **Gates port** — carried by master `prds/propagate-gates` (analyzing).
+   `model/.pearde`.
+2. **Gates port** — carried by master `.pearde/prds/propagate-gates` (analyzing).
 3. **First shared crate** — done. `shared` landed ([[shared-crate]]
    §Landed); consumer adoption is held under shared `p5-adoption`.
 4. **Origin vocabulary** — carried by model child
-   `model/prds/one-learn-origin`. No prerequisite; lands now.
-5. **Grade shape into mitosys** — carried by mitosys `prds/p9-perf-floor`
-   under master `prds/one-ratchet` ([[ratchet]]).
+   `model/.pearde/prds/one-learn-origin`. No prerequisite; lands now.
+5. **Grade shape into mitosys** — carried by mitosys `.pearde/prds/p9-perf-floor`
+   under master `.pearde/prds/one-ratchet` ([[ratchet]]).
 6. **Record convergence** — direction per [[record-shape]]; carried by
-   mitosys child `mitosys/prds/record-shape-port`, sequenced with the fold
-   rewrite `p6k10` (`mitosys/prds/p6-rust-core/p6k-kern-merge/
-   p6k10-production-fold`). Unblocks master `prds/storage-convergence`.
+   mitosys child `mitosys/.pearde/prds/record-shape-port`, sequenced with the fold
+   rewrite `p6k10` (`mitosys/.pearde/prds/p6-rust-core/p6k-kern-merge/
+   p6k10-production-fold`). Unblocks master `.pearde/prds/storage-convergence`.
 7. **model behind `LlmFunc`/`EmbedFunc`** — carried by model child
-   `model/prds/back-llmfunc`. Last on purpose: the plumbing is small and it
+   `model/.pearde/prds/back-llmfunc`. Last on purpose: the plumbing is small and it
    is not the goal. Then corpus flow — a future master-board PRD, admitted
    when steps 4 and 6 hold.

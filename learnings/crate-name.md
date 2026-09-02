@@ -1,7 +1,7 @@
 ---
 type: learning
 learning: crate-name
-subject: the crate is named `shared`, not `conserved` — directory and package move together, live prose is renamed and `prds/` is not, and the rev bump is a correctness requirement no compiler enforces
+subject: the crate is named `shared`, not `conserved` — directory and package move together, live prose is renamed and `.pearde/` is not, and the rev bump is a correctness requirement no compiler enforces
 binds: [mitosys, model, realm, shared]
 status: decided
 date: 2026-08-28
@@ -68,7 +68,7 @@ The one failure is **not** the rename and is not this decision's to fix:
 ```
 thread 'every_done_prd_has_no_unticked_box' panicked at
 conserved/tests/done_boxes_are_ticked.rs:276:9:
-  prds/p5-adoption/mitosys/prd.md: 7 unticked box(es)
+  .pearde/prds/p5-adoption/mitosys/prd.md: 7 unticked box(es)
 ```
 
 It is red on `main` today for an unrelated reason. Every child PRD's verify is
@@ -113,25 +113,25 @@ all its renamed `.rs` files showed no drift.
 `git grep -lI conserved`, `vendor/` and `target/` excluded, per tree. Reproduced
 today, exact:
 
-| tree | files naming `conserved` | of which under `prds/` |
+| tree | files naming `conserved` | of which under `.pearde/` |
 |---|---|---|
 | shared | 97 | 56 |
 | mitosys | 38 | 8 |
 | model | 26 | 3 |
 | realm | 21 | 2 |
-| master board (`infra/prds/`) | 44 | all of it |
+| master board (`infra/.pearde/`) | 44 | all of it |
 
 **226 files family-wide.** Wide, mechanical, and it crosses every tree — which
 is why the decision is filed here and the work is filed there.
 
 ## History is not renamed
 
-**798 of `shared`'s 1041 `conserved` tokens live under `prds/`, in 56 files**
+**798 of `shared`'s 1041 `conserved` tokens live under `.pearde/`, in 56 files**
 recording completed work. (The analyst counted 1036 on the same day; two commits
 have landed since. The 798 is unchanged and exact.)
 
 Those are not renamed, in any tree. The reason is not sentiment: **a done PRD's
-directory name is an address.** `infra/prds/vision.md` names two of them as
+directory name is an address.** `infra/.pearde/vision.md` names two of them as
 graph edges —
 
 ```
@@ -139,7 +139,7 @@ graph edges —
 - "@shared/p5-adoption -> @model/adopt-conserved"
 ```
 
-— and renaming `mitosys/prds/adopt-conserved/` breaks an edge in the master
+— and renaming `mitosys/.pearde/prds/adopt-conserved/` breaks an edge in the master
 board's own destination graph to gain nothing. The same holds for
 `mitosys/.mi/docs/memos/`: `conserved-rev-drift.md` keeps its filename, because
 it is an open memo about the two revs *as they were named*, and renaming a memo
@@ -147,7 +147,7 @@ file reddens mitosys's memo-index gate until its README link is rewritten too.
 
 **Live prose is renamed; the record is not.** In: `learnings/`, `README.md`,
 `AGENTS.md`, `.cargo/config.toml`, justfiles, CI workflows, source, manifests,
-`vendor/`, `scripts/`. Out: `prds/`, `.mi/docs/memos/`, and two historical
+`vendor/`, `scripts/`. Out: `.pearde/`, `.mi/docs/memos/`, and two historical
 artifacts in `shared` — `.mi/gantt/plan.{md,json}` (a planning record naming a
 `.mi/prd/` layout that no longer exists) and `.mi/docs/memos/scaffold-reset.md`
 (about `conserved-core`).
@@ -186,7 +186,7 @@ and the three cases are different:
 3. **A filename and a directory name never change, because they are
    addresses.** `conserved-rev-drift.md` keeps its name — renaming it reddens
    mitosys's memo-index gate until the README link above is rewritten too. Only
-   its `status:` changes. Every `prds/` directory keeps its name for the reason
+   its `status:` changes. Every `.pearde/prds/` directory keeps its name for the reason
    in the paragraph above.
 
 ## Three traps a blanket `sed` walks into
@@ -229,10 +229,10 @@ Four child PRDs, one per tree, `state: open`:
 
 | child | tree | pinned rev today |
 |---|---|---|
-| `shared/prds/rename-conserved-to-shared` | shared | — it *produces* the rev |
-| `mitosys/prds/rename-conserved-to-shared` | mitosys | `70d7e15cd21c6017ec928c63697d0c7f42f53a20` |
-| `model/prds/rename-conserved-to-shared` | model | `9a342e1e849dd5775cbadfe6b32e275a076e5f09` |
-| `realm/prds/rename-conserved-to-shared` | realm | `9a342e1e849dd5775cbadfe6b32e275a076e5f09` |
+| `shared/.pearde/prds/rename-conserved-to-shared` | shared | — it *produces* the rev |
+| `mitosys/.pearde/prds/rename-conserved-to-shared` | mitosys | `70d7e15cd21c6017ec928c63697d0c7f42f53a20` |
+| `model/.pearde/prds/rename-conserved-to-shared` | model | `9a342e1e849dd5775cbadfe6b32e275a076e5f09` |
+| `realm/.pearde/prds/rename-conserved-to-shared` | realm | `9a342e1e849dd5775cbadfe6b32e275a076e5f09` |
 
 **`shared` goes first and pushes.** The other three pin a rev by git sha, so a
 package rename in `shared` is a new commit and every consumer's rev bumps in the
@@ -294,17 +294,17 @@ today and each child PRD corrects it in the same edit that renames it.
 
 ## The master board's own prose is left as it is — deliberately
 
-`prds/` is not renamed, and on the master board that rule swallows almost
-everything: **48 files under `/Users/feb/dev/infra/prds/` name the crate**
-(`git grep -lI conserved -- prds`, 2026-08-28), and all but a handful are PRD
+`.pearde/` is not renamed, and on the master board that rule swallows almost
+everything: **48 files under `/Users/feb/dev/infra/.pearde/` name the crate**
+(`git grep -lI conserved -- .pearde`, 2026-08-28), and all but a handful are PRD
 bodies and specs recording work already done.
 
 Two of them are not records, and leaving them is a choice rather than an
 oversight:
 
-- `prds/plan.md:158` — *"`conserved` is pinned from github.com/yesitsfebreeze/shared
+- `.pearde/plan.md:158` — *"`conserved` is pinned from github.com/yesitsfebreeze/shared
   (**private**)"*. About to be wrong twice over: wrong name, wrong visibility.
-- `prds/vision.md:81` and `:92` — both use `conserved` as the **live** crate
+- `.pearde/vision.md:81` and `:92` — both use `conserved` as the **live** crate
   name while describing the destination.
 
 They are left because `plan.md` is regenerated by `plan.py` on every scan and
@@ -328,7 +328,7 @@ update; its filename and its argument are not.
 
 - [[shared-crate]] — the admission rule and what the crate holds; its etymology
   paragraph is rewritten by this decision, its admission test is not
-- `infra/prds/crate-is-named-shared/prd.md` — the master-board node this
+- `infra/.pearde/prds/crate-is-named-shared/prd.md` — the master-board node this
   document is the deliverable of
-- `infra/prds/shared-remote-is-private/prd.md` — the answer it was derived from
+- `infra/.pearde/prds/shared-remote-is-private/prd.md` — the answer it was derived from
 - `mitosys/.mi/docs/memos/conserved-rev-drift.md` — the two revs, `status: open`

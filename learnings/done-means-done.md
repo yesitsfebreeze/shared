@@ -5,7 +5,7 @@ subject: a `done` PRD requires evidence per box, and a box that cannot close is 
 binds: [mitosys, model, realm, shared]
 status: decided
 date: 2026-08-24
-code: prds/done-means-done/prd.md
+code: .pearde/prds/done-means-done/prd.md
 ---
 
 # done-means-done — the family rule for what `state: done` means
@@ -91,7 +91,7 @@ dispatches on.
 
 **`shared/learnings/exemptions-name-their-reason.md` settles it: the whole
 `prd.md`, every heading, `- [~]` read as a closure.** Decided by the user
-2026-08-27, recorded as `prds/memos/done-counts-which-boxes.md`.
+2026-08-27, recorded as `.pearde/memos/done-counts-which-boxes.md`.
 
 That document also carries what this one left unwritten:
 

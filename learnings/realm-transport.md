@@ -11,9 +11,9 @@ code: realm src/cli/src/lib.rs, realm src/drivers/linux/src/lib.rs, realm src/ss
 # realm-transport — where the carrier meets the protocol, and the gate between them
 
 A board exists because the work does not fit on either tree alone.
-`realm/prds/prd.md` records that the `kind: realm` transport lives in the
+`realm/.pearde/prds/prd.md` records that the `kind: realm` transport lives in the
 mitosys repo and that no ACP framing has crossed the carrier realm already
-proves (`realm/prds/prd.md:54`, `realm/prds/prd.md:70`). The carrier is real
+proves (`realm/.pearde/prds/prd.md:54`, `realm/.pearde/prds/prd.md:70`). The carrier is real
 and tested; the protocol is real and tested. The seam between them is not on
 either tree's board, which is what this document closes.
 
@@ -28,8 +28,8 @@ must keep stable is its **CLI subcommand shape** (`realm create`, `realm ps`,
 info`, `realm logs`, `realm metrics`) plus the **live bidirectional stdio
 channel** to a process that is pid 1 of the container
 (`attach_hands_over_live_pipes_into_the_container` proves this on
-`realm/prds/prd.md:53`) and the **SSH-equivalent** `ssh_exec_args` channel
-(`realm/prds/prd.md:78`). The plugin wraps that surface; the surface is the
+`realm/.pearde/prds/prd.md:53`) and the **SSH-equivalent** `ssh_exec_args` channel
+(`realm/.pearde/prds/prd.md:78`). The plugin wraps that surface; the surface is the
 contract realm owes this seam.
 
 ## What proves it
@@ -44,7 +44,7 @@ already proves. The test has two halves:
    realm half is the carrier; it stands on its existing gate and is not
    changed by this PRD.
 2. **On mitosys** — a new test under the child PRD filed at
-   `mitosys/prds/p9-realm-transport/prd.md` (spec04) that loads the
+   `mitosys/.pearde/prds/p9-realm-transport/prd.md` (spec04) that loads the
    `kind: realm` transport plugin, dispatches an agent, and asserts the
    workspace is provisioned, the agent runs, and the workspace is destroyed
    on settle. The test runs under the child PRD's gate (whatever that PRD
@@ -63,7 +63,7 @@ test is the only thing in either tree that proves the seam.
   arm under `just test-root` (a `just` recipe the PRD itself names). The
   gate stays where it is; this PRD adds nothing to it.
 - **mitosys's gate** is the new child PRD's gate, which is whatever the
-  child PRD at `mitosys/prds/p9-realm-transport/prd.md` defines — most
+  child PRD at `mitosys/.pearde/prds/p9-realm-transport/prd.md` defines — most
   likely `just all` (Rust + Lua, the project's standard gate) plus a
   feature-gated test that depends on a `realm` binary on `PATH`. The
   integration test is what gives the child PRD something dispatchable.
@@ -89,7 +89,7 @@ named boundary:
   (`realm/src/drivers/linux/tests/linux_container.rs`). The channel is the
   contract; the test name is the proof.
 - **SSH transport**: the same shape over `ssh_exec_args` —
-  `realm/prds/prd.md:78` — gated by
+  `realm/.pearde/prds/prd.md:78` — gated by
   `exec_over_ssh_streams_output_and_propagates_the_exit_code` on the
   `ssh` driver. The remote end is the contract; the test name is the proof.
 
@@ -98,7 +98,7 @@ moves on the carrier; it does not reshape it.
 
 ## Alternatives considered
 
-Each fork `prds/realm-transport/prd.md` `## The forks` names has a verdict.
+Each fork `.pearde/prds/realm-transport/prd.md` `## The forks` names has a verdict.
 The standing option (b) is included as the chosen one, not omitted for being
 the standing answer — a learning that names only what was picked is a claim,
 and the board reads both halves.
@@ -112,7 +112,7 @@ and the board reads both halves.
   asserts a `kind: realm` workspace against a `realm` crate built in
   place. **Not chosen.** The cross-repo contract turns realm's public
   surface (CLI + agent tool contract) into a partial surface, which is the
-  same drift `prds/realm-transport/prd.md` `## Out of scope` excludes —
+  same drift `.pearde/prds/realm-transport/prd.md` `## Out of scope` excludes —
   *"no hard dependency on mitosys"* in realm's tree is symmetric with
   *"no public surface claim outside the CLI"* in the cross-repo case.
   Cost in the tree that loses: realm loses the right to reshape its
@@ -143,7 +143,7 @@ and the board reads both halves.
   `## Answers` 2026-08-21 entry called the user's to make, and the user
   chose to keep them as written. Cost in the tree that loses: the
   intent is lost from realm's board, which is the cost option (b)'s
-  rejector named in `realm/prds/prd.md:187-199`.
+  rejector named in `realm/.pearde/prds/prd.md:187-199`.
 
 ### What proves it
 
@@ -183,7 +183,7 @@ reads:
 
 The current state, read off the recorded facts:
 
-- `realm/prds/prd.md:27-34` plans realm *as* a mitosys plugin and forbids
+- `realm/.pearde/prds/prd.md:27-34` plans realm *as* a mitosys plugin and forbids
   a hard dependency on mitosys; the `kind: realm` transport stays in the
   mitosys repo (option (b)).
 - `shared/learnings/plugin-core.md` itself names the very event as an
@@ -192,33 +192,33 @@ The current state, read off the recorded facts:
 - `api/plugin/world` is one file, `package mitosys:plugin@0.1.0`, and
   today one repo bumps it (`shared/learnings/plugin-core.md` §The sharp
   edge stays one repo's).
-- `prds/membrane-home` settled 2026-08-23 on the same facts: criterion 1
+- `.pearde/prds/membrane-home` settled 2026-08-23 on the same facts: criterion 1
   fails (only mitosys has plugins), criteria 2 and 3 pass, criterion 4 is
   unanswerable while there is one implementation.
 
 **Verdict: the trigger has not fired as of today (2026-08-24).** A *plan*
-is not a *move* — `realm/prds/prd.md:27` records the plan, the move is a
+is not a *move* — `realm/.pearde/prds/prd.md:27` records the plan, the move is a
 commit that ships realm's plugin from a different repository, and that
 commit has not landed. The `api/plugin/world` version is still one tree's
 bump, and `membrane-home` settled 2026-08-23 on the same shape. The
-finding is consistent with `prds/membrane-home` `state: done` and adds
+finding is consistent with `.pearde/prds/membrane-home` `state: done` and adds
 nothing to it.
 
 **The condition that flips this finding.** The day realm's plugin moves
 out of the mitosys repo, criterion (2) of the trigger fires (a second
 repo needs to pin `api/plugin/world`'s package version), the verdict
-here flips, and a new master-board PRD lands at `prds/membrane-reopen/`
+here flips, and a new master-board PRD lands at `.pearde/prds/membrane-reopen/`
 with `state: open` and `from: realm-transport` recorded on the body. The
 mechanism is `shared/learnings/plugin-core.md` §The revisit trigger, the
-filing is `prds/membrane-reopen/prd.md` (does not exist today — its
+filing is `.pearde/prds/membrane-reopen/prd.md` (does not exist today — its
 absence is part of the verdict; if it existed the verdict would be (b)).
-No `prds/membrane-reopen/` exists, so the verdict is (a).
+No `.pearde/prds/membrane-reopen/` exists, so the verdict is (a).
 
 ## Disposition of realm's blocked boxes
 
-The two boxes in `realm/prds/prd.md` `## Requirements` and the matching
+The two boxes in `realm/.pearde/prds/prd.md` `## Requirements` and the matching
 acceptance line are PERMANENTLY BLOCKED by the user's 2026-08-21 answer
-(option (b) in `realm/prds/prd.md` `## Escalation — SETTLED`). The realm
+(option (b) in `realm/.pearde/prds/prd.md` `## Escalation — SETTLED`). The realm
 board keeps them unstruck and never reaches `state: done` while realm
 ships standalone — **this is the recorded decision, not a gap**, and the
 master board's `## Acceptance` line *"Realm's permanently-blocked boxes
@@ -226,7 +226,7 @@ either become closable, or the learning records that they stay open by
 decision and why"* is closed by this section recording the second: **they
 stay open by decision.**
 
-The answer the user gave (`realm/prds/prd.md:133-143`, 2026-08-21) is
+The answer the user gave (`realm/.pearde/prds/prd.md:133-143`, 2026-08-21) is
 quoted by reference: *"keep both boxes, mark them PERMANENTLY BLOCKED. Do
 not strike them, do not create a mitosys ticket, do not write mitosys
 code."* The user explicitly accepted the consequence: the realm root PRD
@@ -244,7 +244,7 @@ record; the cost is the price of the contradiction's transparency.
 
 **What would make them closable.** A single commit in the mitosys repo
 that lands the `kind: realm` transport — the plugin the child PRD at
-`mitosys/prds/p9-realm-transport/prd.md` (spec04) defines — and a
+`mitosys/.pearde/prds/p9-realm-transport/prd.md` (spec04) defines — and a
 two-tree integration test that proves the seam. With that commit, the two
 boxes become a requirement (the transport exists) and a verified
 acceptance (the test is green on both trees), and the realm board's
@@ -255,7 +255,7 @@ is what the child PRD plus the integration test build.
 ## What this binds
 
 - **mitosys** owes: the `kind: realm` transport plugin (the child PRD
-  at `mitosys/prds/p9-realm-transport/`), an integration test that
+  at `mitosys/.pearde/prds/p9-realm-transport/`), an integration test that
   drives it against a real `realm` binary, and a gate that proves the
   test on the host that runs CI.
 - **realm** owes: the carrier boundary named in `## The carrier boundary

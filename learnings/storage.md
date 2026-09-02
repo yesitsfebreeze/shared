@@ -125,8 +125,8 @@ as nodes. The sequence, one owned carrier per step, states as of 2026-08-23:
    behavior explicitly unchanged in that node. `p8-membrane/prd.md` §Out of
    scope sequences the redb swap after `p8l`; after it, the swap changes
    one plugin's store instead of the core's.
-6. **The swap** — mitosys child `prds/redb-swap`, under master
-   `prds/storage-convergence`: heed → redb inside `store_core`, the seam to
+6. **The swap** — mitosys child `.pearde/prds/redb-swap`, under master
+   `.pearde/prds/storage-convergence`: heed → redb inside `store_core`, the seam to
    `store` untouched. Four table handles become
    `TableDefinition<&str, &[u8]>`; the bincode values do not move.
    `MAP_SIZE` with both `.map_size()` call sites
@@ -163,7 +163,7 @@ today** without a `MITOSYS_MEMORY_DIR` pin:
 | `model/.pi/kern/data` | 160M |
 | `realm/.pi/kern/data` | 3.3M |
 | `shared/.pi/kern/data` | 2.9M |
-| `/Users/feb/dev/archive/ui/.pi/kern/data` | 2.8M — retired with the tree (`prds/ui-disposition`, done) |
+| `/Users/feb/dev/archive/ui/.pi/kern/data` | 2.8M — retired with the tree (`.pearde/prds/ui-disposition`, done) |
 
 Disposition: the `.pi` → `.mi` move stranded these stores, not this swap;
 the swap deletes their last *reader* from HEAD, never the files. The
@@ -196,7 +196,7 @@ what model's `src/grade/` does and exactly what mitosys lacks.
 
 Which reorders the plan: **sharing the grade harness is a prerequisite for
 executing this decision, not a parallel task.** The carrier is mitosys
-`prds/p9-perf-floor` (step 6 above).
+`.pearde/prds/p9-perf-floor` (step 6 above).
 
 ## Housekeeping when this lands
 
@@ -204,5 +204,5 @@ executing this decision, not a parallel task.** The carrier is mitosys
   (`model/Cargo.toml:56`). When the swap child pins redb in mitosys's
   `[workspace.dependencies]`, model bumps its pin to match — one Cargo
   line, admitted to model's board at that moment; a child placed now would
-  carry an unknown version. `model/prds/workspace-deps` (open) does not
+  carry an unknown version. `model/.pearde/prds/workspace-deps` (open) does not
   cover the bump: that lift keeps `Cargo.lock` unchanged.

@@ -12,9 +12,9 @@ code: mitosys src/mitosys/api/plugin, mitosys src/mitosys/api/plugin/world/wit/m
 
 mitosys is extracting its plugin core as **membrane**
 (`mitosys/.mi/docs/memos/membrane-is-the-core.md`, claimed at
-`mitosys/prds/p8-membrane/`). Measured 2026-08-23, four of its crates carry
+`mitosys/.pearde/prds/p8-membrane/`). Measured 2026-08-23, four of its crates carry
 7,428 impl lines with zero domain dependencies — the most domain-free code in
-the family. Decided 2026-08-23 (`prds/membrane-home`): it is **not**
+the family. Decided 2026-08-23 (`.pearde/prds/membrane-home`): it is **not**
 `shared`'s next admission.
 
 ## The decision
@@ -60,12 +60,12 @@ model rejects the stack in its own docs, verified 2026-08-23:
   *seam*, not a utility … deserves its own crate, on its own schedule, once
   the swap work actually starts." A future `interface` crate is a separate
   admission with its own PRD; it is not membrane.
-- Zero mentions of membrane or a plugin host on `model/prds/` (grep,
+- Zero mentions of membrane or a plugin host on `model/.pearde/` (grep,
   2026-08-23).
 
 realm ships a plugin, never hosts one:
 
-- `realm/prds/prd.md:28-34` plans realm *as* a mitosys plugin and forbids
+- `realm/.pearde/prds/prd.md:28-34` plans realm *as* a mitosys plugin and forbids
   a hard dependency on mitosys; the `kind: realm` transport stays in the
   mitosys repo (option b, recorded there).
 - Authoring a plugin never needs the membrane crate — the WIT world is the
@@ -113,7 +113,7 @@ membrane then carries. Priced and accepted.
 
 No tree gains or loses work, so this decision spawns **zero child PRDs**:
 
-- mitosys's extraction is already claimed at `mitosys/prds/p8-membrane/` —
+- mitosys's extraction is already claimed at `mitosys/.pearde/prds/p8-membrane/` —
   that board owns it.
 - model adopts nothing.
 - realm adopts nothing.
@@ -142,7 +142,7 @@ shared crate exists to carry it.
   isolation realms, quiescence, swap discipline — across five serialized
   waves. Freezing a churning API behind a cross-repo rev pin mid-flight is
   the maximum-cost moment to admit it. And nothing waits:
-  `mitosys/prds/p8-membrane/prd.md` §Out of scope excludes the home question
+  `mitosys/.pearde/prds/p8-membrane/prd.md` §Out of scope excludes the home question
   explicitly, and `p8a` names, addresses and gates the crate in-tree — own
   manifest, zero domain edges, gated — exactly the shape that later moves to
   `shared/` as a rev-pinned git dependency with zero call-site rework, the

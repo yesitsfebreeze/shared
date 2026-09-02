@@ -17,7 +17,7 @@ down to the commit message. And they contradicted each other on four rules,
 in both directions, each tree enforcing its own version — so no shared code
 could satisfy both.
 
-Decided 2026-08-23 (`prds/settle-divergences`). Each answer names the rule
+Decided 2026-08-23 (`.pearde/prds/settle-divergences`). Each answer names the rule
 the family keeps and what breaks in the tree that loses.
 
 A mechanical fact narrows what the test-law and dependency answers govern: a
@@ -25,7 +25,7 @@ shared crate reaches each tree as a rev-pinned git dependency
 ([[shared-crate]] §Where it lives), outside both repo roots, so neither
 tree's gate scans its files. The answers decide (1) the layout and manifest
 shape shared crates carry and (2) which law each gate port in
-`prds/propagate-gates` enforces.
+`.pearde/prds/propagate-gates` enforces.
 
 ## Test law — mitosys's, family-wide, one dated exemption
 
@@ -46,7 +46,7 @@ crate split — `model/docs/dev-loop.md` §The ceiling names the split, and the
 split is the event that removes the exemption. Until then the gate holds the
 line model already breaks: no new beside-the-module test dirs, no new root
 `tests/` files. The gate is the `source_layout` port in
-`prds/propagate-gates`.
+`.pearde/prds/propagate-gates`.
 
 ## Packaging — both rules stand, no conflict
 
@@ -83,12 +83,12 @@ already adopted it, and a shared crate must pass the gate to be admitted
 **model pays.** Its ~60 per-package version declarations lose:
 `model/Cargo.toml` lifts them into `[workspace.dependencies]` now, members
 inherit — same versions, same features, same `Cargo.lock`, no behavior
-change. The `dependency_tree` port in `prds/propagate-gates` then has a
+change. The `dependency_tree` port in `.pearde/prds/propagate-gates` then has a
 table to assert against.
 
 ## The children
 
-Three child PRDs, all on `model/prds` — model is the only tree an answer
+Three child PRDs, all on `model/.pearde` — model is the only tree an answer
 changes:
 
 | child | carries |
@@ -105,7 +105,7 @@ No child elsewhere:
   layout landed, `[workspace.dependencies]` in `shared/Cargo.toml`,
   `rust-version = "1.94.0"`.
 - **mitosys** keeps every kept rule — nothing changes there. The gate ports
-  are `prds/propagate-gates`' work, not a child of this decision.
+  are `.pearde/prds/propagate-gates`' work, not a child of this decision.
 
 ## The evidence: LearnOrigin is two enums
 
@@ -143,7 +143,7 @@ with prose:
 Two trees, two independent demonstrations that a shared rule with nothing
 running it decays. Law 3: the law on the lowest rung is the one violated
 first, silently. So every answer above that a gate could hold names the
-gate, and every named gate is `prds/propagate-gates`' input — the decision
+gate, and every named gate is `.pearde/prds/propagate-gates`' input — the decision
 is not done until something reads it.
 
 ## What this beat

@@ -10,7 +10,7 @@
 //! does; `mitosys` has nothing.
 //!
 //! This is the producing side of that gate. It asserts, from inside the repo
-//! that makes the rev, that `prds/rename-conserved-to-shared/prd.md` §Landed
+//! that makes the rev, that `.pearde/prds/rename-conserved-to-shared/prd.md` §Landed
 //! names a sha which
 //!
 //! 1. exists in this repository,
@@ -26,7 +26,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 /// The PRD that produces the rev, relative to the repository root.
-const PRD: &str = "prds/rename-conserved-to-shared/prd.md";
+const PRD: &str = ".pearde/prds/rename-conserved-to-shared/prd.md";
 
 /// The repository root — the workspace directory above this crate.
 fn repo_root() -> PathBuf {

@@ -99,7 +99,7 @@ this working tree:
 
 ```
 every_done_prd_has_a_ticked_acceptance
-  prds/done-means-done/shared-classify/prd.md: 3 unticked box(es)
+  .pearde/prds/done-means-done/shared-classify/prd.md: 3 unticked box(es)
 ```
 
 A PRD marked `state: done` carrying three unticked acceptance boxes — exactly
@@ -131,7 +131,7 @@ on 2026-08-23, so history was rewritten recently enough to be worth one scan.
 
 # Productiveness
 
-- **`ruff`** — 34 Python files (`prds/`, `pearde/`) with no linter, no
+- **`ruff`** — 34 Python files (`.pearde/`, `pearde/`) with no linter, no
   formatter, no `pyproject.toml`. `uv` is already installed and unused. The
   board tooling is the least-gated code in the workspace.
 - **`cargo-insta`** — snapshot testing. The `shared` crate's tests assert on

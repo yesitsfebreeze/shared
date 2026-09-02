@@ -15,7 +15,7 @@ code, its tests each refusing one class of violation with a named exemption
 list. model and realm run none — their gate commands compile and nothing reads
 the doctrine. This learning classifies mitosys's gates: which every family
 tree carries, which bind two trees, and which are mitosys's alone. The child
-PRDs (`model/prds/adopt-gates`, `realm/prds/15-gates`) cite this
+PRDs (`model/.pearde/prds/adopt-gates`, `realm/.pearde/prds/15-gates`) cite this
 classification instead of restating it.
 
 ## The count
@@ -27,13 +27,13 @@ sentence. The four tables below cover all seventeen files: 4 + 3 + 2 + 8.
 
 ## Carried by every tree — the family subset
 
-The subset `model/prds/adopt-gates` and `realm/prds/15-gates` land:
+The subset `model/.pearde/prds/adopt-gates` and `realm/.pearde/prds/15-gates` land:
 
 | gate | evidence |
 |---|---|
 | `source_layout` | the test law, decided family-wide 2026-08-23 (`shared/learnings/divergences.md` §Test law), with one dated exemption for model's legacy `llm` package until its crate split |
 | `one_vocabulary` | one concept, one name, one owner — the gate class that would have caught `LearnOrigin` declared twice in model (`src/node/mod.rs:44`, `src/record/mod.rs:90`). Mechanical form per tree: mitosys checks command-namespace ownership; model and realm check that no public type name is declared twice outside an exemption list |
-| `dependency_tree` | `[workspace.dependencies]` decided family-wide (divergences §Dependencies). realm's table already exists (`realm/Cargo.toml`); model's arrives via `model/prds/workspace-deps` |
+| `dependency_tree` | `[workspace.dependencies]` decided family-wide (divergences §Dependencies). realm's table already exists (`realm/Cargo.toml`); model's arrives via `model/.pearde/prds/workspace-deps` |
 | `board_is_tracked` | every tree carries a board, and the gate's own doc records the family incident: 77 untracked `prd.md` in mitosys, 51 in model — a `git clone` produced a repository with no board |
 
 ## Bind mitosys + model
@@ -94,7 +94,7 @@ the PRD's constraints:
 ## Addition 2026-08-27 — the family subset is five, not four
 
 `done_boxes_are_ticked` is the fifth gate every tree carries. It shipped from
-`prds/done-means-done` into `mitosys`, `realm` and `shared` after this document
+`.pearde/prds/done-means-done` into `mitosys`, `realm` and `shared` after this document
 was written, which is why the tables above count four.
 
 | gate | evidence |
@@ -105,18 +105,18 @@ was written, which is why the tables above count four.
 2026-08-23 scan named PRDs only in mitosys/realm/shared; model was never
 flagged"* — true on 2026-08-23, false by 2026-08-27, when
 `model/next-wave/sampler` was measured `state: done` with three open acceptance
-boxes. `model/prds/exemptions-name-their-reason` ports the gate.
+boxes. `model/.pearde/prds/exemptions-name-their-reason` ports the gate.
 
 Two more corrections this addition carries, additively:
 
 - **`shared` is not "where nothing changes".** § Where nothing changes says no
   child PRD lands on shared's board. One does:
-  `shared/prds/exemptions-name-their-reason`. shared runs
+  `shared/.pearde/prds/exemptions-name-their-reason`. shared runs
   `shared/tests/done_boxes_are_ticked.rs` today and owes the widening.
 - **`binds:` is four trees, not three.** This document's frontmatter names
   `[mitosys, model, realm]`; `done_boxes_are_ticked` binds `shared` too.
   Corrected 2026-08-27, on the round that closed
-  `prds/exemptions-name-their-reason`: the frontmatter now reads
+  `.pearde/prds/exemptions-name-their-reason`: the frontmatter now reads
   `[mitosys, model, realm, shared]`.
 
 **Population and exemption contract are not restated here.**

@@ -14,10 +14,10 @@ The duplication census behind `shared-crate.md` found three sets of functions
 that score as duplicates and are not: one name with three behaviours, one
 algorithm at two integer widths, and twenty copies of a scratch-name builder
 of which one is correct. This document decides each of the three and states
-the rule they earn. `mitosys/prds/adopt-conserved` and
-`model/prds/adopt-conserved` read it before touching any site named below;
-the code work is carried by two child PRDs, `mitosys/prds/civil-from-days-has-one-width`
-and `model/prds/same-name-is-not-same-function`.
+the rule they earn. `mitosys/.pearde/prds/adopt-conserved` and
+`model/.pearde/prds/adopt-conserved` read it before touching any site named below;
+the code work is carried by two child PRDs, `mitosys/.pearde/prds/civil-from-days-has-one-width`
+and `model/.pearde/prds/same-name-is-not-same-function`.
 
 Every line number here is as of mitosys `251809fe` and model `279192e2`,
 `HEAD` in each tree on 2026-08-29 — the probe extracts by symbol, so a moved
@@ -41,7 +41,7 @@ one — the divergence is in the signature, where a body matcher cannot look.
 
 ## Evidence
 
-`sh prds/a-shared-name-is-not-a-shared-function/probe/run.sh` from the
+`sh .pearde/prds/a-shared-name-is-not-a-shared-function/probe/run.sh` from the
 master root re-measures every site. It extracts the bodies from the trees at
 run time and compiles them with bare `rustc` into a run-time directory — no
 tree build, no lock taken in any member. `sh probe/census.sh` is the family 3
@@ -173,14 +173,14 @@ and the clock, or it is not a scratch name.**
 
 | reader | before |
 |---|---|
-| `mitosys/prds/adopt-conserved` | touching `engine/record/store.rs` or `engine/util/util.rs` |
-| `model/prds/adopt-conserved` | touching `src/record/event.rs` or any `temp_dir()` site |
-| `mitosys/prds/civil-from-days-has-one-width` | carries family 2 |
-| `model/prds/same-name-is-not-same-function` | carries families 1 and 3 |
+| `mitosys/.pearde/prds/adopt-conserved` | touching `engine/record/store.rs` or `engine/util/util.rs` |
+| `model/.pearde/prds/adopt-conserved` | touching `src/record/event.rs` or any `temp_dir()` site |
+| `mitosys/.pearde/prds/civil-from-days-has-one-width` | carries family 2 |
+| `model/.pearde/prds/same-name-is-not-same-function` | carries families 1 and 3 |
 
 ## Re-measure
 
-`sh prds/a-shared-name-is-not-a-shared-function/probe/run.sh` from the master
+`sh .pearde/prds/a-shared-name-is-not-a-shared-function/probe/run.sh` from the master
 root. Family 1 and both family 2 rows print `DIVERGE` until the children land;
 afterwards `run.sh` extracts nothing for the deleted symbols and its `rustc`
 step fails on them, which is the signal that the tree no longer has the

@@ -10,11 +10,11 @@ code: mitosys src/mitosys/engine/record/door.rs:55, model src/node/mod.rs:48, mo
 
 # Corpus flow — mitosys's record becomes model's corpus
 
-Decided 2026-08-24 (`prds/corpus-flow`). The seam already named by
+Decided 2026-08-24 (`.pearde/prds/corpus-flow`). The seam already named by
 [[two-halves]] §The seam (the corpus-signal row) and §Sequencing step 7
 ("admitted after the origin vocabulary and the record shape converge") is
-now admitted: steps 4 (`model/prds/one-learn-origin`) and 6
-(`mitosys/prds/record-shape-port`) are both `state: open`, and this
+now admitted: steps 4 (`model/.pearde/prds/one-learn-origin`) and 6
+(`mitosys/.pearde/prds/record-shape-port`) are both `state: open`, and this
 document settles direction, mechanism, vocabulary admission, refusal
 enforcement, and the filtering rule.
 
@@ -71,7 +71,7 @@ mapping of `Human` and `Tool` is settled:
 
 `Human` → `Prompt` and `Tool` → `Teacher` are byte-level collapses
 [[two-halves]] §"One `LearnOrigin`" already authorized, and
-`model/prds/one-learn-origin` carries the format consequence.
+`model/.pearde/prds/one-learn-origin` carries the format consequence.
 This learning does not change the mapping; it adopts it as the
 producer-side classifier. A `Human`-tagged event arriving at the door
 is tagged `Prompt`; a `Tool`-tagged event is tagged `Teacher`. The
@@ -140,7 +140,7 @@ reach `learn_trains`:
   the chain is tainted).
 - `Correction`s with missing or unresolvable upstream provenance
   (the record shape has not converged — handled by
-  `mitosys/prds/record-shape-port`).
+  `mitosys/.pearde/prds/record-shape-port`).
 
 The remaining class — `Correction`s over `Prompt`s that trace back to
 a human keystroke or a `Teacher` — is what model admits.
@@ -226,6 +226,6 @@ reason each lost.
   per-event content ids; `record-shape-port` is the carrier
 - [[divergences]] §The evidence — the duplicate `LearnOrigin` is what
   the seam collapsed; `one-learn-origin` is the format consequence
-- `prds/corpus-flow/` — the master PRD
-- `mitosys/prds/corpus-flow-producer/` — the producing half (child)
-- `model/prds/corpus-flow-consumer/` — the consuming half (child)
+- `.pearde/prds/corpus-flow/` — the master PRD
+- `mitosys/.pearde/prds/corpus-flow-producer/` — the producing half (child)
+- `model/.pearde/prds/corpus-flow-consumer/` — the consuming half (child)
