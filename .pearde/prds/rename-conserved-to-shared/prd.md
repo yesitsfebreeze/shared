@@ -19,6 +19,7 @@ footprint:
   - .pi/ontology/digest.md
   - .mi/docs/memos/distribution.md
 actual: 0.47h
+commit: cac9070
 ---
 
 # `conserved` becomes `shared` — directory, package, and the rev the family pins
