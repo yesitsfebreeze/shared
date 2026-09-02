@@ -1,16 +1,15 @@
 ---
-state: blocked
+state: done
 repo: shared
 origin: derived
 from: "@master/crate-is-named-shared"
 priority: 70
 complexity: 30
 blast-radius: high
-needs:
   - "push: origin/main carries the rename commit — the user's act, then collect"
 verify: "cargo test -p shared"
 footprint:
-  - conserved/
+  - shared/
   - Cargo.toml
   - Cargo.lock
   - README.md
@@ -19,6 +18,7 @@ footprint:
   - .github/workflows/ci.yml
   - .pi/ontology/digest.md
   - .mi/docs/memos/distribution.md
+actual: 0.47h
 ---
 
 # `conserved` becomes `shared` — directory, package, and the rev the family pins
@@ -219,9 +219,11 @@ That is the sharp edge of a fourth exclusion class, on top of item 4's three.
 | `learnings/shared-crate.md:335-336` | `mitosys/prds/adopt-conserved`, `model/prds/adopt-conserved` — PRD addresses |
 | `learnings/shared-crate.md:359` | the `conserved-crate` PRD — a real directory, `/Users/feb/dev/infra/prds/conserved-crate/` |
 | `AGENTS.md:159` | `conserved-*`, the condemned pre-split scaffold family |
+| `shared/tests/landed_rev_is_published.rs:13`, `:29` | the address `.pearde/prds/rename-conserved-to-shared/prd.md` — this PRD's own directory name, which the gate spec03 adds must name to read it. A directory name, not the crate name |
+| `learnings/a-shared-name-is-not-a-shared-function.md:17`, `:18`, `:176`, `:177` | `mitosys/.pearde/prds/adopt-conserved`, `model/.pearde/prds/adopt-conserved` — PRD addresses, same class as `shared-crate.md:335-336`. The file landed in `978dbf6`, after this table was first written |
 | all of `.mi/docs/memos/` | amended, never substituted — see item 6 |
 | all of `.mi/gantt/` | historical planning artifact |
-| all of `prds/` | records; a done PRD's directory name is an address |
+| all of `.pearde/` | records; a done PRD's directory name is an address |
 
 ## Verify
 
@@ -232,7 +234,7 @@ cargo test -p shared
 cargo fmt --check --all
 cargo clippy --workspace --all-targets -- -D warnings
 git grep -nI conserved -- . \
-  ':(exclude)prds' \
+  ':(exclude).pearde' \
   ':(exclude).mi/gantt' \
   ':(exclude).mi/docs/memos' \
   ':(exclude)learnings/crate-name.md' \
@@ -241,16 +243,31 @@ git grep -nI conserved -- . \
 ```
 
 The last command must return **exactly** these and nothing else — count them,
-do not eyeball them:
+do not eyeball them. **18 lines**, measured 2026-09-02:
 
-- the three `b"conserved"` sites (`shared/tests/content_id.rs:31`, `:108`,
-  `shared/tests/content_id_serde.rs:30`)
-- the two `conserved-core` sites (`shared/src/clock.rs:86`,
-  `shared/tests/clock_source.rs:48`)
-- `learnings/README.md:164`
-- `learnings/shared-crate.md`'s six survivor lines from the table above
-- `AGENTS.md:159`
-- any `conserved-rev-drift` mention
+| # | survivor | class |
+|---|---|---|
+| 3 | `shared/tests/content_id.rs:31`, `:108`, `shared/tests/content_id_serde.rs:30` | `b"conserved"`, a blake3 input |
+| 2 | `shared/src/clock.rs:86`, `shared/tests/clock_source.rs:48` | `conserved-core`, a proper noun |
+| 2 | `shared/tests/landed_rev_is_published.rs:13`, `:29` | this PRD's own directory address |
+| 1 | `learnings/README.md:164` | index entry |
+| 5 | `learnings/shared-crate.md:13`, `:15`, `:335`, `:336`, `:359` | etymology and PRD addresses |
+| 4 | `learnings/a-shared-name-is-not-a-shared-function.md:17`, `:18`, `:176`, `:177` | PRD addresses |
+| 1 | `AGENTS.md:159` | the condemned scaffold family |
+
+plus any `conserved-rev-drift` mention.
+
+**Excluding `prds` no longer excludes the board.** Commit `27db1b7` moved it to
+`.pearde/`; the grep above says `':(exclude).pearde'` for that reason. With the
+old spelling the same command returns **861** lines, because the whole board
+falls back into the census.
+
+Two entries postdate this table's first writing and are not regressions.
+`landed_rev_is_published.rs` is spec03's own gate — it must name the PRD it
+reads, and a PRD directory name is immutable under §7.
+`a-shared-name-is-not-a-shared-function.md` arrived in `978dbf6` from another
+PRD, and its four lines are consumer PRD addresses, the same class already
+granted to `shared-crate.md:335-336`.
 
 `.pi/ontology/digest.md` is excluded from the grep because it is held; if the
 user's ruling releases it, drop that exclusion and the file renames with the
@@ -316,9 +333,14 @@ exclusion above.
       `cargo clippy --workspace --all-targets -- -D warnings` clean
 - [x] The scoped `git grep` above returns **exactly** the survivor set
       enumerated under §Verify, and its line count equals the number of entries
-      there — not "roughly", counted (14 with `--untracked`: the 12 plus the
-      gate file's two lines naming this PRD's path; spec02 records the amendment)
-- [x] `prds/` and `.mi/gantt/` are untouched (measured as `git status --porcelain`, the merge-base form measures nothing once the claim commit is HEAD~1; this PRD's own folder is the board's record, not the rename's), and `.mi/docs/memos/` changed by
+      there — not "roughly", counted. **18 on 2026-09-02**, and the exclude
+      must read `':(exclude).pearde'`, not `':(exclude)prds'` — the board moved
+      in `27db1b7` and the old spelling returns 861. The 12 first measured, plus
+      the gate file's two lines naming this PRD's path, plus four PRD addresses
+      in `learnings/a-shared-name-is-not-a-shared-function.md`, which landed in
+      `978dbf6` from another PRD. The gate file is tracked now, so plain
+      `git grep` finds it and `--untracked` changes nothing
+- [x] `.pearde/` and `.mi/gantt/` are untouched (measured as `git status --porcelain`, the merge-base form measures nothing once the claim commit is HEAD~1; this PRD's own folder is the board's record, not the rename's), and `.mi/docs/memos/` changed by
       amendment only:
       `git diff --name-only <merge-base with origin/main>..HEAD -- prds/ .mi/gantt/`
       is empty, and `git diff -- .mi/docs/memos/` shows **added lines only**
@@ -342,8 +364,11 @@ exclusion above.
         correction block; the old text stays under rule 1.
       The box passes when the grep returns only lines inside a dated correction
       block or inside `learnings/crate-name.md`
-- [ ] **Pushed.** `git branch -r --contains HEAD` names `origin/main`, and the
+- [x] **Pushed.** `git branch -r --contains HEAD` names `origin/main`, and the
       sha is written into §Landed below where the three consumer PRDs read it
+      (`git branch -r --contains HEAD` → `origin/HEAD -> origin/main` /
+      `origin/main`; the same for `dfc98fba`, the rename commit itself, which is
+      the sha §Landed names. `git rev-list --count origin/main..HEAD` = **0**)
 
 ## Landed
 
@@ -351,7 +376,9 @@ exclusion above.
      mitosys, model and realm are all blocked until it is here. -->
 
 - rev: `dfc98fba70039863797f7185d860ef392becb21f`
-- pushed to `origin/main`: `TBD`
+- pushed to `origin/main`: `2026-09-02` (09:27:44 +0200, the push that moved
+  `origin/main` from `24997ea` to `978dbf6` and published 7 commits, three of
+  them this PRD's: `0567f75`, `dfc98fb`, `673cc25`)
 
 > **Use plain `mv`, never `git mv` — measured 2026-08-28, and it already bit
 > once.** `git mv` stages the rename into the shared index, and a concurrent
@@ -366,3 +393,7 @@ exclusion above.
 > similarity at diff time, not from the index, so a plain `mv` produces exactly
 > the same `R100` rows in the eventual commit. The only thing `git mv` adds is
 > the window in which someone else's commit can take your half-finished rename.
+
+## Answers
+
+**Q1** *(answered 2026-09-02 09:27)* — Let me push this branch on your behalf when a finished piece of work is waiting only on that, and I do it from now on without asking. (standing grant: the board pushes a member branch whenever finished work waits only on the remote)

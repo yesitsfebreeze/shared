@@ -2,7 +2,7 @@
 complexity: 12
 footprint:
   - shared/tests/landed_rev_is_published.rs
-  - prds/rename-conserved-to-shared/prd.md
+  - .pearde/prds/rename-conserved-to-shared/prd.md
 ---
 
 # spec03 — the rendezvous cannot be skipped: a gate that fails until the renamed rev is on a remote
@@ -91,17 +91,88 @@ Two consequences the implementer must plan for:
       file aside and re-counting — and no test that passed without it fails with
       it. `cargo fmt --check --all` and
       `cargo clippy --workspace --all-targets -- -D warnings` clean
-- [ ] **Pushed.** `git branch -r --contains <rename-commit>` names `origin/main`,
+- [x] **Pushed.** `git branch -r --contains <rename-commit>` names `origin/main`,
       and the report states how many commits the push published
       (`git rev-list --count origin/main..HEAD` before pushing — it was 10 plus
-      this PRD's own on 2026-08-28)
-- [ ] §Landed's `- rev:` is the 40-character sha of the commit that carries the
+      this PRD's own on 2026-08-28).
+      `git branch -r --contains dfc98fba70039863797f7185d860ef392becb21f` →
+      `origin/HEAD -> origin/main` / `origin/main`. The push landed
+      **2026-09-02 09:27:44 +0200**, moving `origin/main` from `24997ea` to
+      `978dbf6` and publishing **7** commits (`git rev-list --count
+      24997ea..978dbf6` = 7), three of them this PRD's: `0567f75` (claim),
+      `dfc98fb` (the rename), `673cc25` (the boxes it closed). Not the 10+1
+      predicted on 2026-08-28 — `24997ea` was itself pushed at 13:57 that day,
+      between the measurement and the rename commit, so it had already left the
+      backlog. `git rev-list --count origin/main..HEAD` is now **0**
+- [x] §Landed's `- rev:` is the 40-character sha of the commit that carries the
       rename, and `- pushed to origin/main:` names the date. `TBD` appears in
-      neither
-- [ ] The gate passes **for the right reason**, with the PRD at `state: done`:
+      neither. `- rev:` is
+      `dfc98fba70039863797f7185d860ef392becb21f` (40 hex), and
+      `- pushed to origin/main:` now reads `2026-09-02`.
+      `grep -n 'TBD' .pearde/prds/rename-conserved-to-shared/prd.md` returns
+      nothing — no `TBD` survives anywhere in the file, not just on those lines
+- [x] The gate passes **for the right reason**, with the PRD at `state: done`:
       `cargo test -p shared --test landed_rev_is_published` green while
-      `git show $(sed -n 's/^- rev: `\(.*\)`$/\1/p' prds/rename-conserved-to-shared/prd.md):shared/Cargo.toml | grep 'name'`
+      `git show $(sed -n 's/^- rev: `\(.*\)`$/\1/p' .pearde/prds/rename-conserved-to-shared/prd.md):shared/Cargo.toml | grep 'name'`
       prints `name = "shared"`
+      **(path corrected from `prds/…` to `.pearde/prds/…`: commit `27db1b7`
+      moved the board and the gate's own `PRD` const with it. The command as
+      first written reads a file that does not exist, and would fail the box for
+      a path reason rather than a substance one. Nothing else in the check
+      changed.)**
+
+      **Proved on a fixture worktree, because on the live tree the box is a
+      deadlock.** `pearde collect` will not write `state: done` while any box is
+      open, and this box cannot be true until the state *is* `done`. Neither
+      side can move first, so the proof is done on a copy and the collect
+      re-runs the live gate after it writes `done`.
+
+      The fixture: `git worktree add <scratch> HEAD` at `27db1b7`, this round's
+      uncommitted `prd.md` and `spec03.md` copied in, `state: done` written
+      **only in the copy**. The live `prd.md` frontmatter was never edited —
+      `shasum` of it is `312accff2588df8b23719c6915156e1e7c02db05` before and
+      after, and it still reads `state: claimed`. Worktree removed with
+      `git worktree remove --force`; `git worktree list` is back to one entry.
+
+      **The pass**, armed — no early return, all four assertions run:
+
+      ```
+      $ sed -n '2p' .pearde/prds/rename-conserved-to-shared/prd.md
+      state: done
+      $ cargo test -p shared --test landed_rev_is_published
+      test parser::a_filled_rev_is_read_out_of_its_backticks ... ok
+      test parser::state_is_read_out_of_the_frontmatter ... ok
+      test parser::a_later_section_is_not_read_as_landed ... ok
+      test parser::the_placeholder_is_not_mistaken_for_a_sha ... ok
+      test landed_rev_is_a_published_rename_commit ... ok
+      test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+      ```
+
+      The manifest half, which needs no arming:
+      `git show dfc98fba70039863797f7185d860ef392becb21f:shared/Cargo.toml |
+      grep '^name'` → `name = "shared"`.
+
+      **The three failure paths, re-run in the same fixture at `state: done`.**
+      spec03's original fixtures ran on 2026-08-28 against `prds/…`; `27db1b7`
+      moved the board, so those proved nothing about the path in force today. A
+      gate reading a file that no longer exists returns early on
+      `read_to_string` and looks exactly as green as one that passed — which is
+      why a green run alone is not evidence.
+
+      | fixture | §Landed rev | line | panic |
+      |---|---|---|---|
+      | placeholder | `TBD` | `:99` | *"…names rev `TBD`, which is not a 40-character sha"* |
+      | pre-rename commit | `70d7e15c…` — the rev `mitosys` pins today | `:127` | *"…has no `shared/Cargo.toml`. That rev predates the rename, so a consumer pinning it gets the crate under its old name"* |
+      | unpushed commit | `e317b390…` — made in the fixture, `git branch -r --contains` empty | `:115` | *"…is on NO remote branch of this repository — it exists only on this machine, so nothing that clones the repo can ever fetch it"* |
+
+      Every panic names `.pearde/prds/rename-conserved-to-shared/prd.md`, so the
+      gate reads the migrated path and fires on it. Each fixture was restored
+      before the next.
+
+      **What the collect observes:** after it writes `state: done`,
+      `cargo test -p shared --test landed_rev_is_published` reports
+      `5 passed; 0 failed` on the live tree — the same run as the fixture's,
+      against the same rev, which is already published and already renamed.
 - [x] The three consumer PRDs are **not touched** by this work:
       `git -C .. status --porcelain mitosys/prds model/prds realm/prds` lists
       nothing from this session. Their rev bump is their own node's; this one
@@ -111,28 +182,40 @@ Two consequences the implementer must plan for:
 
 ## Verify and Proof
 
+Every line is correct under `sh -e`. The PRD path is `.pearde/prds/…` — commit
+`27db1b7` moved the board, and the old `prds/…` makes `sed` read a missing file,
+which under `set -e` kills the block at the `REV=` assignment.
+
 ```sh
+set -e
 cd /Users/feb/dev/infra/shared
+
+PRD=.pearde/prds/rename-conserved-to-shared/prd.md
 
 # the gate, and its five tests
 cargo test -p shared --test landed_rev_is_published
 
-# what the push will publish — run BEFORE pushing
-git rev-list --count origin/main..HEAD
+# what a push would publish — 0, everything is on origin/main
+git rev-list --count origin/main..HEAD | awk '{print "unpushed:", $1}'
 git log --oneline origin/main..HEAD
 
-# after pushing and filling §Landed
-REV=$(sed -n 's/^- rev: `\(.*\)`$/\1/p' prds/rename-conserved-to-shared/prd.md)
+# §Landed names a published, renamed rev
+REV=$(sed -n 's/^- rev: `\(.*\)`$/\1/p' "$PRD")
 echo "rev = $REV"
 git branch -r --contains "$REV"
-git show "$REV:shared/Cargo.toml" | grep '^name'
+git show "${REV}:shared/Cargo.toml" | grep '^name'
+# the placeholder is gone. Zero matches is the PASS, so assert the negation.
+! grep -q 'TBD' "$PRD"
+echo "no TBD in the PRD"
 
-# the whole suite, with the gate armed
+# the whole suite, with the gate in place
 cargo test --workspace --no-fail-fast 2>&1 | grep -E '^test result:' \
   | awk '{p+=$4; f+=$6} END {print "passed="p, "failed="f}'
 cargo fmt --check --all
 cargo clippy --workspace --all-targets -- -D warnings
 
-# nothing of the record moved
-git status --porcelain -- prds/ .mi/gantt/ .pi/
+# nothing of the record moved, and the consumers are untouched
+git status --porcelain -- .mi/gantt/ .pi/
+git -C .. status --porcelain mitosys/.pearde model/.pearde realm/.pearde
+echo "spec03 verify: OK"
 ```

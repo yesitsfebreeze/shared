@@ -120,12 +120,21 @@ explicitly and names them. `git diff --numstat -- .mi/docs/memos/` shows
 
 ## Acceptance
 
-- [x] The scoped grep from the PRD's §Verify, run with `--untracked`, returns
-      **exactly 14 lines**: the 12 in the table above plus
-      `shared/tests/landed_rev_is_published.rs:13` and `:29` — the PRD's own
-      address, the same class as the `adopt-conserved` addresses the table
-      already counts. Amended from 12 at collect; plain `git grep` never saw
-      spec03's untracked gate file
+- [x] The scoped grep from the PRD's §Verify returns **exactly 18 lines**
+      (`survivors: 18`, run under `sh -e` on 2026-09-02). Amended twice:
+      12 → 14 at the first collect, 14 → 18 now.
+      - The exclude must read `':(exclude).pearde'`. `27db1b7` moved the board
+        out of `prds/`, so the old spelling leaves the whole board in the
+        census — **861 lines**, and the box measures nothing.
+      - `+2` `shared/tests/landed_rev_is_published.rs:13`, `:29` — the PRD's own
+        address, the same class as the `adopt-conserved` addresses the table
+        already counts. The file is tracked now, so `--untracked` is no longer
+        needed to see it.
+      - `+4` `learnings/a-shared-name-is-not-a-shared-function.md:17`, `:18`,
+        `:176`, `:177` — `mitosys/.pearde/prds/adopt-conserved` and
+        `model/.pearde/prds/adopt-conserved`, PRD addresses. The file arrived in
+        `978dbf6` from another PRD, after this spec was written. Not a
+        regression of this work
 - [x] `AGENTS.md:159`'s `conserved-*` and `learnings/README.md:164` survive
       verbatim: `git diff -- AGENTS.md learnings/README.md` shows no change on
       those lines
@@ -147,67 +156,84 @@ explicitly and names them. `git diff --numstat -- .mi/docs/memos/` shows
       split of the crate being renamed, not a thing that ever existed
 - [x] No prose reads *"shared's own shared"*, *"the shared tests"* or any other
       artefact of renaming the crate name used as an adjective:
-      `git grep -nI 'shared shared\|own shared \|The shared tests' -- . ':(exclude)prds' ':(exclude)vendor'`
+      `git grep -nI 'shared shared\|own shared \|The shared tests' -- . ':(exclude).pearde' ':(exclude)vendor'`
       returns only the `code:` frontmatter lines of the form
       `shared shared/src/…`, which are `<tree> <path>` and correct
 - [x] `.mi/docs/memos/` changed by **addition only**:
       `git diff --numstat -- .mi/docs/memos/` has `0` in the deletions column for
       every row, and `distribution.md` still contains its original 5 `conserved`
       tokens
-- [x] `prds/`, `.mi/gantt/` and `.pi/ontology/digest.md` are untouched by this
-      work: `git status --porcelain -- prds/ .mi/gantt/ .pi/` lists nothing
-      except `prds/.history.jsonl` and `prds/.plan.json`, which are board
-      machinery and were already modified before this PRD started.
+- [x] The board, `.mi/gantt/` and `.pi/ontology/digest.md` are untouched by
+      this work: `git status --porcelain -- .mi/gantt/ .pi/` lists **nothing**
+      (verified 2026-09-02 under `sh -e`). The board is `.pearde/` since
+      `27db1b7`, not `prds/`; its modified entries are
+      `.pearde/.state/history.jsonl` and `.pearde/.state/plan.json`, board
+      machinery already modified before this PRD started, plus this PRD's own
+      folder, which is the board's record and not the rename's.
       **Do not use the PRD's `git diff <merge-base with origin/main>..HEAD` form
       — see spec03; it does not measure this**
 - [x] Every document asserting the remote is private carries a dated correction.
-      `git grep -nI 'PRIVATE\|is still \*\*private\*\*\|(private)' -- . ':(exclude)prds' ':(exclude)vendor'`
+      `git grep -nI 'PRIVATE\|is still \*\*private\*\*\|(private)' -- . ':(exclude).pearde' ':(exclude)vendor'`
       returns only lines inside `learnings/crate-name.md` or inside
       `learnings/shared-crate.md`'s **Corrected 2026-08-28** block at `:206`.
+      Measured 2026-09-02: four lines — `crate-name.md:292` and
+      `shared-crate.md:198`, `:199`, `:215`. All four are inside the two
+      permitted regions.
       `.github/workflows/ci.yml:15` was already corrected and must stay corrected
 - [x] The suite population is still spec01's, and `cargo fmt --check --all` and
       `cargo clippy --workspace --all-targets -- -D warnings` are clean — this
       tree's tests read the repository at runtime, so prose can break a test
-      here. Measured after the whole prose pass: **85 passed / 0 failed**
+      here. Measured after the whole prose pass: **85 passed / 0 failed**.
+      With spec03's gate in the tree the same command reads **90 / 0** — the
+      same 85 plus the gate's 5, no test lost
 
 ## Verify and Proof
 
+Every line is correct under `sh -e`. Two corrections the board move forced:
+the exclude list drops `prds` for **`.pearde`** — commit `27db1b7` moved the
+board, and excluding the old name leaves the whole board in the census (**861**
+matches instead of 18) — and `git status` measures `.pearde/` for the same
+reason.
+
 ```sh
+set -e
 cd /Users/feb/dev/infra/shared
 
-# the survivor census — must be 12
+# the survivor census — 18
 git grep -nI conserved -- . \
-  ':(exclude)prds' \
+  ':(exclude).pearde' \
   ':(exclude).mi/gantt' \
   ':(exclude).mi/docs/memos' \
   ':(exclude)learnings/crate-name.md' \
   ':(exclude).pi/ontology/digest.md' \
   ':(exclude)vendor'
-git grep -nI conserved -- . ':(exclude)prds' ':(exclude).mi/gantt' \
+git grep -nI conserved -- . ':(exclude).pearde' ':(exclude).mi/gantt' \
   ':(exclude).mi/docs/memos' ':(exclude)learnings/crate-name.md' \
-  ':(exclude).pi/ontology/digest.md' ':(exclude)vendor' | wc -l
+  ':(exclude).pi/ontology/digest.md' ':(exclude)vendor' \
+  | wc -l | awk '{print "survivors:", $1}'
 
 # the decision document is untouched — count its tokens, do not trust 45
 git diff --numstat -- learnings/crate-name.md
-grep -oI conserved learnings/crate-name.md | wc -l
+grep -oI conserved learnings/crate-name.md | wc -l | awk '{print "crate-name.md tokens:", $1}'
 
 # the admission test did not move
 BASE=$(git merge-base origin/main HEAD)
-git show "$BASE":learnings/shared-crate.md | awk '/^## The admission test/,/^## What goes in/' | shasum
+git show "${BASE}:learnings/shared-crate.md" | awk '/^## The admission test/,/^## What goes in/' | shasum
 awk '/^## The admission test/,/^## What goes in/' learnings/shared-crate.md | shasum
 
 # memos: additions only
 git diff --numstat -- .mi/docs/memos/
 
-# the record is not touched
-git status --porcelain -- prds/ .mi/gantt/ .pi/
+# the record is not touched — nothing of this PRD's outside its own folder
+git status --porcelain -- .mi/gantt/ .pi/
 
-# visibility
-git grep -nI 'PRIVATE\|is still \*\*private\*\*\|(private)' -- . ':(exclude)prds' ':(exclude)vendor'
+# visibility: the population is enumerated, not judged
+git grep -nI 'PRIVATE\|is still \*\*private\*\*\|(private)' -- . ':(exclude).pearde' ':(exclude)vendor'
 
 # the tree still builds and the suite has not moved
 cargo test --workspace --no-fail-fast 2>&1 | grep -E '^test result:' \
   | awk '{p+=$4; f+=$6} END {print "passed="p, "failed="f}'
 cargo fmt --check --all
 cargo clippy --workspace --all-targets -- -D warnings
+echo "spec02 verify: OK"
 ```
