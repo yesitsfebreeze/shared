@@ -15,10 +15,6 @@ db-urls = ["https://github.com/rustsec/advisory-db"]
 unused-ignored-advisory = "allow"
 ignore = [
     { id = "RUSTSEC-2023-0089", reason = "atomic-polyfill: archived upstream; pulled via a maintained parent; no known exploit" },
-    { id = "RUSTSEC-2024-0436", reason = "paste: archived upstream; macro-only, build-time only, no runtime surface; no known exploit" },
-    { id = "RUSTSEC-2024-0413", reason = "gtk-rs GTK3: superseded by gtk4-rs; GUI bindings, not reachable from any server path" },
-    { id = "RUSTSEC-2024-0416", reason = "gtk-rs GTK3 second component: same reasoning as RUSTSEC-2024-0413" },
-    { id = "RUSTSEC-2025-0141", reason = "bincode: archived upstream; serialized data is this family's own, not attacker-controlled" },
 ]
 
 # Not gated yet: license and duplicate-version backlogs are real but
